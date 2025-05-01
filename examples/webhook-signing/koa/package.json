@@ -16,7 +16,7 @@
     "koa-bodyparser": "^4.3.0"
   },
   "devDependencies": {
-    "eslint": "^8.33.0",
+    "eslint": "^9.0.0",
     "@types/node": "^13.1.4",
     "@types/koa": "^2.13.5",
     "@types/koa-bodyparser": "^4.3.10",
