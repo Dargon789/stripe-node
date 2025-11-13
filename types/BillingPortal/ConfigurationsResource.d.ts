@@ -33,6 +33,11 @@ declare module 'stripe' {
          * Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
          */
         metadata?: Stripe.MetadataParam;
+
+        /**
+         * The name of the configuration.
+         */
+        name?: Stripe.Emptyable<string>;
       }
 
       namespace ConfigurationCreateParams {
@@ -117,6 +122,11 @@ declare module 'stripe' {
              * Whether the feature is enabled.
              */
             enabled: boolean;
+
+            /**
+             * The [Payment Method Configuration](https://docs.stripe.com/api/payment_method_configurations) to use for this portal session. When specified, customers will be able to update their payment method to one of the options specified by the payment method configuration. If not set or set to an empty string, the default payment method configuration is used.
+             */
+            payment_method_configuration?: Stripe.Emptyable<string>;
           }
 
           interface SubscriptionCancel {
@@ -201,12 +211,22 @@ declare module 'stripe' {
              * Setting to control when an update should be scheduled at the end of the period instead of applying immediately.
              */
             schedule_at_period_end?: SubscriptionUpdate.ScheduleAtPeriodEnd;
+
+            /**
+             * The behavior when updating a subscription that is trialing.
+             */
+            trial_update_behavior?: SubscriptionUpdate.TrialUpdateBehavior;
           }
 
           namespace SubscriptionUpdate {
             type DefaultAllowedUpdate = 'price' | 'promotion_code' | 'quantity';
 
             interface Product {
+              /**
+               * Control whether the quantity of the product can be adjusted.
+               */
+              adjustable_quantity?: Product.AdjustableQuantity;
+
               /**
                * The list of price IDs for the product that a subscription can be updated to.
                */
@@ -216,6 +236,25 @@ declare module 'stripe' {
                * The product id.
                */
               product: string;
+            }
+
+            namespace Product {
+              interface AdjustableQuantity {
+                /**
+                 * Set to true if the quantity can be adjusted to any non-negative integer.
+                 */
+                enabled: boolean;
+
+                /**
+                 * The maximum quantity that can be set for the product.
+                 */
+                maximum?: number;
+
+                /**
+                 * The minimum quantity that can be set for the product.
+                 */
+                minimum?: number;
+              }
             }
 
             type ProrationBehavior =
@@ -242,6 +281,8 @@ declare module 'stripe' {
                 type Type = 'decreasing_item_amount' | 'shortening_interval';
               }
             }
+
+            type TrialUpdateBehavior = 'continue_trial' | 'end_trial';
           }
         }
 
@@ -295,6 +336,11 @@ declare module 'stripe' {
          * Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
          */
         metadata?: Stripe.Emptyable<Stripe.MetadataParam>;
+
+        /**
+         * The name of the configuration.
+         */
+        name?: Stripe.Emptyable<string>;
       }
 
       namespace ConfigurationUpdateParams {
@@ -379,6 +425,11 @@ declare module 'stripe' {
              * Whether the feature is enabled.
              */
             enabled: boolean;
+
+            /**
+             * The [Payment Method Configuration](https://docs.stripe.com/api/payment_method_configurations) to use for this portal session. When specified, customers will be able to update their payment method to one of the options specified by the payment method configuration. If not set or set to an empty string, the default payment method configuration is used.
+             */
+            payment_method_configuration?: Stripe.Emptyable<string>;
           }
 
           interface SubscriptionCancel {
@@ -463,12 +514,22 @@ declare module 'stripe' {
              * Setting to control when an update should be scheduled at the end of the period instead of applying immediately.
              */
             schedule_at_period_end?: SubscriptionUpdate.ScheduleAtPeriodEnd;
+
+            /**
+             * The behavior when updating a subscription that is trialing.
+             */
+            trial_update_behavior?: SubscriptionUpdate.TrialUpdateBehavior;
           }
 
           namespace SubscriptionUpdate {
             type DefaultAllowedUpdate = 'price' | 'promotion_code' | 'quantity';
 
             interface Product {
+              /**
+               * Control whether the quantity of the product can be adjusted.
+               */
+              adjustable_quantity?: Product.AdjustableQuantity;
+
               /**
                * The list of price IDs for the product that a subscription can be updated to.
                */
@@ -478,6 +539,25 @@ declare module 'stripe' {
                * The product id.
                */
               product: string;
+            }
+
+            namespace Product {
+              interface AdjustableQuantity {
+                /**
+                 * Set to true if the quantity can be adjusted to any non-negative integer.
+                 */
+                enabled: boolean;
+
+                /**
+                 * The maximum quantity that can be set for the product.
+                 */
+                maximum?: number;
+
+                /**
+                 * The minimum quantity that can be set for the product.
+                 */
+                minimum?: number;
+              }
             }
 
             type ProrationBehavior =
@@ -506,6 +586,8 @@ declare module 'stripe' {
                 type Type = 'decreasing_item_amount' | 'shortening_interval';
               }
             }
+
+            type TrialUpdateBehavior = 'continue_trial' | 'end_trial';
           }
         }
 

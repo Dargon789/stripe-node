@@ -27,7 +27,7 @@ declare module 'stripe' {
     namespace FileCreateParams {
       interface FileLinkData {
         /**
-         * Set this to `true` to create a file link for the newly created file. Creating a link is only possible when the file's `purpose` is one of the following: `business_icon`, `business_logo`, `customer_signature`, `dispute_evidence`, `issuing_regulatory_reporting`, `pci_document`, `tax_document_user_upload`, or `terminal_reader_splashscreen`.
+         * Set this to `true` to create a file link for the newly created file. Creating a link is only possible when the file's `purpose` is one of the following: `business_icon`, `business_logo`, `customer_signature`, `dispute_evidence`, `issuing_regulatory_reporting`, `pci_document`, `tax_document_user_upload`, `terminal_android_apk`, or `terminal_reader_splashscreen`.
          */
         create: boolean;
 
@@ -52,7 +52,9 @@ declare module 'stripe' {
         | 'identity_document'
         | 'issuing_regulatory_reporting'
         | 'pci_document'
+        | 'platform_terms_of_service'
         | 'tax_document_user_upload'
+        | 'terminal_android_apk'
         | 'terminal_reader_splashscreen';
     }
 
@@ -95,9 +97,11 @@ declare module 'stripe' {
         | 'identity_document_downloadable'
         | 'issuing_regulatory_reporting'
         | 'pci_document'
+        | 'platform_terms_of_service'
         | 'selfie'
         | 'sigma_scheduled_query'
         | 'tax_document_user_upload'
+        | 'terminal_android_apk'
         | 'terminal_reader_splashscreen';
     }
 
@@ -113,7 +117,7 @@ declare module 'stripe' {
       ): Promise<Stripe.Response<Stripe.File>>;
 
       /**
-       * Retrieves the details of an existing file object. After you supply a unique file ID, Stripe returns the corresponding file object. Learn how to [access file contents](https://stripe.com/docs/file-upload#download-file-contents).
+       * Retrieves the details of an existing file object. After you supply a unique file ID, Stripe returns the corresponding file object. Learn how to [access file contents](https://docs.stripe.com/docs/file-upload#download-file-contents).
        */
       retrieve(
         id: string,

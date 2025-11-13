@@ -8,6 +8,7 @@ import {
   generateV1Error,
   generateV2Error,
 } from './Error.js';
+import {StripeContext} from './StripeContext.js';
 import {
   StripeObject,
   RequestHeaders,
@@ -50,6 +51,17 @@ export class RequestSender {
   constructor(stripe: StripeObject, maxBufferedRequestMetric: number) {
     this._stripe = stripe;
     this._maxBufferedRequestMetric = maxBufferedRequestMetric;
+  }
+
+  private _normalizeStripeContext(
+    optsContext?: string | StripeContext | null,
+    clientContext?: string | StripeContext | null
+  ): string | null {
+    if (optsContext) {
+      return optsContext.toString() || null; // return null for empty strings
+    }
+
+    return clientContext?.toString() || null; // return null for empty strings
   }
 
   _addHeadersDirectlyToObject(obj: any, headers: RequestHeaders): void {
@@ -468,7 +480,8 @@ export class RequestSender {
     method: string,
     path: string,
     params?: RequestData,
-    options?: RequestOptions
+    options?: RequestOptions,
+    usage?: Array<string>
   ): Promise<any> {
     const requestPromise = new Promise<any>((resolve, reject) => {
       let opts: RequestOpts;
@@ -487,7 +500,8 @@ export class RequestSender {
 
         // Pull request data and options (headers, auth) from args.
         const dataFromArgs = getDataFromArgs(args);
-        const data = Object.assign({}, dataFromArgs);
+        const data =
+          requestMethod === 'POST' ? Object.assign({}, dataFromArgs) : null;
         const calculatedOptions = getOptionsFromArgs(args);
 
         const headers = calculatedOptions.headers;
@@ -500,10 +514,11 @@ export class RequestSender {
           queryData: {},
           authenticator,
           headers,
-          host: null,
-          streaming: false,
+          host: calculatedOptions.host,
+          streaming: !!calculatedOptions.streaming,
           settings: {},
-          usage: ['raw_request'],
+          // We use this for thin event internals, so we should record the more specific `usage`, when available
+          usage: usage || ['raw_request'],
         };
       } catch (err) {
         reject(err);
@@ -707,16 +722,19 @@ export class RequestSender {
             apiMode == 'v2'
               ? 'application/json'
               : 'application/x-www-form-urlencoded',
-          contentLength: requestData.length,
+          contentLength: new TextEncoder().encode(requestData).length, // if we calculate this wrong, the server treats it as invalid json
           apiVersion: apiVersion,
           clientUserAgent,
           method,
-          userSuppliedHeaders: options.headers,
-          userSuppliedSettings: options.settings,
+          // other callers expect null, but .headers being optional means it's undefined if not supplied. So we normalize to null.
+          userSuppliedHeaders: options.headers ?? null,
+          userSuppliedSettings: options.settings ?? {},
           stripeAccount:
-            apiMode == 'v2' ? null : this._stripe.getApiField('stripeAccount'),
-          stripeContext:
-            apiMode == 'v2' ? this._stripe.getApiField('stripeContext') : null,
+            options.stripeAccount ?? this._stripe.getApiField('stripeAccount'),
+          stripeContext: this._normalizeStripeContext(
+            options.stripeContext,
+            this._stripe.getApiField('stripeContext')
+          ),
           apiMode: apiMode,
         });
 

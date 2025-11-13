@@ -17,6 +17,7 @@ import {
 } from './testUtils.js';
 import Stripe = require('../src/stripe.cjs.node.js');
 import crypto = require('crypto');
+import {StripeContext} from '../src/StripeContext.js';
 
 const stripe = getStripeMockClient();
 
@@ -241,7 +242,7 @@ describe('Stripe Module', function() {
         ).to.eventually.have.property('uname', 'fo%C3%B8name');
       });
 
-      it('sets uname to UNKOWN in case of an error', () => {
+      it('sets uname to UNKNOWN in case of an error', () => {
         const stripe = createStripe(
           getMockPlatformFunctions((cmd: string, cb: any): void => {
             cb(new Error('security'), null);
@@ -479,8 +480,6 @@ describe('Stripe Module', function() {
             stripe.customers.create(
               {this_is_not_a_real_param: 'foobar'},
               (err, customer) => {
-                console.log(err);
-                console.log(customer);
                 if (err) {
                   resolve('ErrorWasPassed');
                 } else {
@@ -632,13 +631,13 @@ describe('Stripe Module', function() {
         );
       });
       afterEach(() => closeServer());
-      it('is not sent on v1 call', (callback) => {
+      it('is sent on v1 call', (callback) => {
         stripeClient.customers.create((err) => {
           closeServer();
           if (err) {
             return callback(err);
           }
-          expect(headers['stripe-context']).to.equal(undefined);
+          expect(headers['stripe-context']).to.equal('ctx_123');
           return callback();
         });
       });
@@ -723,7 +722,7 @@ describe('Stripe Module', function() {
     });
   });
 
-  describe('parseThinEvent', () => {
+  describe('parseEventNotification', () => {
     const secret = 'whsec_test_secret';
 
     it('can parse event from JSON payload', () => {
@@ -737,19 +736,276 @@ describe('Stripe Module', function() {
         payload,
         secret,
       });
-      const event = stripe.parseThinEvent(payload, header, secret);
+      const event = stripe.parseEventNotification(payload, header, secret);
 
       expect(event.type).to.equal(jsonPayload.type);
       expect(event.data).to.equal(jsonPayload.data);
       expect(event.related_object.id).to.equal(jsonPayload.related_object.id);
+      expect(event.context).to.be.undefined;
     });
 
     it('throws an error for invalid signatures', () => {
       const payload = JSON.stringify({event_type: 'account.created'});
 
       expect(() => {
-        stripe.parseThinEvent(payload, 'bad sigheader', secret);
+        stripe.parseEventNotification(payload, 'bad sigheader', secret);
       }).to.throw(StripeSignatureVerificationError);
+    });
+
+    it('should parse webhook with a functioning fetchEvent method', (done) => {
+      const jsonPayload = {
+        id: 'evt_123',
+        type: 'account.created',
+      };
+      const jsonWithData = {
+        ...jsonPayload,
+        data: 'hello',
+      };
+      let telemetryHeader;
+      let shouldStayOpen = true;
+      return getTestServerStripe(
+        {},
+        (req, res) => {
+          telemetryHeader = req.headers['x-stripe-client-telemetry'];
+          res.setHeader('Request-Id', `req_1`);
+          if (
+            req.url === '/v2/core/events/evt_123' &&
+            req.headers['stripe-context'] == null
+          ) {
+            res.write(JSON.stringify(jsonWithData));
+          } else {
+            res.writeHead(404);
+            res.write(
+              JSON.stringify({
+                error: 'not found; something about test setup is wrong',
+              })
+            );
+          }
+          res.end();
+          const ret = {shouldStayOpen};
+          shouldStayOpen = false;
+          return ret;
+        },
+        async (err, stripe, closeServer) => {
+          if (err) return done(err);
+          try {
+            const payload = JSON.stringify(jsonPayload);
+            const header = stripe.webhooks.generateTestHeaderString({
+              payload,
+              secret,
+            });
+
+            const event = stripe.parseEventNotification(
+              payload,
+              header,
+              secret
+            );
+
+            expect(event.fetchEvent).to.be.a('function');
+            // this is always present, but hidden in the types if there's no object
+            // not easy to add conditionally because we don't know at runtime if we have a type for the event or not
+            expect(event.fetchRelatedObject).to.be.a('function');
+            expect(await event.fetchRelatedObject()).to.be.null;
+            const pulled = await event.fetchEvent();
+            expect(pulled.data).to.equal(jsonWithData.data);
+            // Have to call another requests for metrics to be sent.
+            await event.fetchEvent();
+            expect(telemetryHeader).to.exist;
+            expect(
+              JSON.parse(telemetryHeader).last_request_metrics.usage
+            ).to.deep.equal(['fetch_event']);
+
+            closeServer();
+            done();
+          } catch (err) {
+            return done(err);
+          }
+        }
+      );
+    });
+
+    it('should use the context property when pulling, if available', (done) => {
+      const jsonPayload = {
+        id: 'evt_123',
+        context: 'acct_123',
+        type: 'account.created',
+      };
+      const jsonWithData = {
+        ...jsonPayload,
+        data: 'hello',
+      };
+      return getTestServerStripe(
+        {},
+        (req, res) => {
+          if (
+            req.url === '/v2/core/events/evt_123' &&
+            req.headers['stripe-context'] === 'acct_123'
+          ) {
+            res.write(JSON.stringify(jsonWithData));
+          } else {
+            res.writeHead(404);
+            res.write(
+              JSON.stringify({
+                error: 'not found; something about test setup is wrong',
+              })
+            );
+          }
+          res.end();
+        },
+        async (err, stripe, closeServer) => {
+          if (err) return done(err);
+          try {
+            const payload = JSON.stringify(jsonPayload);
+            const header = stripe.webhooks.generateTestHeaderString({
+              payload,
+              secret,
+            });
+
+            const event = stripe.parseEventNotification(
+              payload,
+              header,
+              secret
+            );
+
+            expect(event.context).to.be.instanceOf(StripeContext);
+            expect(event.context.toString()).to.equal('acct_123');
+            expect(event.fetchEvent).to.be.a('function');
+            expect(event.fetch_related_object).not.to.be.a('function');
+            const pulled = await event.fetchEvent();
+            expect(pulled.data).to.equal(jsonWithData.data);
+
+            closeServer();
+            done();
+          } catch (err) {
+            console.log(err);
+            return done(err);
+          }
+        }
+      );
+    });
+
+    it('should parse webhook with a functioning fetchRelatedObject method', (done) => {
+      let telemetryHeader;
+      let shouldStayOpen = true;
+      getTestServerStripe(
+        {},
+        (req, res) => {
+          telemetryHeader = req.headers['x-stripe-client-telemetry'];
+          res.setHeader('Request-Id', `req_1`);
+          if (
+            req.url === '/api/whatever/obj_123' &&
+            req.headers['stripe-context'] == null
+          ) {
+            res.write(JSON.stringify({id: 'obj_123', data: 'some data'}));
+          } else {
+            res.writeHead(404);
+            res.write(
+              JSON.stringify({
+                error: 'not found; something about test setup is wrong',
+              })
+            );
+          }
+          res.end();
+          const ret = {shouldStayOpen};
+          shouldStayOpen = false;
+          return ret;
+        },
+        async (err, stripe, closeServer) => {
+          if (err) return done(err);
+          const jsonPayload = {
+            id: 'evt_123',
+            type: 'account.created',
+            related_object: {
+              id: '123',
+              url: `/api/whatever/obj_123`,
+            },
+          };
+
+          try {
+            const payload = JSON.stringify(jsonPayload);
+            const header = stripe.webhooks.generateTestHeaderString({
+              payload,
+              secret,
+            });
+
+            const event = stripe.parseEventNotification(
+              payload,
+              header,
+              secret
+            );
+
+            expect(event.fetchRelatedObject).to.be.a('function');
+            const relatedObj = await event.fetchRelatedObject();
+            expect(relatedObj.id).to.equal('obj_123');
+            expect(relatedObj.data).to.equal('some data');
+
+            await event.fetchRelatedObject();
+            expect(
+              JSON.parse(telemetryHeader).last_request_metrics.usage
+            ).to.deep.equal(['fetch_related_object']);
+
+            closeServer();
+            done();
+          } catch (err) {
+            return done(err);
+          }
+        }
+      );
+    });
+
+    it('should use the context property when fetching relatedObject, if available', (done) => {
+      getTestServerStripe(
+        {},
+        (req, res) => {
+          if (
+            req.url === '/api/whatever/obj_123' &&
+            req.headers['stripe-context'] === 'acct_123'
+          ) {
+            res.write(JSON.stringify({id: 'obj_123', data: 'some data'}));
+          } else {
+            res.writeHead(404);
+            res.write(JSON.stringify({error: 'not found'}));
+          }
+          res.end();
+        },
+        async (err, stripe, closeServer) => {
+          if (err) return done(err);
+          const jsonPayload = {
+            id: 'evt_123',
+            type: 'account.created',
+            context: 'acct_123',
+            related_object: {
+              id: '123',
+              url: `/api/whatever/obj_123`,
+            },
+          };
+
+          try {
+            const payload = JSON.stringify(jsonPayload);
+            const header = stripe.webhooks.generateTestHeaderString({
+              payload,
+              secret,
+            });
+
+            const event = stripe.parseEventNotification(
+              payload,
+              header,
+              secret
+            );
+
+            expect(event.fetchRelatedObject).to.be.a('function');
+            const relatedObj = await event.fetchRelatedObject();
+
+            expect(relatedObj.id).to.equal('obj_123');
+            expect(relatedObj.data).to.equal('some data');
+
+            closeServer();
+            done();
+          } catch (err) {
+            return done(err);
+          }
+        }
+      );
     });
   });
 
@@ -879,7 +1135,6 @@ describe('Stripe Module', function() {
       return getTestServerStripe(
         {},
         (req, res) => {
-          console.log(req.headers);
           expect(req.headers.foo).to.equal('bar');
           res.write(JSON.stringify(returnedCustomer));
           res.end();

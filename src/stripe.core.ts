@@ -1,6 +1,7 @@
 import * as _Error from './Error.js';
 import {RequestSender} from './RequestSender.js';
 import {StripeResource} from './StripeResource.js';
+import {StripeContext} from './StripeContext.js';
 import {
   AppInfo,
   RequestAuthenticator,
@@ -9,7 +10,7 @@ import {
   RequestData,
   RequestOptions,
 } from './Types.js';
-import {WebhookEvent, createWebhooks} from './Webhooks.js';
+import {createWebhooks} from './Webhooks.js';
 import {ApiVersion} from './apiVersion.js';
 import {CryptoProvider} from './crypto/CryptoProvider.js';
 import {HttpClient, HttpClientResponse} from './net/HttpClient.js';
@@ -59,7 +60,8 @@ export function createStripe(
   platformFunctions: PlatformFunctions,
   requestSender: RequestSenderFactory = defaultRequestSenderFactory
 ): typeof Stripe {
-  Stripe.PACKAGE_VERSION = '18.1.0';
+  Stripe.PACKAGE_VERSION = '19.3.1';
+  Stripe.API_VERSION = ApiVersion;
   Stripe.USER_AGENT = {
     bindings_version: Stripe.PACKAGE_VERSION,
     lang: 'node',
@@ -69,6 +71,7 @@ export function createStripe(
     ...determineProcessUserAgentProperties(),
   };
   Stripe.StripeResource = StripeResource;
+  Stripe.StripeContext = StripeContext;
   Stripe.resources = resources;
   Stripe.HttpClient = HttpClient;
   Stripe.HttpClientResponse = HttpClientResponse;
@@ -484,16 +487,17 @@ export function createStripe(
       return config;
     },
 
-    parseThinEvent(
+    parseEventNotification(
       payload: string | Uint8Array,
       header: string | Uint8Array,
       secret: string,
       tolerance?: number,
       cryptoProvider?: CryptoProvider,
       receivedAt?: number
-    ): WebhookEvent {
+      // this return type is ignored?? picks up types from `types/index.d.ts` instead
+    ): unknown {
       // parses and validates the event payload all in one go
-      return this.webhooks.constructEvent(
+      const eventNotification = this.webhooks.constructEvent(
         payload,
         header,
         secret,
@@ -501,6 +505,43 @@ export function createStripe(
         cryptoProvider,
         receivedAt
       );
+
+      // Parse string context into StripeContext object if present
+      if (eventNotification.context) {
+        eventNotification.context = StripeContext.parse(
+          eventNotification.context
+        );
+      }
+
+      eventNotification.fetchEvent = (): Promise<unknown> => {
+        return this._requestSender._rawRequest(
+          'GET',
+          `/v2/core/events/${eventNotification.id}`,
+          undefined,
+          {
+            stripeContext: eventNotification.context,
+          },
+          ['fetch_event']
+        );
+      };
+
+      eventNotification.fetchRelatedObject = (): Promise<unknown> => {
+        if (!eventNotification.related_object) {
+          return Promise.resolve(null);
+        }
+
+        return this._requestSender._rawRequest(
+          'GET',
+          eventNotification.related_object.url,
+          undefined,
+          {
+            stripeContext: eventNotification.context,
+          },
+          ['fetch_related_object']
+        );
+      };
+
+      return eventNotification;
     },
   } as StripeObject;
 

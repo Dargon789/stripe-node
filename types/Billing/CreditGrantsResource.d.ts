@@ -15,14 +15,14 @@ declare module 'stripe' {
         applicability_config: CreditGrantCreateParams.ApplicabilityConfig;
 
         /**
-         * The category of this credit grant.
-         */
-        category: CreditGrantCreateParams.Category;
-
-        /**
          * ID of the customer to receive the billing credits.
          */
         customer: string;
+
+        /**
+         * The category of this credit grant. It defaults to `paid` if not specified.
+         */
+        category?: CreditGrantCreateParams.Category;
 
         /**
          * The time when the billing credits become effective-when they're eligible for use. It defaults to the current timestamp if not specified.
@@ -63,7 +63,7 @@ declare module 'stripe' {
           monetary?: Amount.Monetary;
 
           /**
-           * Specify the type of this amount. We currently only support `monetary` billing credits.
+           * The type of this amount. We currently only support `monetary` billing credits.
            */
           type: 'monetary';
         }

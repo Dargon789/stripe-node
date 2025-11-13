@@ -84,6 +84,16 @@ declare module 'stripe' {
       cashapp?: PaymentMethodCreateParams.Cashapp;
 
       /**
+       * If this is a Crypto PaymentMethod, this hash contains details about the Crypto payment method.
+       */
+      crypto?: PaymentMethodCreateParams.Crypto;
+
+      /**
+       * If this is a `custom` PaymentMethod, this hash contains details about the Custom payment method.
+       */
+      custom?: PaymentMethodCreateParams.Custom;
+
+      /**
        * The `Customer` to whom the original PaymentMethod is attached.
        */
       customer?: string;
@@ -152,6 +162,11 @@ declare module 'stripe' {
        * If this is an `Link` PaymentMethod, this hash contains details about the Link payment method.
        */
       link?: PaymentMethodCreateParams.Link;
+
+      /**
+       * If this is a MB WAY PaymentMethod, this hash contains details about the MB WAY payment method.
+       */
+      mb_way?: PaymentMethodCreateParams.MbWay;
 
       /**
        * Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
@@ -425,6 +440,15 @@ declare module 'stripe' {
 
       interface Cashapp {}
 
+      interface Crypto {}
+
+      interface Custom {
+        /**
+         * ID of the Dashboard-only CustomPaymentMethodType. This field is used by Stripe products' internal code to support CPMs.
+         */
+        type: string;
+      }
+
       interface CustomerBalance {}
 
       interface Eps {
@@ -522,6 +546,7 @@ declare module 'stripe' {
           | 'abn_amro'
           | 'asn_bank'
           | 'bunq'
+          | 'buut'
           | 'handelsbanken'
           | 'ing'
           | 'knab'
@@ -572,6 +597,8 @@ declare module 'stripe' {
       interface KrCard {}
 
       interface Link {}
+
+      interface MbWay {}
 
       interface Mobilepay {}
 
@@ -718,6 +745,8 @@ declare module 'stripe' {
         | 'boleto'
         | 'card'
         | 'cashapp'
+        | 'crypto'
+        | 'custom'
         | 'customer_balance'
         | 'eps'
         | 'fpx'
@@ -729,6 +758,7 @@ declare module 'stripe' {
         | 'konbini'
         | 'kr_card'
         | 'link'
+        | 'mb_way'
         | 'mobilepay'
         | 'multibanco'
         | 'naver_pay'
@@ -819,19 +849,9 @@ declare module 'stripe' {
       expand?: Array<string>;
 
       /**
-       * If this is an `Link` PaymentMethod, this hash contains details about the Link payment method.
-       */
-      link?: PaymentMethodUpdateParams.Link;
-
-      /**
        * Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
        */
       metadata?: Stripe.Emptyable<Stripe.MetadataParam>;
-
-      /**
-       * If this is a `pay_by_bank` PaymentMethod, this hash contains details about the PayByBank payment method.
-       */
-      pay_by_bank?: PaymentMethodUpdateParams.PayByBank;
 
       /**
        * If this is an `us_bank_account` PaymentMethod, this hash contains details about the US bank account payment method.
@@ -899,10 +919,6 @@ declare module 'stripe' {
         }
       }
 
-      interface Link {}
-
-      interface PayByBank {}
-
       interface UsBankAccount {
         /**
          * Bank account holder type.
@@ -934,7 +950,7 @@ declare module 'stripe' {
       expand?: Array<string>;
 
       /**
-       * An optional filter on the list, based on the object `type` field. Without the filter, the list includes all current and future payment method types. If your integration expects only one type of payment method in the response, make sure to provide a type value in the request.
+       * Filters the list by the object `type` field. Unfiltered, the list returns all payment method types except `custom`. If your integration expects only one type of payment method in the response, specify that type value in the request to reduce your payload.
        */
       type?: PaymentMethodListParams.Type;
     }
@@ -955,6 +971,8 @@ declare module 'stripe' {
         | 'boleto'
         | 'card'
         | 'cashapp'
+        | 'crypto'
+        | 'custom'
         | 'customer_balance'
         | 'eps'
         | 'fpx'
@@ -966,6 +984,7 @@ declare module 'stripe' {
         | 'konbini'
         | 'kr_card'
         | 'link'
+        | 'mb_way'
         | 'mobilepay'
         | 'multibanco'
         | 'naver_pay'
@@ -1011,9 +1030,9 @@ declare module 'stripe' {
 
     class PaymentMethodsResource {
       /**
-       * Creates a PaymentMethod object. Read the [Stripe.js reference](https://stripe.com/docs/stripe-js/reference#stripe-create-payment-method) to learn how to create PaymentMethods via Stripe.js.
+       * Creates a PaymentMethod object. Read the [Stripe.js reference](https://docs.stripe.com/docs/stripe-js/reference#stripe-create-payment-method) to learn how to create PaymentMethods via Stripe.js.
        *
-       * Instead of creating a PaymentMethod directly, we recommend using the [PaymentIntents API to accept a payment immediately or the <a href="/docs/payments/save-and-reuse">SetupIntent](https://stripe.com/docs/payments/accept-a-payment) API to collect payment method details ahead of a future payment.
+       * Instead of creating a PaymentMethod directly, we recommend using the [PaymentIntents API to accept a payment immediately or the <a href="/docs/payments/save-and-reuse">SetupIntent](https://docs.stripe.com/docs/payments/accept-a-payment) API to collect payment method details ahead of a future payment.
        */
       create(
         params?: PaymentMethodCreateParams,
@@ -1024,7 +1043,7 @@ declare module 'stripe' {
       ): Promise<Stripe.Response<Stripe.PaymentMethod>>;
 
       /**
-       * Retrieves a PaymentMethod object attached to the StripeAccount. To retrieve a payment method attached to a Customer, you should use [Retrieve a Customer's PaymentMethods](https://stripe.com/docs/api/payment_methods/customer)
+       * Retrieves a PaymentMethod object attached to the StripeAccount. To retrieve a payment method attached to a Customer, you should use [Retrieve a Customer's PaymentMethods](https://docs.stripe.com/docs/api/payment_methods/customer)
        */
       retrieve(
         id: string,
@@ -1037,7 +1056,7 @@ declare module 'stripe' {
       ): Promise<Stripe.Response<Stripe.PaymentMethod>>;
 
       /**
-       * Updates a PaymentMethod object. A PaymentMethod must be attached a customer to be updated.
+       * Updates a PaymentMethod object. A PaymentMethod must be attached to a customer to be updated.
        */
       update(
         id: string,
@@ -1046,7 +1065,7 @@ declare module 'stripe' {
       ): Promise<Stripe.Response<Stripe.PaymentMethod>>;
 
       /**
-       * Returns a list of PaymentMethods for Treasury flows. If you want to list the PaymentMethods attached to a Customer for payments, you should use the [List a Customer's PaymentMethods](https://stripe.com/docs/api/payment_methods/customer_list) API instead.
+       * Returns a list of PaymentMethods for Treasury flows. If you want to list the PaymentMethods attached to a Customer for payments, you should use the [List a Customer's PaymentMethods](https://docs.stripe.com/docs/api/payment_methods/customer_list) API instead.
        */
       list(
         params?: PaymentMethodListParams,
@@ -1057,16 +1076,16 @@ declare module 'stripe' {
       /**
        * Attaches a PaymentMethod object to a Customer.
        *
-       * To attach a new PaymentMethod to a customer for future payments, we recommend you use a [SetupIntent](https://stripe.com/docs/api/setup_intents)
-       * or a PaymentIntent with [setup_future_usage](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage).
+       * To attach a new PaymentMethod to a customer for future payments, we recommend you use a [SetupIntent](https://docs.stripe.com/docs/api/setup_intents)
+       * or a PaymentIntent with [setup_future_usage](https://docs.stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage).
        * These approaches will perform any necessary steps to set up the PaymentMethod for future payments. Using the /v1/payment_methods/:id/attach
        * endpoint without first using a SetupIntent or PaymentIntent with setup_future_usage does not optimize the PaymentMethod for
        * future use, which makes later declines and payment friction more likely.
-       * See [Optimizing cards for future payments](https://stripe.com/docs/payments/payment-intents#future-usage) for more information about setting up
+       * See [Optimizing cards for future payments](https://docs.stripe.com/docs/payments/payment-intents#future-usage) for more information about setting up
        * future payments.
        *
        * To use this PaymentMethod as the default for invoice or subscription payments,
-       * set [invoice_settings.default_payment_method](https://stripe.com/docs/api/customers/update#update_customer-invoice_settings-default_payment_method),
+       * set [invoice_settings.default_payment_method](https://docs.stripe.com/docs/api/customers/update#update_customer-invoice_settings-default_payment_method),
        * on the Customer to the PaymentMethod's ID.
        */
       attach(

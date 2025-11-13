@@ -199,7 +199,7 @@ declare module 'stripe' {
 
         interface Card {
           /**
-           * Card brand. Can be `amex`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+           * Card brand. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa` or `unknown`.
            */
           brand: string | null;
 
@@ -400,7 +400,7 @@ declare module 'stripe' {
 
         interface Ideal {
           /**
-           * The customer's bank. Can be one of `abn_amro`, `asn_bank`, `bunq`, `handelsbanken`, `ing`, `knab`, `moneyou`, `n26`, `nn`, `rabobank`, `regiobank`, `revolut`, `sns_bank`, `triodos_bank`, `van_lanschot`, or `yoursafe`.
+           * The customer's bank. Can be one of `abn_amro`, `asn_bank`, `bunq`, `buut`, `handelsbanken`, `ing`, `knab`, `moneyou`, `n26`, `nn`, `rabobank`, `regiobank`, `revolut`, `sns_bank`, `triodos_bank`, `van_lanschot`, or `yoursafe`.
            */
           bank: Ideal.Bank | null;
 
@@ -436,6 +436,7 @@ declare module 'stripe' {
             | 'abn_amro'
             | 'asn_bank'
             | 'bunq'
+            | 'buut'
             | 'handelsbanken'
             | 'ing'
             | 'knab'
@@ -455,6 +456,7 @@ declare module 'stripe' {
             | 'ASNBNL21'
             | 'BITSNL2A'
             | 'BUNQNL2A'
+            | 'BUUTNL2A'
             | 'FVLBNL22'
             | 'HANDNL2A'
             | 'INGBNL2A'
@@ -581,7 +583,7 @@ declare module 'stripe' {
         network_advice_code?: string;
 
         /**
-         * For card errors resulting from a card issuer decline, a brand specific 2, 3, or 4 digit code which indicates the reason the authorization failed.
+         * For payments declined by the network, an alphanumeric code which indicates the reason the payment failed.
          */
         network_decline_code?: string;
 
@@ -702,22 +704,27 @@ declare module 'stripe' {
           | 'coupon_expired'
           | 'customer_max_payment_methods'
           | 'customer_max_subscriptions'
+          | 'customer_session_expired'
           | 'customer_tax_location_invalid'
           | 'debit_not_authorized'
           | 'email_invalid'
           | 'expired_card'
           | 'financial_connections_account_inactive'
+          | 'financial_connections_account_pending_account_numbers'
+          | 'financial_connections_account_unavailable_account_numbers'
           | 'financial_connections_no_successful_transaction_refresh'
           | 'forwarding_api_inactive'
           | 'forwarding_api_invalid_parameter'
           | 'forwarding_api_retryable_upstream_error'
           | 'forwarding_api_upstream_connection_error'
           | 'forwarding_api_upstream_connection_timeout'
+          | 'forwarding_api_upstream_error'
           | 'idempotency_key_in_use'
           | 'incorrect_address'
           | 'incorrect_cvc'
           | 'incorrect_number'
           | 'incorrect_zip'
+          | 'india_recurring_payment_mandate_canceled'
           | 'instant_payouts_config_disabled'
           | 'instant_payouts_currency_disabled'
           | 'instant_payouts_limit_exceeded'
@@ -764,6 +771,7 @@ declare module 'stripe' {
           | 'payment_intent_mandate_invalid'
           | 'payment_intent_payment_attempt_expired'
           | 'payment_intent_payment_attempt_failed'
+          | 'payment_intent_rate_limit_exceeded'
           | 'payment_intent_unexpected_state'
           | 'payment_method_bank_account_already_verified'
           | 'payment_method_bank_account_blocked'

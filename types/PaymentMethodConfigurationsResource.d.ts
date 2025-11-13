@@ -59,7 +59,7 @@ declare module 'stripe' {
       bancontact?: PaymentMethodConfigurationCreateParams.Bancontact;
 
       /**
-       * Billie is a [single-use](https://docs.stripe.com/payments/payment-methods#usage) payment method that offers businesses Pay by Invoice where they offer payment terms ranging from 7-120 days. Customers are redirected from your website or app, authorize the payment with Billie, then return to your website or app. You get [immediate notification](https://stripe.com/payments/payment-methods#payment-notification) of whether the payment succeeded or failed.
+       * Billie is a [single-use](https://docs.stripe.com/payments/payment-methods#usage) payment method that offers businesses Pay by Invoice where they offer payment terms ranging from 7-120 days. Customers are redirected from your website or app, authorize the payment with Billie, then return to your website or app. You get [immediate notification](https://docs.stripe.com/payments/payment-methods#payment-notification) of whether the payment succeeded or failed.
        */
       billie?: PaymentMethodConfigurationCreateParams.Billie;
 
@@ -89,6 +89,11 @@ declare module 'stripe' {
       cashapp?: PaymentMethodConfigurationCreateParams.Cashapp;
 
       /**
+       * [Stablecoin payments](https://stripe.com/docs/payments/stablecoin-payments) enable customers to pay in stablecoins like USDC from 100s of wallets including Phantom and Metamask.
+       */
+      crypto?: PaymentMethodConfigurationCreateParams.Crypto;
+
+      /**
        * Uses a customer's [cash balance](https://stripe.com/docs/payments/customer-balance) for the payment. The cash balance can be funded via a bank transfer. Check this [page](https://stripe.com/docs/payments/bank-transfers) for more details.
        */
       customer_balance?: PaymentMethodConfigurationCreateParams.CustomerBalance;
@@ -107,6 +112,11 @@ declare module 'stripe' {
        * Financial Process Exchange (FPX) is a Malaysia-based payment method that allows customers to complete transactions online using their bank credentials. Bank Negara Malaysia (BNM), the Central Bank of Malaysia, and eleven other major Malaysian financial institutions are members of the PayNet Group, which owns and operates FPX. It is one of the most popular online payment methods in Malaysia, with nearly 90 million transactions in 2018 according to BNM. Check this [page](https://stripe.com/docs/payments/fpx) for more details.
        */
       fpx?: PaymentMethodConfigurationCreateParams.Fpx;
+
+      /**
+       * Meal vouchers in France, or “titres-restaurant”, is a local benefits program commonly offered by employers for their employees to purchase prepared food and beverages on working days. Check this [page](https://stripe.com/docs/payments/benefits/fr-meal-vouchers) for more details.
+       */
+      fr_meal_voucher_conecs?: PaymentMethodConfigurationCreateParams.FrMealVoucherConecs;
 
       /**
        * giropay is a German payment method based on online banking, introduced in 2006. It allows customers to complete transactions online using their online banking environment, with funds debited from their bank account. Depending on their bank, customers confirm payments on giropay using a second factor of authentication or a PIN. giropay accounts for 10% of online checkouts in Germany. Check this [page](https://stripe.com/docs/payments/giropay) for more details.
@@ -134,6 +144,11 @@ declare module 'stripe' {
       jcb?: PaymentMethodConfigurationCreateParams.Jcb;
 
       /**
+       * Kakao Pay is a popular local wallet available in South Korea.
+       */
+      kakao_pay?: PaymentMethodConfigurationCreateParams.KakaoPay;
+
+      /**
        * Klarna gives customers a range of [payment options](https://stripe.com/docs/payments/klarna#payment-options) during checkout. Available payment options vary depending on the customer's billing address and the transaction amount. These payment options make it convenient for customers to purchase items in all price ranges. Check this [page](https://stripe.com/docs/payments/klarna) for more details.
        */
       klarna?: PaymentMethodConfigurationCreateParams.Klarna;
@@ -144,9 +159,19 @@ declare module 'stripe' {
       konbini?: PaymentMethodConfigurationCreateParams.Konbini;
 
       /**
+       * Korean cards let users pay using locally issued cards from South Korea.
+       */
+      kr_card?: PaymentMethodConfigurationCreateParams.KrCard;
+
+      /**
        * [Link](https://stripe.com/docs/payments/link) is a payment method network. With Link, users save their payment details once, then reuse that information to pay with one click for any business on the network.
        */
       link?: PaymentMethodConfigurationCreateParams.Link;
+
+      /**
+       * MB WAY is the most popular wallet in Portugal. After entering their phone number in your checkout, customers approve the payment directly in their MB WAY app. Check this [page](https://stripe.com/docs/payments/mb-way) for more details.
+       */
+      mb_way?: PaymentMethodConfigurationCreateParams.MbWay;
 
       /**
        * MobilePay is a [single-use](https://stripe.com/docs/payments/payment-methods#usage) card wallet payment method used in Denmark and Finland. It allows customers to [authenticate and approve](https://stripe.com/docs/payments/payment-methods#customer-actions) payments using the MobilePay app. Check this [page](https://stripe.com/docs/payments/mobilepay) for more details.
@@ -162,6 +187,11 @@ declare module 'stripe' {
        * Configuration name.
        */
       name?: string;
+
+      /**
+       * Naver Pay is a popular local wallet available in South Korea.
+       */
+      naver_pay?: PaymentMethodConfigurationCreateParams.NaverPay;
 
       /**
        * Stripe users in New Zealand can accept Bulk Electronic Clearing System (BECS) direct debit payments from customers with a New Zeland bank account. Check this [page](https://stripe.com/docs/payments/nz-bank-account) for more details.
@@ -189,6 +219,11 @@ declare module 'stripe' {
       pay_by_bank?: PaymentMethodConfigurationCreateParams.PayByBank;
 
       /**
+       * PAYCO is a [single-use](https://docs.stripe.com/payments/payment-methods#usage local wallet available in South Korea.
+       */
+      payco?: PaymentMethodConfigurationCreateParams.Payco;
+
+      /**
        * PayNow is a Singapore-based payment method that allows customers to make a payment using their preferred app from participating banks and participating non-bank financial institutions. Check this [page](https://stripe.com/docs/payments/paynow) for more details.
        */
       paynow?: PaymentMethodConfigurationCreateParams.Paynow;
@@ -214,7 +249,12 @@ declare module 'stripe' {
       revolut_pay?: PaymentMethodConfigurationCreateParams.RevolutPay;
 
       /**
-       * Satispay is a [single-use](https://docs.stripe.com/payments/payment-methods#usage) payment method where customers are required to [authenticate](https://stripe.com/payments/payment-methods#customer-actions) their payment. Customers pay by being redirected from your website or app, authorizing the payment with Satispay, then returning to your website or app. You get [immediate notification](https://stripe.com/payments/payment-methods#payment-notification) of whether the payment succeeded or failed.
+       * Samsung Pay is a [single-use](https://docs.stripe.com/payments/payment-methods#usage local wallet available in South Korea.
+       */
+      samsung_pay?: PaymentMethodConfigurationCreateParams.SamsungPay;
+
+      /**
+       * Satispay is a [single-use](https://docs.stripe.com/payments/payment-methods#usage) payment method where customers are required to [authenticate](https://docs.stripe.com/payments/payment-methods#customer-actions) their payment. Customers pay by being redirected from your website or app, authorizing the payment with Satispay, then returning to your website or app. You get [immediate notification](https://docs.stripe.com/payments/payment-methods#payment-notification) of whether the payment succeeded or failed.
        */
       satispay?: PaymentMethodConfigurationCreateParams.Satispay;
 
@@ -595,6 +635,26 @@ declare module 'stripe' {
         }
       }
 
+      interface Crypto {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: Crypto.DisplayPreference;
+      }
+
+      namespace Crypto {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
       interface CustomerBalance {
         /**
          * Whether or not the payment method should be displayed.
@@ -643,6 +703,26 @@ declare module 'stripe' {
       }
 
       namespace Fpx {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface FrMealVoucherConecs {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: FrMealVoucherConecs.DisplayPreference;
+      }
+
+      namespace FrMealVoucherConecs {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.
@@ -755,6 +835,26 @@ declare module 'stripe' {
         }
       }
 
+      interface KakaoPay {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: KakaoPay.DisplayPreference;
+      }
+
+      namespace KakaoPay {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
       interface Klarna {
         /**
          * Whether or not the payment method should be displayed.
@@ -795,6 +895,26 @@ declare module 'stripe' {
         }
       }
 
+      interface KrCard {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: KrCard.DisplayPreference;
+      }
+
+      namespace KrCard {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
       interface Link {
         /**
          * Whether or not the payment method should be displayed.
@@ -803,6 +923,26 @@ declare module 'stripe' {
       }
 
       namespace Link {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface MbWay {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: MbWay.DisplayPreference;
+      }
+
+      namespace MbWay {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.
@@ -843,6 +983,26 @@ declare module 'stripe' {
       }
 
       namespace Multibanco {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface NaverPay {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: NaverPay.DisplayPreference;
+      }
+
+      namespace NaverPay {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.
@@ -923,6 +1083,26 @@ declare module 'stripe' {
       }
 
       namespace PayByBank {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface Payco {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: Payco.DisplayPreference;
+      }
+
+      namespace Payco {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.
@@ -1023,6 +1203,26 @@ declare module 'stripe' {
       }
 
       namespace RevolutPay {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface SamsungPay {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: SamsungPay.DisplayPreference;
+      }
+
+      namespace SamsungPay {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.
@@ -1265,7 +1465,7 @@ declare module 'stripe' {
       bancontact?: PaymentMethodConfigurationUpdateParams.Bancontact;
 
       /**
-       * Billie is a [single-use](https://docs.stripe.com/payments/payment-methods#usage) payment method that offers businesses Pay by Invoice where they offer payment terms ranging from 7-120 days. Customers are redirected from your website or app, authorize the payment with Billie, then return to your website or app. You get [immediate notification](https://stripe.com/payments/payment-methods#payment-notification) of whether the payment succeeded or failed.
+       * Billie is a [single-use](https://docs.stripe.com/payments/payment-methods#usage) payment method that offers businesses Pay by Invoice where they offer payment terms ranging from 7-120 days. Customers are redirected from your website or app, authorize the payment with Billie, then return to your website or app. You get [immediate notification](https://docs.stripe.com/payments/payment-methods#payment-notification) of whether the payment succeeded or failed.
        */
       billie?: PaymentMethodConfigurationUpdateParams.Billie;
 
@@ -1295,6 +1495,11 @@ declare module 'stripe' {
       cashapp?: PaymentMethodConfigurationUpdateParams.Cashapp;
 
       /**
+       * [Stablecoin payments](https://stripe.com/docs/payments/stablecoin-payments) enable customers to pay in stablecoins like USDC from 100s of wallets including Phantom and Metamask.
+       */
+      crypto?: PaymentMethodConfigurationUpdateParams.Crypto;
+
+      /**
        * Uses a customer's [cash balance](https://stripe.com/docs/payments/customer-balance) for the payment. The cash balance can be funded via a bank transfer. Check this [page](https://stripe.com/docs/payments/bank-transfers) for more details.
        */
       customer_balance?: PaymentMethodConfigurationUpdateParams.CustomerBalance;
@@ -1313,6 +1518,11 @@ declare module 'stripe' {
        * Financial Process Exchange (FPX) is a Malaysia-based payment method that allows customers to complete transactions online using their bank credentials. Bank Negara Malaysia (BNM), the Central Bank of Malaysia, and eleven other major Malaysian financial institutions are members of the PayNet Group, which owns and operates FPX. It is one of the most popular online payment methods in Malaysia, with nearly 90 million transactions in 2018 according to BNM. Check this [page](https://stripe.com/docs/payments/fpx) for more details.
        */
       fpx?: PaymentMethodConfigurationUpdateParams.Fpx;
+
+      /**
+       * Meal vouchers in France, or “titres-restaurant”, is a local benefits program commonly offered by employers for their employees to purchase prepared food and beverages on working days. Check this [page](https://stripe.com/docs/payments/benefits/fr-meal-vouchers) for more details.
+       */
+      fr_meal_voucher_conecs?: PaymentMethodConfigurationUpdateParams.FrMealVoucherConecs;
 
       /**
        * giropay is a German payment method based on online banking, introduced in 2006. It allows customers to complete transactions online using their online banking environment, with funds debited from their bank account. Depending on their bank, customers confirm payments on giropay using a second factor of authentication or a PIN. giropay accounts for 10% of online checkouts in Germany. Check this [page](https://stripe.com/docs/payments/giropay) for more details.
@@ -1340,6 +1550,11 @@ declare module 'stripe' {
       jcb?: PaymentMethodConfigurationUpdateParams.Jcb;
 
       /**
+       * Kakao Pay is a popular local wallet available in South Korea.
+       */
+      kakao_pay?: PaymentMethodConfigurationUpdateParams.KakaoPay;
+
+      /**
        * Klarna gives customers a range of [payment options](https://stripe.com/docs/payments/klarna#payment-options) during checkout. Available payment options vary depending on the customer's billing address and the transaction amount. These payment options make it convenient for customers to purchase items in all price ranges. Check this [page](https://stripe.com/docs/payments/klarna) for more details.
        */
       klarna?: PaymentMethodConfigurationUpdateParams.Klarna;
@@ -1350,9 +1565,19 @@ declare module 'stripe' {
       konbini?: PaymentMethodConfigurationUpdateParams.Konbini;
 
       /**
+       * Korean cards let users pay using locally issued cards from South Korea.
+       */
+      kr_card?: PaymentMethodConfigurationUpdateParams.KrCard;
+
+      /**
        * [Link](https://stripe.com/docs/payments/link) is a payment method network. With Link, users save their payment details once, then reuse that information to pay with one click for any business on the network.
        */
       link?: PaymentMethodConfigurationUpdateParams.Link;
+
+      /**
+       * MB WAY is the most popular wallet in Portugal. After entering their phone number in your checkout, customers approve the payment directly in their MB WAY app. Check this [page](https://stripe.com/docs/payments/mb-way) for more details.
+       */
+      mb_way?: PaymentMethodConfigurationUpdateParams.MbWay;
 
       /**
        * MobilePay is a [single-use](https://stripe.com/docs/payments/payment-methods#usage) card wallet payment method used in Denmark and Finland. It allows customers to [authenticate and approve](https://stripe.com/docs/payments/payment-methods#customer-actions) payments using the MobilePay app. Check this [page](https://stripe.com/docs/payments/mobilepay) for more details.
@@ -1368,6 +1593,11 @@ declare module 'stripe' {
        * Configuration name.
        */
       name?: string;
+
+      /**
+       * Naver Pay is a popular local wallet available in South Korea.
+       */
+      naver_pay?: PaymentMethodConfigurationUpdateParams.NaverPay;
 
       /**
        * Stripe users in New Zealand can accept Bulk Electronic Clearing System (BECS) direct debit payments from customers with a New Zeland bank account. Check this [page](https://stripe.com/docs/payments/nz-bank-account) for more details.
@@ -1388,6 +1618,11 @@ declare module 'stripe' {
        * Pay by bank is a redirect payment method backed by bank transfers. A customer is redirected to their bank to authorize a bank transfer for a given amount. This removes a lot of the error risks inherent in waiting for the customer to initiate a transfer themselves, and is less expensive than card payments.
        */
       pay_by_bank?: PaymentMethodConfigurationUpdateParams.PayByBank;
+
+      /**
+       * PAYCO is a [single-use](https://docs.stripe.com/payments/payment-methods#usage local wallet available in South Korea.
+       */
+      payco?: PaymentMethodConfigurationUpdateParams.Payco;
 
       /**
        * PayNow is a Singapore-based payment method that allows customers to make a payment using their preferred app from participating banks and participating non-bank financial institutions. Check this [page](https://stripe.com/docs/payments/paynow) for more details.
@@ -1415,7 +1650,12 @@ declare module 'stripe' {
       revolut_pay?: PaymentMethodConfigurationUpdateParams.RevolutPay;
 
       /**
-       * Satispay is a [single-use](https://docs.stripe.com/payments/payment-methods#usage) payment method where customers are required to [authenticate](https://stripe.com/payments/payment-methods#customer-actions) their payment. Customers pay by being redirected from your website or app, authorizing the payment with Satispay, then returning to your website or app. You get [immediate notification](https://stripe.com/payments/payment-methods#payment-notification) of whether the payment succeeded or failed.
+       * Samsung Pay is a [single-use](https://docs.stripe.com/payments/payment-methods#usage local wallet available in South Korea.
+       */
+      samsung_pay?: PaymentMethodConfigurationUpdateParams.SamsungPay;
+
+      /**
+       * Satispay is a [single-use](https://docs.stripe.com/payments/payment-methods#usage) payment method where customers are required to [authenticate](https://docs.stripe.com/payments/payment-methods#customer-actions) their payment. Customers pay by being redirected from your website or app, authorizing the payment with Satispay, then returning to your website or app. You get [immediate notification](https://docs.stripe.com/payments/payment-methods#payment-notification) of whether the payment succeeded or failed.
        */
       satispay?: PaymentMethodConfigurationUpdateParams.Satispay;
 
@@ -1796,6 +2036,26 @@ declare module 'stripe' {
         }
       }
 
+      interface Crypto {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: Crypto.DisplayPreference;
+      }
+
+      namespace Crypto {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
       interface CustomerBalance {
         /**
          * Whether or not the payment method should be displayed.
@@ -1844,6 +2104,26 @@ declare module 'stripe' {
       }
 
       namespace Fpx {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface FrMealVoucherConecs {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: FrMealVoucherConecs.DisplayPreference;
+      }
+
+      namespace FrMealVoucherConecs {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.
@@ -1956,6 +2236,26 @@ declare module 'stripe' {
         }
       }
 
+      interface KakaoPay {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: KakaoPay.DisplayPreference;
+      }
+
+      namespace KakaoPay {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
       interface Klarna {
         /**
          * Whether or not the payment method should be displayed.
@@ -1996,6 +2296,26 @@ declare module 'stripe' {
         }
       }
 
+      interface KrCard {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: KrCard.DisplayPreference;
+      }
+
+      namespace KrCard {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
       interface Link {
         /**
          * Whether or not the payment method should be displayed.
@@ -2004,6 +2324,26 @@ declare module 'stripe' {
       }
 
       namespace Link {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface MbWay {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: MbWay.DisplayPreference;
+      }
+
+      namespace MbWay {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.
@@ -2044,6 +2384,26 @@ declare module 'stripe' {
       }
 
       namespace Multibanco {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface NaverPay {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: NaverPay.DisplayPreference;
+      }
+
+      namespace NaverPay {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.
@@ -2124,6 +2484,26 @@ declare module 'stripe' {
       }
 
       namespace PayByBank {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface Payco {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: Payco.DisplayPreference;
+      }
+
+      namespace Payco {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.
@@ -2224,6 +2604,26 @@ declare module 'stripe' {
       }
 
       namespace RevolutPay {
+        interface DisplayPreference {
+          /**
+           * The account's preference for whether or not to display this payment method.
+           */
+          preference?: DisplayPreference.Preference;
+        }
+
+        namespace DisplayPreference {
+          type Preference = 'none' | 'off' | 'on';
+        }
+      }
+
+      interface SamsungPay {
+        /**
+         * Whether or not the payment method should be displayed.
+         */
+        display_preference?: SamsungPay.DisplayPreference;
+      }
+
+      namespace SamsungPay {
         interface DisplayPreference {
           /**
            * The account's preference for whether or not to display this payment method.

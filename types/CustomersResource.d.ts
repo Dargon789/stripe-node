@@ -14,6 +14,11 @@ declare module 'stripe' {
       balance?: number;
 
       /**
+       * The customer's business name. This may be up to *150 characters*.
+       */
+      business_name?: Stripe.Emptyable<string>;
+
+      /**
        * Balance information and default balance settings for this customer.
        */
       cash_balance?: CustomerCreateParams.CashBalance;
@@ -32,6 +37,11 @@ declare module 'stripe' {
        * Specifies which fields in the response should be expanded.
        */
       expand?: Array<string>;
+
+      /**
+       * The customer's full name. This may be up to *150 characters*.
+       */
+      individual_name?: Stripe.Emptyable<string>;
 
       /**
        * The prefix for the customer used to generate unique invoice numbers. Must be 3–12 uppercase letters or numbers.
@@ -357,6 +367,11 @@ declare module 'stripe' {
       balance?: number;
 
       /**
+       * The customer's business name. This may be up to *150 characters*.
+       */
+      business_name?: Stripe.Emptyable<string>;
+
+      /**
        * Balance information and default balance settings for this customer.
        */
       cash_balance?: CustomerUpdateParams.CashBalance;
@@ -384,6 +399,11 @@ declare module 'stripe' {
        * Specifies which fields in the response should be expanded.
        */
       expand?: Array<string>;
+
+      /**
+       * The customer's full name. This may be up to *150 characters*.
+       */
+      individual_name?: Stripe.Emptyable<string>;
 
       /**
        * The prefix for the customer used to generate unique invoice numbers. Must be 3–12 uppercase letters or numbers.
@@ -875,6 +895,8 @@ declare module 'stripe' {
         | 'boleto'
         | 'card'
         | 'cashapp'
+        | 'crypto'
+        | 'custom'
         | 'customer_balance'
         | 'eps'
         | 'fpx'
@@ -886,6 +908,7 @@ declare module 'stripe' {
         | 'konbini'
         | 'kr_card'
         | 'link'
+        | 'mb_way'
         | 'mobilepay'
         | 'multibanco'
         | 'naver_pay'
@@ -1201,7 +1224,7 @@ declare module 'stripe' {
       ): Promise<Stripe.Response<Stripe.DeletedCustomer>>;
 
       /**
-       * Creates an immutable transaction that updates the customer's credit [balance](https://stripe.com/docs/billing/customer/balance).
+       * Creates an immutable transaction that updates the customer's credit [balance](https://docs.stripe.com/docs/billing/customer/balance).
        */
       createBalanceTransaction(
         id: string,
@@ -1225,7 +1248,7 @@ declare module 'stripe' {
        *
        * If the card's owner has no default card, then the new card will become the default.
        * However, if the owner already has a default, then it will not change.
-       * To change the default, you should [update the customer](https://stripe.com/docs/api#update_customer) to have a new default_source.
+       * To change the default, you should [update the customer](https://docs.stripe.com/docs/api#update_customer) to have a new default_source.
        */
       createSource(
         id: string,
@@ -1290,7 +1313,7 @@ declare module 'stripe' {
       ): Promise<Stripe.Response<Stripe.DeletedTaxId>>;
 
       /**
-       * Returns a list of transactions that updated the customer's [balances](https://stripe.com/docs/billing/customer/balance).
+       * Returns a list of transactions that updated the customer's [balances](https://docs.stripe.com/docs/billing/customer/balance).
        */
       listBalanceTransactions(
         id: string,
@@ -1303,7 +1326,7 @@ declare module 'stripe' {
       ): ApiListPromise<Stripe.CustomerBalanceTransaction>;
 
       /**
-       * Returns a list of transactions that modified the customer's [cash balance](https://stripe.com/docs/payments/customer-balance).
+       * Returns a list of transactions that modified the customer's [cash balance](https://docs.stripe.com/docs/payments/customer-balance).
        */
       listCashBalanceTransactions(
         id: string,
@@ -1355,7 +1378,7 @@ declare module 'stripe' {
       ): ApiListPromise<Stripe.TaxId>;
 
       /**
-       * Retrieves a specific customer balance transaction that updated the customer's [balances](https://stripe.com/docs/billing/customer/balance).
+       * Retrieves a specific customer balance transaction that updated the customer's [balances](https://docs.stripe.com/docs/billing/customer/balance).
        */
       retrieveBalanceTransaction(
         customerId: string,
@@ -1383,7 +1406,7 @@ declare module 'stripe' {
       ): Promise<Stripe.Response<Stripe.CashBalance>>;
 
       /**
-       * Retrieves a specific cash balance transaction, which updated the customer's [cash balance](https://stripe.com/docs/payments/customer-balance).
+       * Retrieves a specific cash balance transaction, which updated the customer's [cash balance](https://docs.stripe.com/docs/payments/customer-balance).
        */
       retrieveCashBalanceTransaction(
         customerId: string,
@@ -1443,7 +1466,7 @@ declare module 'stripe' {
       ): Promise<Stripe.Response<Stripe.TaxId>>;
 
       /**
-       * Search for customers you've previously created using Stripe's [Search Query Language](https://stripe.com/docs/search#search-query-language).
+       * Search for customers you've previously created using Stripe's [Search Query Language](https://docs.stripe.com/docs/search#search-query-language).
        * Don't use search in read-after-write flows where strict consistency is necessary. Under normal operating
        * conditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up
        * to an hour behind during outages. Search functionality is not available to merchants in India.

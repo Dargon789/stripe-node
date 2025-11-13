@@ -9,7 +9,7 @@ declare module 'stripe' {
       invoice: string;
 
       /**
-       * The integer amount in cents (or local equivalent) representing the total amount of the credit note.
+       * The integer amount in cents (or local equivalent) representing the total amount of the credit note. One of `amount`, `lines`, or `shipping_cost` must be provided.
        */
       amount?: number;
 
@@ -34,7 +34,7 @@ declare module 'stripe' {
       expand?: Array<string>;
 
       /**
-       * Line items that make up the credit note.
+       * Line items that make up the credit note. One of `amount`, `lines`, or `shipping_cost` must be provided.
        */
       lines?: Array<CreditNoteCreateParams.Line>;
 
@@ -69,7 +69,7 @@ declare module 'stripe' {
       refunds?: Array<CreditNoteCreateParams.Refund>;
 
       /**
-       * When shipping_cost contains the shipping_rate from the invoice, the shipping_cost is included in the credit note.
+       * When shipping_cost contains the shipping_rate from the invoice, the shipping_cost is included in the credit note. One of `amount`, `lines`, or `shipping_cost` must be provided.
        */
       shipping_cost?: CreditNoteCreateParams.ShippingCost;
     }
@@ -158,9 +158,35 @@ declare module 'stripe' {
         amount_refunded?: number;
 
         /**
-         * ID of an existing refund to link this credit note to.
+         * The PaymentRecord refund details to link to this credit note. Required when `type` is `payment_record_refund`.
+         */
+        payment_record_refund?: Refund.PaymentRecordRefund;
+
+        /**
+         * ID of an existing refund to link this credit note to. Required when `type` is `refund`.
          */
         refund?: string;
+
+        /**
+         * Type of the refund, one of `refund` or `payment_record_refund`. Defaults to `refund`.
+         */
+        type?: Refund.Type;
+      }
+
+      namespace Refund {
+        interface PaymentRecordRefund {
+          /**
+           * The ID of the PaymentRecord with the refund to link to this credit note.
+           */
+          payment_record: string;
+
+          /**
+           * The PaymentRecord refund group to link to this credit note. For refunds processed off-Stripe, this will correspond to the `processor_details.custom.refund_reference` field provided when reporting the refund on the PaymentRecord.
+           */
+          refund_group: string;
+        }
+
+        type Type = 'payment_record_refund' | 'refund';
       }
 
       interface ShippingCost {
@@ -231,7 +257,7 @@ declare module 'stripe' {
       invoice: string;
 
       /**
-       * The integer amount in cents (or local equivalent) representing the total amount of the credit note.
+       * The integer amount in cents (or local equivalent) representing the total amount of the credit note. One of `amount`, `lines`, or `shipping_cost` must be provided.
        */
       amount?: number;
 
@@ -256,7 +282,7 @@ declare module 'stripe' {
       expand?: Array<string>;
 
       /**
-       * Line items that make up the credit note.
+       * Line items that make up the credit note. One of `amount`, `lines`, or `shipping_cost` must be provided.
        */
       lines?: Array<CreditNoteListPreviewLineItemsParams.Line>;
 
@@ -291,7 +317,7 @@ declare module 'stripe' {
       refunds?: Array<CreditNoteListPreviewLineItemsParams.Refund>;
 
       /**
-       * When shipping_cost contains the shipping_rate from the invoice, the shipping_cost is included in the credit note.
+       * When shipping_cost contains the shipping_rate from the invoice, the shipping_cost is included in the credit note. One of `amount`, `lines`, or `shipping_cost` must be provided.
        */
       shipping_cost?: CreditNoteListPreviewLineItemsParams.ShippingCost;
     }
@@ -380,9 +406,35 @@ declare module 'stripe' {
         amount_refunded?: number;
 
         /**
-         * ID of an existing refund to link this credit note to.
+         * The PaymentRecord refund details to link to this credit note. Required when `type` is `payment_record_refund`.
+         */
+        payment_record_refund?: Refund.PaymentRecordRefund;
+
+        /**
+         * ID of an existing refund to link this credit note to. Required when `type` is `refund`.
          */
         refund?: string;
+
+        /**
+         * Type of the refund, one of `refund` or `payment_record_refund`. Defaults to `refund`.
+         */
+        type?: Refund.Type;
+      }
+
+      namespace Refund {
+        interface PaymentRecordRefund {
+          /**
+           * The ID of the PaymentRecord with the refund to link to this credit note.
+           */
+          payment_record: string;
+
+          /**
+           * The PaymentRecord refund group to link to this credit note. For refunds processed off-Stripe, this will correspond to the `processor_details.custom.refund_reference` field provided when reporting the refund on the PaymentRecord.
+           */
+          refund_group: string;
+        }
+
+        type Type = 'payment_record_refund' | 'refund';
       }
 
       interface ShippingCost {
@@ -400,7 +452,7 @@ declare module 'stripe' {
       invoice: string;
 
       /**
-       * The integer amount in cents (or local equivalent) representing the total amount of the credit note.
+       * The integer amount in cents (or local equivalent) representing the total amount of the credit note. One of `amount`, `lines`, or `shipping_cost` must be provided.
        */
       amount?: number;
 
@@ -425,7 +477,7 @@ declare module 'stripe' {
       expand?: Array<string>;
 
       /**
-       * Line items that make up the credit note.
+       * Line items that make up the credit note. One of `amount`, `lines`, or `shipping_cost` must be provided.
        */
       lines?: Array<CreditNotePreviewParams.Line>;
 
@@ -460,7 +512,7 @@ declare module 'stripe' {
       refunds?: Array<CreditNotePreviewParams.Refund>;
 
       /**
-       * When shipping_cost contains the shipping_rate from the invoice, the shipping_cost is included in the credit note.
+       * When shipping_cost contains the shipping_rate from the invoice, the shipping_cost is included in the credit note. One of `amount`, `lines`, or `shipping_cost` must be provided.
        */
       shipping_cost?: CreditNotePreviewParams.ShippingCost;
     }
@@ -549,9 +601,35 @@ declare module 'stripe' {
         amount_refunded?: number;
 
         /**
-         * ID of an existing refund to link this credit note to.
+         * The PaymentRecord refund details to link to this credit note. Required when `type` is `payment_record_refund`.
+         */
+        payment_record_refund?: Refund.PaymentRecordRefund;
+
+        /**
+         * ID of an existing refund to link this credit note to. Required when `type` is `refund`.
          */
         refund?: string;
+
+        /**
+         * Type of the refund, one of `refund` or `payment_record_refund`. Defaults to `refund`.
+         */
+        type?: Refund.Type;
+      }
+
+      namespace Refund {
+        interface PaymentRecordRefund {
+          /**
+           * The ID of the PaymentRecord with the refund to link to this credit note.
+           */
+          payment_record: string;
+
+          /**
+           * The PaymentRecord refund group to link to this credit note. For refunds processed off-Stripe, this will correspond to the `processor_details.custom.refund_reference` field provided when reporting the refund on the PaymentRecord.
+           */
+          refund_group: string;
+        }
+
+        type Type = 'payment_record_refund' | 'refund';
       }
 
       interface ShippingCost {
@@ -571,20 +649,19 @@ declare module 'stripe' {
 
     class CreditNotesResource {
       /**
-       * Issue a credit note to adjust the amount of a finalized invoice. For a status=open invoice, a credit note reduces
-       * its amount_due. For a status=paid invoice, a credit note does not affect its amount_due. Instead, it can result
-       * in any combination of the following:
+       * Issue a credit note to adjust the amount of a finalized invoice. A credit note will first reduce the invoice's amount_remaining (and amount_due), but not below zero.
+       * This amount is indicated by the credit note's pre_payment_amount. The excess amount is indicated by post_payment_amount, and it can result in any combination of the following:
        *
        *
-       * Refund: create a new refund (using refund_amount) or link an existing refund (using refund).
+       * Refunds: create a new refund (using refund_amount) or link existing refunds (using refunds).
        * Customer balance credit: credit the customer's balance (using credit_amount) which will be automatically applied to their next invoice when it's finalized.
        * Outside of Stripe credit: record the amount that is or will be credited outside of Stripe (using out_of_band_amount).
        *
        *
-       * For post-payment credit notes the sum of the refund, credit and outside of Stripe amounts must equal the credit note total.
+       * The sum of refunds, customer balance credits, and outside of Stripe credits must equal the post_payment_amount.
        *
-       * You may issue multiple credit notes for an invoice. Each credit note will increment the invoice's pre_payment_credit_notes_amount
-       * or post_payment_credit_notes_amount depending on its status at the time of credit note creation.
+       * You may issue multiple credit notes for an invoice. Each credit note may increment the invoice's pre_payment_credit_notes_amount,
+       * post_payment_credit_notes_amount, or both, depending on the invoice's amount_remaining at the time of credit note creation.
        */
       create(
         params: CreditNoteCreateParams,
@@ -652,7 +729,7 @@ declare module 'stripe' {
       ): Promise<Stripe.Response<Stripe.CreditNote>>;
 
       /**
-       * Marks a credit note as void. Learn more about [voiding credit notes](https://stripe.com/docs/billing/invoices/credit-notes#voiding).
+       * Marks a credit note as void. Learn more about [voiding credit notes](https://docs.stripe.com/docs/billing/invoices/credit-notes#voiding).
        */
       voidCreditNote(
         id: string,

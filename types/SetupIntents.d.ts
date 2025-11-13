@@ -83,6 +83,13 @@ declare module 'stripe' {
       description: string | null;
 
       /**
+       * Payment method types that are excluded from this SetupIntent.
+       */
+      excluded_payment_method_types: Array<
+        SetupIntent.ExcludedPaymentMethodType
+      > | null;
+
+      /**
        * Indicates the directions of money movement for which this payment method is intended to be used.
        *
        * Include `inbound` if you intend to use the payment method as the origin to pull funds from. Include `outbound` if you intend to use the payment method as the destination to send funds to. You can include both if you intend to use the payment method for both purposes.
@@ -140,7 +147,7 @@ declare module 'stripe' {
       payment_method_options: SetupIntent.PaymentMethodOptions | null;
 
       /**
-       * The list of payment method types (e.g. card) that this SetupIntent is allowed to set up.
+       * The list of payment method types (e.g. card) that this SetupIntent is allowed to set up. A list of valid payment method types can be found [here](https://docs.stripe.com/api/payment_methods/object#payment_method_object-type).
        */
       payment_method_types: Array<string>;
 
@@ -186,6 +193,56 @@ declare module 'stripe' {
         | 'duplicate'
         | 'requested_by_customer';
 
+      type ExcludedPaymentMethodType =
+        | 'acss_debit'
+        | 'affirm'
+        | 'afterpay_clearpay'
+        | 'alipay'
+        | 'alma'
+        | 'amazon_pay'
+        | 'au_becs_debit'
+        | 'bacs_debit'
+        | 'bancontact'
+        | 'billie'
+        | 'blik'
+        | 'boleto'
+        | 'card'
+        | 'cashapp'
+        | 'crypto'
+        | 'customer_balance'
+        | 'eps'
+        | 'fpx'
+        | 'giropay'
+        | 'grabpay'
+        | 'ideal'
+        | 'kakao_pay'
+        | 'klarna'
+        | 'konbini'
+        | 'kr_card'
+        | 'mb_way'
+        | 'mobilepay'
+        | 'multibanco'
+        | 'naver_pay'
+        | 'nz_bank_account'
+        | 'oxxo'
+        | 'p24'
+        | 'pay_by_bank'
+        | 'payco'
+        | 'paynow'
+        | 'paypal'
+        | 'pix'
+        | 'promptpay'
+        | 'revolut_pay'
+        | 'samsung_pay'
+        | 'satispay'
+        | 'sepa_debit'
+        | 'sofort'
+        | 'swish'
+        | 'twint'
+        | 'us_bank_account'
+        | 'wechat_pay'
+        | 'zip';
+
       type FlowDirection = 'inbound' | 'outbound';
 
       interface LastSetupError {
@@ -225,7 +282,7 @@ declare module 'stripe' {
         network_advice_code?: string;
 
         /**
-         * For card errors resulting from a card issuer decline, a brand specific 2, 3, or 4 digit code which indicates the reason the authorization failed.
+         * For payments declined by the network, an alphanumeric code which indicates the reason the payment failed.
          */
         network_decline_code?: string;
 
@@ -346,22 +403,27 @@ declare module 'stripe' {
           | 'coupon_expired'
           | 'customer_max_payment_methods'
           | 'customer_max_subscriptions'
+          | 'customer_session_expired'
           | 'customer_tax_location_invalid'
           | 'debit_not_authorized'
           | 'email_invalid'
           | 'expired_card'
           | 'financial_connections_account_inactive'
+          | 'financial_connections_account_pending_account_numbers'
+          | 'financial_connections_account_unavailable_account_numbers'
           | 'financial_connections_no_successful_transaction_refresh'
           | 'forwarding_api_inactive'
           | 'forwarding_api_invalid_parameter'
           | 'forwarding_api_retryable_upstream_error'
           | 'forwarding_api_upstream_connection_error'
           | 'forwarding_api_upstream_connection_timeout'
+          | 'forwarding_api_upstream_error'
           | 'idempotency_key_in_use'
           | 'incorrect_address'
           | 'incorrect_cvc'
           | 'incorrect_number'
           | 'incorrect_zip'
+          | 'india_recurring_payment_mandate_canceled'
           | 'instant_payouts_config_disabled'
           | 'instant_payouts_currency_disabled'
           | 'instant_payouts_limit_exceeded'
@@ -408,6 +470,7 @@ declare module 'stripe' {
           | 'payment_intent_mandate_invalid'
           | 'payment_intent_payment_attempt_expired'
           | 'payment_intent_payment_attempt_failed'
+          | 'payment_intent_rate_limit_exceeded'
           | 'payment_intent_unexpected_state'
           | 'payment_method_bank_account_already_verified'
           | 'payment_method_bank_account_blocked'
@@ -492,7 +555,7 @@ declare module 'stripe' {
         redirect_to_url?: NextAction.RedirectToUrl;
 
         /**
-         * Type of the next action to perform, one of `redirect_to_url`, `use_stripe_sdk`, `alipay_handle_redirect`, `oxxo_display_details`, or `verify_with_microdeposits`.
+         * Type of the next action to perform. Refer to the other child attributes under `next_action` for available values. Examples include: `redirect_to_url`, `use_stripe_sdk`, `alipay_handle_redirect`, `oxxo_display_details`, or `verify_with_microdeposits`.
          */
         type: string;
 
@@ -550,7 +613,9 @@ declare module 'stripe' {
           url: string | null;
         }
 
-        interface UseStripeSdk {}
+        type UseStripeSdk = {
+          [key: string]: unknown;
+        };
 
         interface VerifyWithMicrodeposits {
           /**
@@ -596,6 +661,8 @@ declare module 'stripe' {
         card?: PaymentMethodOptions.Card;
 
         card_present?: PaymentMethodOptions.CardPresent;
+
+        klarna?: PaymentMethodOptions.Klarna;
 
         link?: PaymentMethodOptions.Link;
 
@@ -772,6 +839,18 @@ declare module 'stripe' {
         }
 
         interface CardPresent {}
+
+        interface Klarna {
+          /**
+           * The currency of the setup intent. Three letter ISO currency code.
+           */
+          currency: string | null;
+
+          /**
+           * Preferred locale of the Klarna checkout page that the customer is redirected to.
+           */
+          preferred_locale: string | null;
+        }
 
         interface Link {
           /**

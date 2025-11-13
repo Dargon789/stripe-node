@@ -23,9 +23,14 @@ declare module 'stripe' {
       address?: Stripe.Address | null;
 
       /**
-       * The current balance, if any, that's stored on the customer. If negative, the customer has credit to apply to their next invoice. If positive, the customer has an amount owed that's added to their next invoice. The balance only considers amounts that Stripe hasn't successfully applied to any invoice. It doesn't reflect unpaid invoices. This balance is only taken into account after invoices finalize.
+       * The current balance, if any, that's stored on the customer in their default currency. If negative, the customer has credit to apply to their next invoice. If positive, the customer has an amount owed that's added to their next invoice. The balance only considers amounts that Stripe hasn't successfully applied to any invoice. It doesn't reflect unpaid invoices. This balance is only taken into account after invoices finalize. For multi-currency balances, see [invoice_credit_balance](https://stripe.com/docs/api/customers/object#customer_object-invoice_credit_balance).
        */
       balance: number;
+
+      /**
+       * The customer's business name.
+       */
+      business_name?: string;
 
       /**
        * The current funds being held by Stripe on behalf of the customer. You can apply these funds towards payment intents when the source is "cash_balance". The `settings[reconciliation_mode]` field describes if these funds apply to these payment intents manually or automatically.
@@ -77,6 +82,11 @@ declare module 'stripe' {
        * The customer's email address.
        */
       email: string | null;
+
+      /**
+       * The customer's individual name.
+       */
+      individual_name?: string;
 
       /**
        * The current multi-currency balances, if any, that's stored on the customer. If positive in a currency, the customer has a credit to apply to their next invoice denominated in that currency. If negative, the customer has an amount owed that's added to their next invoice denominated in that currency. These balances don't apply to unpaid invoices. They solely track amounts that Stripe hasn't successfully applied to any invoice. Stripe only applies a balance in a specific currency to an invoice after that invoice (which is in the same currency) finalizes.
@@ -243,6 +253,11 @@ declare module 'stripe' {
          * The identified tax location of the customer.
          */
         location: Tax.Location | null;
+
+        /**
+         * The tax calculation provider used for location resolution. Defaults to `stripe` when not using a [third-party provider](https://docs.stripe.com/tax/third-party-apps).
+         */
+        provider: Tax.Provider;
       }
 
       namespace Tax {
@@ -276,6 +291,8 @@ declare module 'stripe' {
             | 'payment_method'
             | 'shipping_destination';
         }
+
+        type Provider = 'anrok' | 'avalara' | 'sphere' | 'stripe';
       }
 
       type TaxExempt = 'exempt' | 'none' | 'reverse';

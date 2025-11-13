@@ -4,7 +4,7 @@ declare module 'stripe' {
   namespace Stripe {
     namespace BillingPortal {
       /**
-       * A portal configuration describes the functionality and behavior of a portal session.
+       * A portal configuration describes the functionality and behavior you embed in a portal session. Related guide: [Configure the customer portal](https://docs.stripe.com/customer-management/configure-portal).
        */
       interface Configuration {
         /**
@@ -61,6 +61,11 @@ declare module 'stripe' {
          * Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format.
          */
         metadata: Stripe.Metadata | null;
+
+        /**
+         * The name of the configuration.
+         */
+        name: string | null;
 
         /**
          * Time at which the object was last updated. Measured in seconds since the Unix epoch.
@@ -211,12 +216,19 @@ declare module 'stripe' {
             proration_behavior: SubscriptionUpdate.ProrationBehavior;
 
             schedule_at_period_end: SubscriptionUpdate.ScheduleAtPeriodEnd;
+
+            /**
+             * Determines how handle updates to trialing subscriptions. Valid values are `end_trial` and `continue_trial`. Defaults to a value of `end_trial` if you don't set it during creation.
+             */
+            trial_update_behavior: SubscriptionUpdate.TrialUpdateBehavior;
           }
 
           namespace SubscriptionUpdate {
             type DefaultAllowedUpdate = 'price' | 'promotion_code' | 'quantity';
 
             interface Product {
+              adjustable_quantity: Product.AdjustableQuantity;
+
               /**
                * The list of price IDs which, when subscribed to, a subscription can be updated.
                */
@@ -226,6 +238,25 @@ declare module 'stripe' {
                * The product ID.
                */
               product: string;
+            }
+
+            namespace Product {
+              interface AdjustableQuantity {
+                /**
+                 * If true, the quantity can be adjusted to any non-negative integer.
+                 */
+                enabled: boolean;
+
+                /**
+                 * The maximum quantity that can be set for the product.
+                 */
+                maximum: number | null;
+
+                /**
+                 * The minimum quantity that can be set for the product.
+                 */
+                minimum: number;
+              }
             }
 
             type ProrationBehavior =
@@ -252,6 +283,8 @@ declare module 'stripe' {
                 type Type = 'decreasing_item_amount' | 'shortening_interval';
               }
             }
+
+            type TrialUpdateBehavior = 'continue_trial' | 'end_trial';
           }
         }
 

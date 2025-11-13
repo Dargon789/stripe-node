@@ -47,7 +47,7 @@ declare module 'stripe' {
      * Stripe applies any customer credit on the account before determining the
      * amount due for the invoice (i.e., the amount that will be actually
      * charged). If the amount due for the invoice is less than Stripe's [minimum allowed charge
-     * per currency](https://stripe.com/docs/currencies#minimum-and-maximum-charge-amounts), the
+     * per currency](https://docs.stripe.com/docs/currencies#minimum-and-maximum-charge-amounts), the
      * invoice is automatically marked paid, and we add the amount due to the
      * customer's credit balance which is applied to the next invoice.
      *
@@ -58,9 +58,9 @@ declare module 'stripe' {
      */
     interface Invoice {
       /**
-       * Unique identifier for the object. This property is always present unless the invoice is an upcoming invoice. See [Retrieve an upcoming invoice](https://stripe.com/docs/api/invoices/upcoming) for more details.
+       * Unique identifier for the object. For preview invoices created using the [create preview](https://stripe.com/docs/api/invoices/create_preview) endpoint, this id will be prefixed with `upcoming_in`.
        */
-      id?: string;
+      id: string;
 
       /**
        * String representing the object's type. Objects of the same type share the same value.
@@ -149,7 +149,7 @@ declare module 'stripe' {
        * * `subscription_cycle`: A subscription advanced into a new period.
        * * `subscription_threshold`: A subscription reached a billing threshold.
        * * `subscription_update`: A subscription was updated.
-       * * `upcoming`: Reserved for simulated invoices, per the upcoming invoice endpoint.
+       * * `upcoming`: Reserved for upcoming invoices created through the Create Preview Invoice API or when an `invoice.upcoming` event is generated for an upcoming invoice on a subscription.
        */
       billing_reason: Invoice.BillingReason | null;
 
@@ -338,12 +338,12 @@ declare module 'stripe' {
       payments?: ApiList<Stripe.InvoicePayment>;
 
       /**
-       * End of the usage period during which invoice items were added to this invoice. This looks back one period for a subscription invoice. Use the [line item period](https://stripe.com/api/invoices/line_item#invoice_line_item_object-period) to get the service period for each price.
+       * End of the usage period during which invoice items were added to this invoice. This looks back one period for a subscription invoice. Use the [line item period](https://docs.stripe.com/api/invoices/line_item#invoice_line_item_object-period) to get the service period for each price.
        */
       period_end: number;
 
       /**
-       * Start of the usage period during which invoice items were added to this invoice. This looks back one period for a subscription invoice. Use the [line item period](https://stripe.com/api/invoices/line_item#invoice_line_item_object-period) to get the service period for each price.
+       * Start of the usage period during which invoice items were added to this invoice. This looks back one period for a subscription invoice. Use the [line item period](https://docs.stripe.com/api/invoices/line_item#invoice_line_item_object-period) to get the service period for each price.
        */
       period_start: number;
 
@@ -751,7 +751,7 @@ declare module 'stripe' {
         network_advice_code?: string;
 
         /**
-         * For card errors resulting from a card issuer decline, a brand specific 2, 3, or 4 digit code which indicates the reason the authorization failed.
+         * For payments declined by the network, an alphanumeric code which indicates the reason the payment failed.
          */
         network_decline_code?: string;
 
@@ -872,22 +872,27 @@ declare module 'stripe' {
           | 'coupon_expired'
           | 'customer_max_payment_methods'
           | 'customer_max_subscriptions'
+          | 'customer_session_expired'
           | 'customer_tax_location_invalid'
           | 'debit_not_authorized'
           | 'email_invalid'
           | 'expired_card'
           | 'financial_connections_account_inactive'
+          | 'financial_connections_account_pending_account_numbers'
+          | 'financial_connections_account_unavailable_account_numbers'
           | 'financial_connections_no_successful_transaction_refresh'
           | 'forwarding_api_inactive'
           | 'forwarding_api_invalid_parameter'
           | 'forwarding_api_retryable_upstream_error'
           | 'forwarding_api_upstream_connection_error'
           | 'forwarding_api_upstream_connection_timeout'
+          | 'forwarding_api_upstream_error'
           | 'idempotency_key_in_use'
           | 'incorrect_address'
           | 'incorrect_cvc'
           | 'incorrect_number'
           | 'incorrect_zip'
+          | 'india_recurring_payment_mandate_canceled'
           | 'instant_payouts_config_disabled'
           | 'instant_payouts_currency_disabled'
           | 'instant_payouts_limit_exceeded'
@@ -934,6 +939,7 @@ declare module 'stripe' {
           | 'payment_intent_mandate_invalid'
           | 'payment_intent_payment_attempt_expired'
           | 'payment_intent_payment_attempt_failed'
+          | 'payment_intent_rate_limit_exceeded'
           | 'payment_intent_unexpected_state'
           | 'payment_method_bank_account_already_verified'
           | 'payment_method_bank_account_blocked'
@@ -1267,6 +1273,8 @@ declare module 'stripe' {
           | 'boleto'
           | 'card'
           | 'cashapp'
+          | 'crypto'
+          | 'custom'
           | 'customer_balance'
           | 'eps'
           | 'fpx'
@@ -1366,9 +1374,9 @@ declare module 'stripe' {
           amount: number;
 
           /**
-           * Tax rates can be applied to [invoices](https://stripe.com/invoicing/taxes/tax-rates), [subscriptions](https://stripe.com/billing/taxes/tax-rates) and [Checkout Sessions](https://stripe.com/payments/checkout/use-manual-tax-rates) to collect tax.
+           * Tax rates can be applied to [invoices](https://docs.stripe.com/invoicing/taxes/tax-rates), [subscriptions](https://docs.stripe.com/billing/taxes/tax-rates) and [Checkout Sessions](https://docs.stripe.com/payments/checkout/use-manual-tax-rates) to collect tax.
            *
-           * Related guide: [Tax rates](https://stripe.com/billing/taxes/tax-rates)
+           * Related guide: [Tax rates](https://docs.stripe.com/billing/taxes/tax-rates)
            */
           rate: Stripe.TaxRate;
 

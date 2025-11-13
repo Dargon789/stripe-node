@@ -134,6 +134,8 @@ declare module 'stripe' {
 
         cashapp?: DestinationDetails.Cashapp;
 
+        crypto?: DestinationDetails.Crypto;
+
         customer_cash_balance?: DestinationDetails.CustomerCashBalance;
 
         eps?: DestinationDetails.Eps;
@@ -254,6 +256,13 @@ declare module 'stripe' {
 
         interface Cashapp {}
 
+        interface Crypto {
+          /**
+           * The transaction hash of the refund.
+           */
+          reference: string | null;
+        }
+
         interface CustomerCashBalance {}
 
         interface Eps {}
@@ -340,7 +349,12 @@ declare module 'stripe' {
 
         interface Paynow {}
 
-        interface Paypal {}
+        interface Paypal {
+          /**
+           * For refunds declined by the network, a decline code provided by the network which indicates the reason the refund failed.
+           */
+          network_decline_code: string | null;
+        }
 
         interface Pix {}
 
@@ -435,7 +449,7 @@ declare module 'stripe' {
 
       interface PresentmentDetails {
         /**
-         * Amount intended to be collected by this payment, denominated in presentment_currency.
+         * Amount intended to be collected by this payment, denominated in `presentment_currency`.
          */
         presentment_amount: number;
 

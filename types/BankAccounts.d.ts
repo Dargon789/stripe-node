@@ -5,11 +5,11 @@ declare module 'stripe' {
     /**
      * These bank accounts are payment methods on `Customer` objects.
      *
-     * On the other hand [External Accounts](https://stripe.com/api#external_accounts) are transfer
+     * On the other hand [External Accounts](https://docs.stripe.com/api#external_accounts) are transfer
      * destinations on `Account` objects for connected accounts.
      * They can be bank accounts or debit cards as well, and are documented in the links above.
      *
-     * Related guide: [Bank debits and transfers](https://stripe.com/payments/bank-debits-transfers)
+     * Related guide: [Bank debits and transfers](https://docs.stripe.com/payments/bank-debits-transfers)
      */
     interface BankAccount {
       /**
@@ -23,7 +23,7 @@ declare module 'stripe' {
       object: 'bank_account';
 
       /**
-       * The account this bank account belongs to. Only applicable on Accounts (not customers or recipients) This property is only available when returned as an [External Account](https://stripe.com/api/external_account_bank_accounts/object) where [controller.is_controller](https://stripe.com/api/accounts/object#account_object-controller-is_controller) is `true`.
+       * The account this bank account belongs to. Only applicable on Accounts (not customers or recipients) This property is only available when returned as an [External Account](https://docs.stripe.com/api/external_account_bank_accounts/object) where [controller.is_controller](https://docs.stripe.com/api/accounts/object#account_object-controller-is_controller) is `true`.
        */
       account?: string | Stripe.Account | null;
 
@@ -162,6 +162,7 @@ declare module 'stripe' {
 
         namespace Error {
           type Code =
+            | 'external_request'
             | 'information_missing'
             | 'invalid_address_city_state_postal_code'
             | 'invalid_address_highway_contract_box'
@@ -204,6 +205,7 @@ declare module 'stripe' {
             | 'invalid_url_website_incomplete_under_construction'
             | 'invalid_url_website_other'
             | 'invalid_value_other'
+            | 'unsupported_business_type'
             | 'verification_directors_mismatch'
             | 'verification_document_address_mismatch'
             | 'verification_document_address_missing'
@@ -302,6 +304,7 @@ declare module 'stripe' {
 
         namespace Error {
           type Code =
+            | 'external_request'
             | 'information_missing'
             | 'invalid_address_city_state_postal_code'
             | 'invalid_address_highway_contract_box'
@@ -344,6 +347,7 @@ declare module 'stripe' {
             | 'invalid_url_website_incomplete_under_construction'
             | 'invalid_url_website_other'
             | 'invalid_value_other'
+            | 'unsupported_business_type'
             | 'verification_directors_mismatch'
             | 'verification_document_address_mismatch'
             | 'verification_document_address_missing'

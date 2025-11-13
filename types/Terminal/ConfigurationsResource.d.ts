@@ -5,7 +5,12 @@ declare module 'stripe' {
     namespace Terminal {
       interface ConfigurationCreateParams {
         /**
-         * An object containing device type specific settings for BBPOS WisePOS E readers
+         * An object containing device type specific settings for BBPOS WisePad 3 readers.
+         */
+        bbpos_wisepad3?: ConfigurationCreateParams.BbposWisepad3;
+
+        /**
+         * An object containing device type specific settings for BBPOS WisePOS E readers.
          */
         bbpos_wisepos_e?: ConfigurationCreateParams.BbposWiseposE;
 
@@ -25,22 +30,22 @@ declare module 'stripe' {
         offline?: Stripe.Emptyable<ConfigurationCreateParams.Offline>;
 
         /**
-         * Reboot time settings for readers that support customized reboot time configuration.
+         * Reboot time settings for readers. that support customized reboot time configuration.
          */
         reboot_window?: ConfigurationCreateParams.RebootWindow;
 
         /**
-         * An object containing device type specific settings for Stripe S700 readers
+         * An object containing device type specific settings for Stripe S700 readers.
          */
         stripe_s700?: ConfigurationCreateParams.StripeS700;
 
         /**
-         * Tipping configurations for readers supporting on-reader tips
+         * Tipping configurations for readers. supporting on-reader tips
          */
         tipping?: Stripe.Emptyable<ConfigurationCreateParams.Tipping>;
 
         /**
-         * An object containing device type specific settings for Verifone P400 readers
+         * An object containing device type specific settings for Verifone P400 readers.
          */
         verifone_p400?: ConfigurationCreateParams.VerifoneP400;
 
@@ -51,6 +56,13 @@ declare module 'stripe' {
       }
 
       namespace ConfigurationCreateParams {
+        interface BbposWisepad3 {
+          /**
+           * A File ID representing an image you want to display on the reader.
+           */
+          splashscreen?: Stripe.Emptyable<string>;
+        }
+
         interface BbposWiseposE {
           /**
            * A File ID representing an image to display on the reader
@@ -79,16 +91,26 @@ declare module 'stripe' {
 
         interface StripeS700 {
           /**
-           * A File ID representing an image you would like displayed on the reader.
+           * A File ID representing an image you want to display on the reader.
            */
           splashscreen?: Stripe.Emptyable<string>;
         }
 
         interface Tipping {
           /**
+           * Tipping configuration for AED
+           */
+          aed?: Tipping.Aed;
+
+          /**
            * Tipping configuration for AUD
            */
           aud?: Tipping.Aud;
+
+          /**
+           * Tipping configuration for BGN
+           */
+          bgn?: Tipping.Bgn;
 
           /**
            * Tipping configuration for CAD
@@ -121,14 +143,29 @@ declare module 'stripe' {
           gbp?: Tipping.Gbp;
 
           /**
+           * Tipping configuration for GIP
+           */
+          gip?: Tipping.Gip;
+
+          /**
            * Tipping configuration for HKD
            */
           hkd?: Tipping.Hkd;
 
           /**
+           * Tipping configuration for HUF
+           */
+          huf?: Tipping.Huf;
+
+          /**
            * Tipping configuration for JPY
            */
           jpy?: Tipping.Jpy;
+
+          /**
+           * Tipping configuration for MXN
+           */
+          mxn?: Tipping.Mxn;
 
           /**
            * Tipping configuration for MYR
@@ -151,6 +188,11 @@ declare module 'stripe' {
           pln?: Tipping.Pln;
 
           /**
+           * Tipping configuration for RON
+           */
+          ron?: Tipping.Ron;
+
+          /**
            * Tipping configuration for SEK
            */
           sek?: Tipping.Sek;
@@ -167,7 +209,41 @@ declare module 'stripe' {
         }
 
         namespace Tipping {
+          interface Aed {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
           interface Aud {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
+          interface Bgn {
             /**
              * Fixed amounts displayed when collecting a tip
              */
@@ -286,6 +362,23 @@ declare module 'stripe' {
             smart_tip_threshold?: number;
           }
 
+          interface Gip {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
           interface Hkd {
             /**
              * Fixed amounts displayed when collecting a tip
@@ -303,7 +396,41 @@ declare module 'stripe' {
             smart_tip_threshold?: number;
           }
 
+          interface Huf {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
           interface Jpy {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
+          interface Mxn {
             /**
              * Fixed amounts displayed when collecting a tip
              */
@@ -388,6 +515,23 @@ declare module 'stripe' {
             smart_tip_threshold?: number;
           }
 
+          interface Ron {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
           interface Sek {
             /**
              * Fixed amounts displayed when collecting a tip
@@ -442,7 +586,7 @@ declare module 'stripe' {
 
         interface VerifoneP400 {
           /**
-           * A File ID representing an image you would like displayed on the reader.
+           * A File ID representing an image you want to display on the reader.
            */
           splashscreen?: Stripe.Emptyable<string>;
         }
@@ -547,7 +691,14 @@ declare module 'stripe' {
 
       interface ConfigurationUpdateParams {
         /**
-         * An object containing device type specific settings for BBPOS WisePOS E readers
+         * An object containing device type specific settings for BBPOS WisePad 3 readers.
+         */
+        bbpos_wisepad3?: Stripe.Emptyable<
+          ConfigurationUpdateParams.BbposWisepad3
+        >;
+
+        /**
+         * An object containing device type specific settings for BBPOS WisePOS E readers.
          */
         bbpos_wisepos_e?: Stripe.Emptyable<
           ConfigurationUpdateParams.BbposWiseposE
@@ -569,24 +720,24 @@ declare module 'stripe' {
         offline?: Stripe.Emptyable<ConfigurationUpdateParams.Offline>;
 
         /**
-         * Reboot time settings for readers that support customized reboot time configuration.
+         * Reboot time settings for readers. that support customized reboot time configuration.
          */
         reboot_window?: Stripe.Emptyable<
           ConfigurationUpdateParams.RebootWindow
         >;
 
         /**
-         * An object containing device type specific settings for Stripe S700 readers
+         * An object containing device type specific settings for Stripe S700 readers.
          */
         stripe_s700?: Stripe.Emptyable<ConfigurationUpdateParams.StripeS700>;
 
         /**
-         * Tipping configurations for readers supporting on-reader tips
+         * Tipping configurations for readers. supporting on-reader tips
          */
         tipping?: Stripe.Emptyable<ConfigurationUpdateParams.Tipping>;
 
         /**
-         * An object containing device type specific settings for Verifone P400 readers
+         * An object containing device type specific settings for Verifone P400 readers.
          */
         verifone_p400?: Stripe.Emptyable<
           ConfigurationUpdateParams.VerifoneP400
@@ -599,6 +750,13 @@ declare module 'stripe' {
       }
 
       namespace ConfigurationUpdateParams {
+        interface BbposWisepad3 {
+          /**
+           * A File ID representing an image you want to display on the reader.
+           */
+          splashscreen?: Stripe.Emptyable<string>;
+        }
+
         interface BbposWiseposE {
           /**
            * A File ID representing an image to display on the reader
@@ -627,16 +785,26 @@ declare module 'stripe' {
 
         interface StripeS700 {
           /**
-           * A File ID representing an image you would like displayed on the reader.
+           * A File ID representing an image you want to display on the reader.
            */
           splashscreen?: Stripe.Emptyable<string>;
         }
 
         interface Tipping {
           /**
+           * Tipping configuration for AED
+           */
+          aed?: Tipping.Aed;
+
+          /**
            * Tipping configuration for AUD
            */
           aud?: Tipping.Aud;
+
+          /**
+           * Tipping configuration for BGN
+           */
+          bgn?: Tipping.Bgn;
 
           /**
            * Tipping configuration for CAD
@@ -669,14 +837,29 @@ declare module 'stripe' {
           gbp?: Tipping.Gbp;
 
           /**
+           * Tipping configuration for GIP
+           */
+          gip?: Tipping.Gip;
+
+          /**
            * Tipping configuration for HKD
            */
           hkd?: Tipping.Hkd;
 
           /**
+           * Tipping configuration for HUF
+           */
+          huf?: Tipping.Huf;
+
+          /**
            * Tipping configuration for JPY
            */
           jpy?: Tipping.Jpy;
+
+          /**
+           * Tipping configuration for MXN
+           */
+          mxn?: Tipping.Mxn;
 
           /**
            * Tipping configuration for MYR
@@ -699,6 +882,11 @@ declare module 'stripe' {
           pln?: Tipping.Pln;
 
           /**
+           * Tipping configuration for RON
+           */
+          ron?: Tipping.Ron;
+
+          /**
            * Tipping configuration for SEK
            */
           sek?: Tipping.Sek;
@@ -715,7 +903,41 @@ declare module 'stripe' {
         }
 
         namespace Tipping {
+          interface Aed {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
           interface Aud {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
+          interface Bgn {
             /**
              * Fixed amounts displayed when collecting a tip
              */
@@ -834,6 +1056,23 @@ declare module 'stripe' {
             smart_tip_threshold?: number;
           }
 
+          interface Gip {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
           interface Hkd {
             /**
              * Fixed amounts displayed when collecting a tip
@@ -851,7 +1090,41 @@ declare module 'stripe' {
             smart_tip_threshold?: number;
           }
 
+          interface Huf {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
           interface Jpy {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
+          interface Mxn {
             /**
              * Fixed amounts displayed when collecting a tip
              */
@@ -936,6 +1209,23 @@ declare module 'stripe' {
             smart_tip_threshold?: number;
           }
 
+          interface Ron {
+            /**
+             * Fixed amounts displayed when collecting a tip
+             */
+            fixed_amounts?: Array<number>;
+
+            /**
+             * Percentages displayed when collecting a tip
+             */
+            percentages?: Array<number>;
+
+            /**
+             * Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+             */
+            smart_tip_threshold?: number;
+          }
+
           interface Sek {
             /**
              * Fixed amounts displayed when collecting a tip
@@ -990,7 +1280,7 @@ declare module 'stripe' {
 
         interface VerifoneP400 {
           /**
-           * A File ID representing an image you would like displayed on the reader.
+           * A File ID representing an image you want to display on the reader.
            */
           splashscreen?: Stripe.Emptyable<string>;
         }

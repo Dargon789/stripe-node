@@ -130,6 +130,7 @@ declare module 'stripe' {
 
         namespace Error {
           type Code =
+            | 'external_request'
             | 'information_missing'
             | 'invalid_address_city_state_postal_code'
             | 'invalid_address_highway_contract_box'
@@ -172,6 +173,7 @@ declare module 'stripe' {
             | 'invalid_url_website_incomplete_under_construction'
             | 'invalid_url_website_other'
             | 'invalid_value_other'
+            | 'unsupported_business_type'
             | 'verification_directors_mismatch'
             | 'verification_document_address_mismatch'
             | 'verification_document_address_missing'
@@ -235,7 +237,7 @@ declare module 'stripe' {
         alternatives: Array<Requirements.Alternative> | null;
 
         /**
-         * Date by which the fields in `currently_due` must be collected to keep the capability enabled for the account. These fields may disable the capability sooner if the next threshold is reached before they are collected.
+         * The date by which all required account information must be both submitted and verified. This includes fields listed in `currently_due` as well as those in `pending_verification`. If any required information is missing or unverified by this date, the account may be disabled. Note that `current_deadline` may change if additional `currently_due` requirements are requested.
          */
         current_deadline: number | null;
 
@@ -314,6 +316,7 @@ declare module 'stripe' {
 
         namespace Error {
           type Code =
+            | 'external_request'
             | 'information_missing'
             | 'invalid_address_city_state_postal_code'
             | 'invalid_address_highway_contract_box'
@@ -356,6 +359,7 @@ declare module 'stripe' {
             | 'invalid_url_website_incomplete_under_construction'
             | 'invalid_url_website_other'
             | 'invalid_value_other'
+            | 'unsupported_business_type'
             | 'verification_directors_mismatch'
             | 'verification_document_address_mismatch'
             | 'verification_document_address_missing'
@@ -412,12 +416,7 @@ declare module 'stripe' {
         }
       }
 
-      type Status =
-        | 'active'
-        | 'disabled'
-        | 'inactive'
-        | 'pending'
-        | 'unrequested';
+      type Status = 'active' | 'inactive' | 'pending' | 'unrequested';
     }
   }
 }

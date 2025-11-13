@@ -23,10 +23,7 @@ declare module 'stripe' {
     }
 
     /**
-     * Invoice Items represent the component lines of an [invoice](https://stripe.com/docs/api/invoices). An invoice item is added to an
-     * invoice by creating or updating it with an `invoice` field, at which point it will be included as
-     * [an invoice line item](https://stripe.com/docs/api/invoices/line_item) within
-     * [invoice.lines](https://stripe.com/docs/api/invoices/object#invoice_object-lines).
+     * Invoice Items represent the component lines of an [invoice](https://stripe.com/docs/api/invoices). When you create an invoice item with an `invoice` field, it is attached to the specified invoice and included as [an invoice line item](https://stripe.com/docs/api/invoices/line_item) within [invoice.lines](https://stripe.com/docs/api/invoices/object#invoice_object-lines).
      *
      * Invoice Items can be created before you are ready to actually send the invoice. This can be particularly useful when combined
      * with a [subscription](https://stripe.com/docs/api/subscriptions). Sometimes you want to add a charge or credit to a customer, but actually charge
@@ -102,7 +99,12 @@ declare module 'stripe' {
       metadata: Stripe.Metadata | null;
 
       /**
-       * The parent that generated this invoice
+       * The amount after discounts, but before credits and taxes. This field is `null` for `discountable=true` items.
+       */
+      net_amount?: number;
+
+      /**
+       * The parent that generated this invoice item.
        */
       parent: InvoiceItem.Parent | null;
 
@@ -117,6 +119,8 @@ declare module 'stripe' {
        * Whether the invoice item was created automatically as a proration adjustment when the customer switched plans.
        */
       proration: boolean;
+
+      proration_details?: InvoiceItem.ProrationDetails;
 
       /**
        * Quantity of units for the invoice item. If the invoice item is a proration, the quantity of the subscription that the proration was computed for.
@@ -198,6 +202,27 @@ declare module 'stripe' {
            * The ID of the product this item is associated with.
            */
           product: string;
+        }
+      }
+
+      interface ProrationDetails {
+        /**
+         * Discount amounts applied when the proration was created.
+         */
+        discount_amounts: Array<ProrationDetails.DiscountAmount>;
+      }
+
+      namespace ProrationDetails {
+        interface DiscountAmount {
+          /**
+           * The amount, in cents (or local equivalent), of the discount.
+           */
+          amount: number;
+
+          /**
+           * The discount that was applied to get this discount amount.
+           */
+          discount: string | Stripe.Discount | Stripe.DeletedDiscount;
         }
       }
     }

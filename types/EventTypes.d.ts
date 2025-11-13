@@ -13,6 +13,7 @@ declare module 'stripe' {
       | ApplicationFeeRefundUpdatedEvent
       | ApplicationFeeRefundedEvent
       | BalanceAvailableEvent
+      | BalanceSettingsUpdatedEvent
       | BillingAlertTriggeredEvent
       | BillingCreditBalanceTransactionCreatedEvent
       | BillingCreditGrantCreatedEvent
@@ -102,6 +103,7 @@ declare module 'stripe' {
       | InvoiceOverpaidEvent
       | InvoicePaidEvent
       | InvoicePaymentActionRequiredEvent
+      | InvoicePaymentAttemptRequiredEvent
       | InvoicePaymentFailedEvent
       | InvoicePaymentSucceededEvent
       | InvoiceSentEvent
@@ -109,6 +111,7 @@ declare module 'stripe' {
       | InvoiceUpdatedEvent
       | InvoiceVoidedEvent
       | InvoiceWillBeDueEvent
+      | InvoicePaymentPaidEvent
       | InvoiceItemCreatedEvent
       | InvoiceItemDeletedEvent
       | IssuingAuthorizationCreatedEvent
@@ -207,6 +210,7 @@ declare module 'stripe' {
       | TaxRateUpdatedEvent
       | TerminalReaderActionFailedEvent
       | TerminalReaderActionSucceededEvent
+      | TerminalReaderActionUpdatedEvent
       | TestHelpersTestClockAdvancingEvent
       | TestHelpersTestClockCreatedEvent
       | TestHelpersTestClockDeletedEvent
@@ -410,6 +414,22 @@ declare module 'stripe' {
         object: Stripe.Balance;
 
         previous_attributes?: Partial<Stripe.Balance>;
+      }
+    }
+
+    /**
+     * Occurs whenever a balance settings status or property has changed.
+     */
+    interface BalanceSettingsUpdatedEvent extends EventBase {
+      type: 'balance_settings.updated';
+      data: BalanceSettingsUpdatedEvent.Data;
+    }
+
+    namespace BalanceSettingsUpdatedEvent {
+      interface Data extends Stripe.Event.Data {
+        object: Stripe.BalanceSettings;
+
+        previous_attributes?: Partial<Stripe.BalanceSettings>;
       }
     }
 
@@ -1844,6 +1864,22 @@ declare module 'stripe' {
     }
 
     /**
+     * Occurs when an invoice requires a payment using a payment method that cannot be processed by Stripe.
+     */
+    interface InvoicePaymentAttemptRequiredEvent extends EventBase {
+      type: 'invoice.payment_attempt_required';
+      data: InvoicePaymentAttemptRequiredEvent.Data;
+    }
+
+    namespace InvoicePaymentAttemptRequiredEvent {
+      interface Data extends Stripe.Event.Data {
+        object: Stripe.Invoice;
+
+        previous_attributes?: Partial<Stripe.Invoice>;
+      }
+    }
+
+    /**
      * Occurs whenever an invoice payment attempt fails, due to either a declined payment, including soft decline, or to the lack of a stored payment method.
      */
     interface InvoicePaymentFailedEvent extends EventBase {
@@ -1952,6 +1988,22 @@ declare module 'stripe' {
         object: Stripe.Invoice;
 
         previous_attributes?: Partial<Stripe.Invoice>;
+      }
+    }
+
+    /**
+     * Occurs when an InvoicePayment is successfully paid.
+     */
+    interface InvoicePaymentPaidEvent extends EventBase {
+      type: 'invoice_payment.paid';
+      data: InvoicePaymentPaidEvent.Data;
+    }
+
+    namespace InvoicePaymentPaidEvent {
+      interface Data extends Stripe.Event.Data {
+        object: Stripe.InvoicePayment;
+
+        previous_attributes?: Partial<Stripe.InvoicePayment>;
       }
     }
 
@@ -3517,6 +3569,22 @@ declare module 'stripe' {
     }
 
     namespace TerminalReaderActionSucceededEvent {
+      interface Data extends Stripe.Event.Data {
+        object: Stripe.Terminal.Reader;
+
+        previous_attributes?: Partial<Stripe.Terminal.Reader>;
+      }
+    }
+
+    /**
+     * Occurs whenever an action sent to a Terminal reader is updated.
+     */
+    interface TerminalReaderActionUpdatedEvent extends EventBase {
+      type: 'terminal.reader.action_updated';
+      data: TerminalReaderActionUpdatedEvent.Data;
+    }
+
+    namespace TerminalReaderActionUpdatedEvent {
       interface Data extends Stripe.Event.Data {
         object: Stripe.Terminal.Reader;
 

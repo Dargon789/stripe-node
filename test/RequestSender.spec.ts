@@ -20,11 +20,49 @@ import {
   getSpyableStripe,
   getTestServerStripe,
 } from './testUtils.js';
+import {StripeContext} from '../src/StripeContext.js';
 
 const stripe = getSpyableStripe();
 
 describe('RequestSender', () => {
   const sender = new RequestSender(stripe, 0);
+
+  describe('_normalizeStripeContext', () => {
+    it('returns the req string if it exists, representation of the context if it exists', () => {
+      const result = sender._normalizeStripeContext('req', 'client');
+      expect(result).to.equal('req');
+    });
+
+    it('returns client if the request context is an empty string', () => {
+      // only empty Context unsets
+      const result = sender._normalizeStripeContext('', 'client');
+      expect(result).to.equal('client');
+    });
+
+    it('returns the client context if optsContext is not provided', () => {
+      const result = sender._normalizeStripeContext(undefined, 'client');
+      expect(result).to.equal('client');
+    });
+    it('returns the client context if optsContext is not provided', () => {
+      const result = sender._normalizeStripeContext(null, 'client');
+      expect(result).to.equal('client');
+    });
+
+    it('returns nothing if an empty context is sent', () => {
+      const result = sender._normalizeStripeContext(
+        new StripeContext(),
+        'client'
+      );
+      expect(result).to.equal(null);
+    });
+    it('returns nothing if an empty context is sent', () => {
+      const result = sender._normalizeStripeContext(
+        new StripeContext(['asdf']),
+        null
+      );
+      expect(result).to.equal('asdf');
+    });
+  });
 
   describe('_makeHeaders', () => {
     it('sets the Stripe-Version header if an API version is provided', () => {
@@ -35,8 +73,16 @@ describe('RequestSender', () => {
       const headers = sender._makeHeaders({});
       expect(headers).to.not.include.keys('Stripe-Version');
     });
+    it('does not the set the Stripe-Context header if no value is provided', () => {
+      const headers = sender._makeHeaders({});
+      expect(headers).to.not.include.keys('Stripe-Context');
+    });
+    it('does not the set the Stripe-Context header if null is provided', () => {
+      const headers = sender._makeHeaders({stripeContext: null});
+      expect(headers).to.not.include.keys('Stripe-Context');
+    });
     describe('idempotency keys', () => {
-      it('only creates creates an idempotency key if a v1 request wil retry', () => {
+      it('only creates creates an idempotency key if a v1 request will retry', () => {
         const headers = sender._makeHeaders({
           method: 'POST',
           userSuppliedSettings: {maxNetworkRetries: 3},
@@ -45,7 +91,7 @@ describe('RequestSender', () => {
         expect(headers['Idempotency-Key']).matches(/^stripe-node-retry/);
       });
       // should probably always create an IK; until then, codify the behavior
-      it("skips idempotency genration for v1 reqeust if we're not retrying the request", () => {
+      it("skips idempotency generation for v1 request if we're not retrying the request", () => {
         const headers = sender._makeHeaders({
           method: 'POST',
           userSuppliedSettings: {maxNetworkRetries: 0},
@@ -126,7 +172,7 @@ describe('RequestSender', () => {
 
     describe('_request', () => {
       // eslint-disable-next-line no-warning-comments
-      // TODO(xavdid): re-add this test with a different enpoint that verifies the same thing
+      // TODO(xavdid): re-add this test with a different endpoint that verifies the same thing
       // it('encodes data for GET requests as query params', (done) => {
       //   const data = {
       //     customer: 'cus_123',
@@ -493,6 +539,48 @@ describe('RequestSender', () => {
           done(err);
           scope.done();
         });
+      });
+    });
+
+    describe('_rawRequest', () => {
+      it('should set the host correctly for raw request', (done) => {
+        const scope = nock(`https://files.stripe.com`)
+          .get(`/v1/files/file_1Mr4LDLkdIwHu7ixFCz0dZiH/contents`)
+          .reply(200, '{}');
+
+        realStripe
+          .rawRequest(
+            'GET',
+            '/v1/files/file_1Mr4LDLkdIwHu7ixFCz0dZiH/contents',
+            {},
+            {
+              host: 'files.stripe.com',
+              streaming: true,
+            }
+          )
+          .then((result) => {
+            done();
+            scope.done();
+          })
+          .catch((error) => {
+            done(error);
+          });
+      });
+
+      it('sends empty v2 GET request bodies', (done) => {
+        const scope = nock(`https://api.stripe.com`)
+          .get(`/v2/core/event_destinations`)
+          .reply(200, {data: [], next_page_url: null, previous_page_url: null});
+
+        realStripe
+          .rawRequest('GET', '/v2/core/event_destinations')
+          .then((result) => {
+            done();
+            scope.done();
+          })
+          .catch((error) => {
+            done(error);
+          });
       });
     });
   });
@@ -919,7 +1007,7 @@ describe('RequestSender', () => {
         });
       });
 
-      it('should retry when a header says it should, even on status codes we ordinarily wouldnt', (done) => {
+      it("should retry when a header says it should, even on status codes we ordinarily wouldn't", (done) => {
         nock(`https://${options.host}`)
           .post(options.path, options.params)
           .reply(
@@ -1188,6 +1276,37 @@ describe('RequestSender', () => {
               const result = await stripe.charges.create(options.data);
               expect(result).to.deep.equal(returnedCharge);
               closeServer();
+              done();
+            } catch (err) {
+              done(err);
+            }
+          }
+        );
+      });
+
+      it('should calculate content-length correctly for unicode strings', (done) => {
+        return getTestServerStripe(
+          {},
+          (req, res) => {
+            res.write(
+              JSON.stringify({
+                gotContentLength: req.headers['content-length'],
+              })
+            );
+            res.end();
+          },
+          async (err, stripe, closeServer) => {
+            if (err) {
+              return done(err);
+            }
+            try {
+              // exact method isn't important, but it needs to be a v2 endpoint
+              const result = await stripe.v2.billing.meterEvents.create({
+                name: 'dåvid',
+              });
+              closeServer();
+              expect(result.gotContentLength).to.equal('17');
+
               done();
             } catch (err) {
               done(err);

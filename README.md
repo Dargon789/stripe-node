@@ -16,7 +16,9 @@ See the [`stripe-node` API docs](https://stripe.com/docs/api?lang=node) for Node
 
 ## Requirements
 
-Node 12 or higher.
+Per our [Language Version Support Policy](https://docs.stripe.com/sdks/versioning?lang=node#stripe-sdk-language-version-support-policy), we currently support all LTS versions of **Node.js 16+**.
+
+Support for Node 16 is deprecated and will be removed in an upcoming major version. Read more and see the full schedule in the docs: https://docs.stripe.com/sdks/versioning?lang=node#stripe-sdk-language-version-support-policy
 
 ## Installation
 
@@ -523,23 +525,29 @@ const stripe = new Stripe('sk_test_...', {
 });
 ```
 
-### Beta SDKs
+### Public Preview SDKs
 
-Stripe has features in the beta phase that can be accessed via the beta version of this package.
-We would love for you to try these and share feedback with us before these features reach the stable phase.
-The beta versions can be installed in one of two ways
+Stripe has features in the [public preview phase](https://docs.stripe.com/release-phases) that can be accessed via versions of this package that have the `-beta.X` suffix like `18.6.0-beta.1`.
+We would love for you to try these as we incrementally release new features and improve them based on your feedback.
 
-- To install the latest beta version, run the command `npm install stripe@beta --save`
-- To install a specific beta version, replace the term "beta" in the above command with the version number like `npm install stripe@1.2.3-beta.1 --save`
+The easiest way to install a public-preview release is to use the dedicated npm tag:
+
+```
+npm install stripe@public-preview --save
+```
+
+Or, to install a specific version from the [releases page](https://github.com/stripe/stripe-node/releases/), you can specify that version explicitly:
+
+```
+npm install stripe@<some-version>
+# for example:
+# npm install stripe@18.6.0-beta.1
+```
 
 > **Note**
-> There can be breaking changes between beta versions. Therefore we recommend pinning the package version to a specific beta version in your package.json file. This way you can install the same version each time without breaking changes unless you are intentionally looking for the latest beta version.
+> There can be breaking changes between two versions of the public preview SDKs without a bump in the major version. Therefore we recommend pinning the package version to a specific version in your package.json file. This way you can install the same version each time without breaking changes unless you are intentionally looking for the latest public preview SDK.
 
-We highly recommend keeping an eye on when the beta feature you are interested in goes from beta to stable so that you can move from using a beta version of the SDK to the stable version.
-
-The versions tab on the [stripe page on npm](https://www.npmjs.com/package/stripe) lists the current tags in use. The `beta` tag here corresponds to the the latest beta version of the package.
-
-If your beta feature requires a `Stripe-Version` header to be sent, use the `apiVersion` property of `config` object to set it:
+Some preview features require a name and version to be set in the `Stripe-Version` header like `feature_beta=v3`. If your preview feature has this requirement, use the `apiVersion` property of `config` object to set it:
 
 ```js
 const stripe = new Stripe('sk_test_...', {
@@ -547,7 +555,17 @@ const stripe = new Stripe('sk_test_...', {
 });
 ```
 
+### Private Preview SDKs
+
+Stripe has features in the [private preview phase](https://docs.stripe.com/release-phases) that can be accessed via versions of this package that have the `-alpha.X` suffix like `18.6.0-alpha.1`. These are invite-only features. Once invited, you can install the private preview SDKs by following the same instructions as for the [public preview SDKs](https://github.com/stripe/stripe-node?tab=readme-ov-file#public-preview-sdks) above and replacing the term `public-preview` with `private-preview`:
+
+```
+npm install stripe@private-preview --save
+```
+
 ### Custom requests
+
+> This feature is only available from version 17 of this SDK.
 
 If you would like to send a request to an undocumented API (for example you are in a private beta), or if you prefer to bypass the method definitions in the library and specify your request details directly, you can use the `rawRequest` method on the StripeClient object.
 

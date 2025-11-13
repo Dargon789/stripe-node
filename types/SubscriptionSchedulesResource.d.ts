@@ -4,6 +4,11 @@ declare module 'stripe' {
   namespace Stripe {
     interface SubscriptionScheduleCreateParams {
       /**
+       * Controls how prorations and invoices for subscriptions are calculated and orchestrated.
+       */
+      billing_mode?: SubscriptionScheduleCreateParams.BillingMode;
+
+      /**
        * The identifier of the customer to create the subscription schedule for.
        */
       customer?: string;
@@ -45,6 +50,33 @@ declare module 'stripe' {
     }
 
     namespace SubscriptionScheduleCreateParams {
+      interface BillingMode {
+        /**
+         * Configure behavior for flexible billing mode.
+         */
+        flexible?: BillingMode.Flexible;
+
+        /**
+         * Controls the calculation and orchestration of prorations and invoices for subscriptions. If no value is passed, the default is `flexible`.
+         */
+        type: BillingMode.Type;
+      }
+
+      namespace BillingMode {
+        interface Flexible {
+          /**
+           * Controls how invoices and invoice items display proration amounts and discount amounts.
+           */
+          proration_discounts?: Flexible.ProrationDiscounts;
+        }
+
+        namespace Flexible {
+          type ProrationDiscounts = 'included' | 'itemized';
+        }
+
+        type Type = 'classic' | 'flexible';
+      }
+
       interface DefaultSettings {
         /**
          * A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the application owner's Stripe account. The request must be made by a platform account on a connected account in order to set an application fee percentage. For more information, see the application fees [documentation](https://stripe.com/docs/connect/subscriptions#collecting-fees-on-subscriptions).
@@ -60,6 +92,13 @@ declare module 'stripe' {
          * Can be set to `phase_start` to set the anchor to the start of the phase or `automatic` to automatically change it if needed. Cannot be set to `phase_start` if this phase specifies a trial. For more information, see the billing cycle [documentation](https://stripe.com/docs/billing/subscriptions/billing-cycle).
          */
         billing_cycle_anchor?: DefaultSettings.BillingCycleAnchor;
+
+        /**
+         * Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period. Pass an empty string to remove previously-defined thresholds.
+         */
+        billing_thresholds?: Stripe.Emptyable<
+          DefaultSettings.BillingThresholds
+        >;
 
         /**
          * Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay the underlying subscription at the end of each billing cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. Defaults to `charge_automatically` on creation.
@@ -124,6 +163,18 @@ declare module 'stripe' {
         }
 
         type BillingCycleAnchor = 'automatic' | 'phase_start';
+
+        interface BillingThresholds {
+          /**
+           * Monetary threshold that triggers the subscription to advance to a new billing period
+           */
+          amount_gte?: number;
+
+          /**
+           * Indicates if the `billing_cycle_anchor` should be reset when a threshold is reached. If true, `billing_cycle_anchor` will be updated to the date/time the threshold was last reached; otherwise, the value will remain unchanged.
+           */
+          reset_billing_cycle_anchor?: boolean;
+        }
 
         type CollectionMethod = 'charge_automatically' | 'send_invoice';
 
@@ -199,6 +250,11 @@ declare module 'stripe' {
         billing_cycle_anchor?: Phase.BillingCycleAnchor;
 
         /**
+         * Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period. Pass an empty string to remove previously-defined thresholds.
+         */
+        billing_thresholds?: Stripe.Emptyable<Phase.BillingThresholds>;
+
+        /**
          * Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay the underlying subscription at the end of each billing cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. Defaults to `charge_automatically` on creation.
          */
         collection_method?: Phase.CollectionMethod;
@@ -229,6 +285,11 @@ declare module 'stripe' {
         discounts?: Stripe.Emptyable<Array<Phase.Discount>>;
 
         /**
+         * The number of intervals the phase should last. If set, `end_date` must not be set.
+         */
+        duration?: Phase.Duration;
+
+        /**
          * The date at which this phase of the subscription schedule ends. If set, `iterations` must not be set.
          */
         end_date?: number;
@@ -244,11 +305,6 @@ declare module 'stripe' {
         items: Array<Phase.Item>;
 
         /**
-         * Integer representing the multiplier applied to the price interval. For example, `iterations=2` applied to a price with `interval=month` and `interval_count=3` results in a phase of duration `2 * 3 months = 6 months`. If set, `end_date` must not be set.
-         */
-        iterations?: number;
-
-        /**
          * Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to a phase. Metadata on a schedule's phase will update the underlying subscription's `metadata` when the phase is entered, adding new keys and replacing existing keys in the subscription's `metadata`. Individual keys in the subscription's `metadata` can be unset by posting an empty value to them in the phase's `metadata`. To unset all keys in the subscription's `metadata`, update the subscription directly or unset every key individually from the phase's `metadata`.
          */
         metadata?: Stripe.MetadataParam;
@@ -259,7 +315,7 @@ declare module 'stripe' {
         on_behalf_of?: string;
 
         /**
-         * Whether the subscription schedule will create [prorations](https://stripe.com/docs/billing/subscriptions/prorations) when transitioning to this phase. The default value is `create_prorations`. This setting controls prorations when a phase is started asynchronously and it is persisted as a field on the phase. It's different from the request-level [proration_behavior](https://stripe.com/docs/api/subscription_schedules/update#update_subscription_schedule-proration_behavior) parameter which controls what happens if the update request affects the billing configuration of the current phase.
+         * Controls whether the subscription schedule should create [prorations](https://stripe.com/docs/billing/subscriptions/prorations) when transitioning to this phase if there is a difference in billing configuration. It's different from the request-level [proration_behavior](https://stripe.com/docs/api/subscription_schedules/update#update_subscription_schedule-proration_behavior) parameter which controls what happens if the update request affects the billing configuration (item price, quantity, etc.) of the current phase.
          */
         proration_behavior?: Phase.ProrationBehavior;
 
@@ -285,6 +341,16 @@ declare module 'stripe' {
            * The coupons to redeem into discounts for the item.
            */
           discounts?: Array<AddInvoiceItem.Discount>;
+
+          /**
+           * Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
+           */
+          metadata?: Stripe.MetadataParam;
+
+          /**
+           * The period associated with this invoice item. If not set, `period.start.type` defaults to `max_item_period_start` and `period.end.type` defaults to `min_item_period_end`.
+           */
+          period?: AddInvoiceItem.Period;
 
           /**
            * The ID of the price object. One of `price` or `price_data` is required.
@@ -323,6 +389,52 @@ declare module 'stripe' {
              * ID of the promotion code to create a new discount for.
              */
             promotion_code?: string;
+          }
+
+          interface Period {
+            /**
+             * End of the invoice item period.
+             */
+            end: Period.End;
+
+            /**
+             * Start of the invoice item period.
+             */
+            start: Period.Start;
+          }
+
+          namespace Period {
+            interface End {
+              /**
+               * A precise Unix timestamp for the end of the invoice item period. Must be greater than or equal to `period.start`.
+               */
+              timestamp?: number;
+
+              /**
+               * Select how to calculate the end of the invoice item period.
+               */
+              type: End.Type;
+            }
+
+            namespace End {
+              type Type = 'min_item_period_end' | 'phase_end' | 'timestamp';
+            }
+
+            interface Start {
+              /**
+               * A precise Unix timestamp for the start of the invoice item period. Must be less than or equal to `period.end`.
+               */
+              timestamp?: number;
+
+              /**
+               * Select how to calculate the start of the invoice item period.
+               */
+              type: Start.Type;
+            }
+
+            namespace Start {
+              type Type = 'max_item_period_start' | 'phase_start' | 'timestamp';
+            }
           }
 
           interface PriceData {
@@ -389,6 +501,18 @@ declare module 'stripe' {
 
         type BillingCycleAnchor = 'automatic' | 'phase_start';
 
+        interface BillingThresholds {
+          /**
+           * Monetary threshold that triggers the subscription to advance to a new billing period
+           */
+          amount_gte?: number;
+
+          /**
+           * Indicates if the `billing_cycle_anchor` should be reset when a threshold is reached. If true, `billing_cycle_anchor` will be updated to the date/time the threshold was last reached; otherwise, the value will remain unchanged.
+           */
+          reset_billing_cycle_anchor?: boolean;
+        }
+
         type CollectionMethod = 'charge_automatically' | 'send_invoice';
 
         interface Discount {
@@ -406,6 +530,22 @@ declare module 'stripe' {
            * ID of the promotion code to create a new discount for.
            */
           promotion_code?: string;
+        }
+
+        interface Duration {
+          /**
+           * Specifies phase duration. Either `day`, `week`, `month` or `year`.
+           */
+          interval: Duration.Interval;
+
+          /**
+           * The multiplier applied to the interval.
+           */
+          interval_count?: number;
+        }
+
+        namespace Duration {
+          type Interval = 'day' | 'month' | 'week' | 'year';
         }
 
         interface InvoiceSettings {
@@ -445,6 +585,11 @@ declare module 'stripe' {
 
         interface Item {
           /**
+           * Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period. Pass an empty string to remove previously-defined thresholds.
+           */
+          billing_thresholds?: Stripe.Emptyable<Item.BillingThresholds>;
+
+          /**
            * The coupons to redeem into discounts for the subscription item.
            */
           discounts?: Stripe.Emptyable<Array<Item.Discount>>;
@@ -481,6 +626,13 @@ declare module 'stripe' {
         }
 
         namespace Item {
+          interface BillingThresholds {
+            /**
+             * Number of units that meets the billing threshold to advance the subscription to a new billing period (e.g., it takes 10 $5 units to meet a $50 [monetary threshold](https://stripe.com/docs/api/subscriptions/update#update_subscription-billing_thresholds-amount_gte))
+             */
+            usage_gte: number;
+          }
+
           interface Discount {
             /**
              * ID of the coupon to create a new discount for.
@@ -604,7 +756,7 @@ declare module 'stripe' {
       phases?: Array<SubscriptionScheduleUpdateParams.Phase>;
 
       /**
-       * If the update changes the current phase, indicates whether the changes should be prorated. The default value is `create_prorations`.
+       * If the update changes the billing configuration (item price, quantity, etc.) of the current phase, indicates how prorations from this change should be handled. The default value is `create_prorations`.
        */
       proration_behavior?: SubscriptionScheduleUpdateParams.ProrationBehavior;
     }
@@ -625,6 +777,13 @@ declare module 'stripe' {
          * Can be set to `phase_start` to set the anchor to the start of the phase or `automatic` to automatically change it if needed. Cannot be set to `phase_start` if this phase specifies a trial. For more information, see the billing cycle [documentation](https://stripe.com/docs/billing/subscriptions/billing-cycle).
          */
         billing_cycle_anchor?: DefaultSettings.BillingCycleAnchor;
+
+        /**
+         * Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period. Pass an empty string to remove previously-defined thresholds.
+         */
+        billing_thresholds?: Stripe.Emptyable<
+          DefaultSettings.BillingThresholds
+        >;
 
         /**
          * Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay the underlying subscription at the end of each billing cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. Defaults to `charge_automatically` on creation.
@@ -689,6 +848,18 @@ declare module 'stripe' {
         }
 
         type BillingCycleAnchor = 'automatic' | 'phase_start';
+
+        interface BillingThresholds {
+          /**
+           * Monetary threshold that triggers the subscription to advance to a new billing period
+           */
+          amount_gte?: number;
+
+          /**
+           * Indicates if the `billing_cycle_anchor` should be reset when a threshold is reached. If true, `billing_cycle_anchor` will be updated to the date/time the threshold was last reached; otherwise, the value will remain unchanged.
+           */
+          reset_billing_cycle_anchor?: boolean;
+        }
 
         type CollectionMethod = 'charge_automatically' | 'send_invoice';
 
@@ -764,6 +935,11 @@ declare module 'stripe' {
         billing_cycle_anchor?: Phase.BillingCycleAnchor;
 
         /**
+         * Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period. Pass an empty string to remove previously-defined thresholds.
+         */
+        billing_thresholds?: Stripe.Emptyable<Phase.BillingThresholds>;
+
+        /**
          * Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay the underlying subscription at the end of each billing cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions and mark the subscription as `active`. Defaults to `charge_automatically` on creation.
          */
         collection_method?: Phase.CollectionMethod;
@@ -794,6 +970,11 @@ declare module 'stripe' {
         discounts?: Stripe.Emptyable<Array<Phase.Discount>>;
 
         /**
+         * The number of intervals the phase should last. If set, `end_date` must not be set.
+         */
+        duration?: Phase.Duration;
+
+        /**
          * The date at which this phase of the subscription schedule ends. If set, `iterations` must not be set.
          */
         end_date?: number | 'now';
@@ -809,11 +990,6 @@ declare module 'stripe' {
         items: Array<Phase.Item>;
 
         /**
-         * Integer representing the multiplier applied to the price interval. For example, `iterations=2` applied to a price with `interval=month` and `interval_count=3` results in a phase of duration `2 * 3 months = 6 months`. If set, `end_date` must not be set.
-         */
-        iterations?: number;
-
-        /**
          * Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to a phase. Metadata on a schedule's phase will update the underlying subscription's `metadata` when the phase is entered, adding new keys and replacing existing keys in the subscription's `metadata`. Individual keys in the subscription's `metadata` can be unset by posting an empty value to them in the phase's `metadata`. To unset all keys in the subscription's `metadata`, update the subscription directly or unset every key individually from the phase's `metadata`.
          */
         metadata?: Stripe.MetadataParam;
@@ -824,7 +1000,7 @@ declare module 'stripe' {
         on_behalf_of?: string;
 
         /**
-         * Whether the subscription schedule will create [prorations](https://stripe.com/docs/billing/subscriptions/prorations) when transitioning to this phase. The default value is `create_prorations`. This setting controls prorations when a phase is started asynchronously and it is persisted as a field on the phase. It's different from the request-level [proration_behavior](https://stripe.com/docs/api/subscription_schedules/update#update_subscription_schedule-proration_behavior) parameter which controls what happens if the update request affects the billing configuration of the current phase.
+         * Controls whether the subscription schedule should create [prorations](https://stripe.com/docs/billing/subscriptions/prorations) when transitioning to this phase if there is a difference in billing configuration. It's different from the request-level [proration_behavior](https://stripe.com/docs/api/subscription_schedules/update#update_subscription_schedule-proration_behavior) parameter which controls what happens if the update request affects the billing configuration (item price, quantity, etc.) of the current phase.
          */
         proration_behavior?: Phase.ProrationBehavior;
 
@@ -855,6 +1031,16 @@ declare module 'stripe' {
            * The coupons to redeem into discounts for the item.
            */
           discounts?: Array<AddInvoiceItem.Discount>;
+
+          /**
+           * Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
+           */
+          metadata?: Stripe.MetadataParam;
+
+          /**
+           * The period associated with this invoice item. If not set, `period.start.type` defaults to `max_item_period_start` and `period.end.type` defaults to `min_item_period_end`.
+           */
+          period?: AddInvoiceItem.Period;
 
           /**
            * The ID of the price object. One of `price` or `price_data` is required.
@@ -893,6 +1079,52 @@ declare module 'stripe' {
              * ID of the promotion code to create a new discount for.
              */
             promotion_code?: string;
+          }
+
+          interface Period {
+            /**
+             * End of the invoice item period.
+             */
+            end: Period.End;
+
+            /**
+             * Start of the invoice item period.
+             */
+            start: Period.Start;
+          }
+
+          namespace Period {
+            interface End {
+              /**
+               * A precise Unix timestamp for the end of the invoice item period. Must be greater than or equal to `period.start`.
+               */
+              timestamp?: number;
+
+              /**
+               * Select how to calculate the end of the invoice item period.
+               */
+              type: End.Type;
+            }
+
+            namespace End {
+              type Type = 'min_item_period_end' | 'phase_end' | 'timestamp';
+            }
+
+            interface Start {
+              /**
+               * A precise Unix timestamp for the start of the invoice item period. Must be less than or equal to `period.end`.
+               */
+              timestamp?: number;
+
+              /**
+               * Select how to calculate the start of the invoice item period.
+               */
+              type: Start.Type;
+            }
+
+            namespace Start {
+              type Type = 'max_item_period_start' | 'phase_start' | 'timestamp';
+            }
           }
 
           interface PriceData {
@@ -959,6 +1191,18 @@ declare module 'stripe' {
 
         type BillingCycleAnchor = 'automatic' | 'phase_start';
 
+        interface BillingThresholds {
+          /**
+           * Monetary threshold that triggers the subscription to advance to a new billing period
+           */
+          amount_gte?: number;
+
+          /**
+           * Indicates if the `billing_cycle_anchor` should be reset when a threshold is reached. If true, `billing_cycle_anchor` will be updated to the date/time the threshold was last reached; otherwise, the value will remain unchanged.
+           */
+          reset_billing_cycle_anchor?: boolean;
+        }
+
         type CollectionMethod = 'charge_automatically' | 'send_invoice';
 
         interface Discount {
@@ -976,6 +1220,22 @@ declare module 'stripe' {
            * ID of the promotion code to create a new discount for.
            */
           promotion_code?: string;
+        }
+
+        interface Duration {
+          /**
+           * Specifies phase duration. Either `day`, `week`, `month` or `year`.
+           */
+          interval: Duration.Interval;
+
+          /**
+           * The multiplier applied to the interval.
+           */
+          interval_count?: number;
+        }
+
+        namespace Duration {
+          type Interval = 'day' | 'month' | 'week' | 'year';
         }
 
         interface InvoiceSettings {
@@ -1015,6 +1275,11 @@ declare module 'stripe' {
 
         interface Item {
           /**
+           * Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period. Pass an empty string to remove previously-defined thresholds.
+           */
+          billing_thresholds?: Stripe.Emptyable<Item.BillingThresholds>;
+
+          /**
            * The coupons to redeem into discounts for the subscription item.
            */
           discounts?: Stripe.Emptyable<Array<Item.Discount>>;
@@ -1051,6 +1316,13 @@ declare module 'stripe' {
         }
 
         namespace Item {
+          interface BillingThresholds {
+            /**
+             * Number of units that meets the billing threshold to advance the subscription to a new billing period (e.g., it takes 10 $5 units to meet a $50 [monetary threshold](https://stripe.com/docs/api/subscriptions/update#update_subscription-billing_thresholds-amount_gte))
+             */
+            usage_gte: number;
+          }
+
           interface Discount {
             /**
              * ID of the coupon to create a new discount for.
