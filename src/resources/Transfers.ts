@@ -7,6 +7,7 @@ import {Account} from './Accounts.js';
 import {Charge} from './Charges.js';
 import {
   MetadataParam,
+  OtherString,
   Emptyable,
   PaginationParams,
   RangeQueryParam,
@@ -45,7 +46,7 @@ export class TransferResource extends StripeResource {
   ): Promise<Response<Transfer>> {
     return this._makeRequest(
       'GET',
-      `/v1/transfers/${id}`,
+      `/v1/transfers/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -62,7 +63,7 @@ export class TransferResource extends StripeResource {
   ): Promise<Response<Transfer>> {
     return this._makeRequest(
       'POST',
-      `/v1/transfers/${id}`,
+      `/v1/transfers/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -77,7 +78,7 @@ export class TransferResource extends StripeResource {
   ): ApiListPromise<TransferReversal> {
     return this._makeRequest(
       'GET',
-      `/v1/transfers/${id}/reversals`,
+      `/v1/transfers/${encodeURIComponent(id)}/reversals`,
       params,
       options,
       {
@@ -99,7 +100,7 @@ export class TransferResource extends StripeResource {
   ): Promise<Response<TransferReversal>> {
     return this._makeRequest(
       'POST',
-      `/v1/transfers/${id}/reversals`,
+      `/v1/transfers/${encodeURIComponent(id)}/reversals`,
       params,
       options
     ) as any;
@@ -115,7 +116,9 @@ export class TransferResource extends StripeResource {
   ): Promise<Response<TransferReversal>> {
     return this._makeRequest(
       'GET',
-      `/v1/transfers/${transferId}/reversals/${id}`,
+      `/v1/transfers/${encodeURIComponent(
+        transferId
+      )}/reversals/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -133,7 +136,9 @@ export class TransferResource extends StripeResource {
   ): Promise<Response<TransferReversal>> {
     return this._makeRequest(
       'POST',
-      `/v1/transfers/${transferId}/reversals/${id}`,
+      `/v1/transfers/${encodeURIComponent(
+        transferId
+      )}/reversals/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -272,7 +277,7 @@ export interface TransferCreateParams {
   transfer_group?: string;
 }
 export namespace TransferCreateParams {
-  export type SourceType = 'bank_account' | 'card' | 'fpx';
+  export type SourceType = 'bank_account' | 'card' | 'fpx' | OtherString;
 }
 export interface TransferRetrieveParams {
   /**

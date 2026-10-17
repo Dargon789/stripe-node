@@ -5,8 +5,8 @@ import {AccountPerson} from './../../../V2/Core/AccountPersons.js';
 import {
   Address,
   MetadataParam,
+  OtherString,
   Decimal,
-  JapanAddressParam,
 } from '../../../../shared.js';
 import {RequestOptions, V2ListPromise, Response} from '../../../../lib.js';
 import {DeletedObject} from './../../../V2/DeletedObject.js';
@@ -17,13 +17,13 @@ export class PersonResource extends StripeResource {
    * @throws Stripe.RateLimitError
    */
   list(
-    id: string,
+    accountId: string,
     params?: V2.Core.Accounts.PersonListParams,
     options?: RequestOptions
   ): V2ListPromise<AccountPerson> {
     return this._makeRequest(
       'GET',
-      `/v2/core/accounts/${id}/persons`,
+      `/v2/core/accounts/${encodeURIComponent(accountId)}/persons`,
       params,
       options,
       {
@@ -53,13 +53,13 @@ export class PersonResource extends StripeResource {
    * @throws Stripe.RateLimitError
    */
   create(
-    id: string,
+    accountId: string,
     params?: V2.Core.Accounts.PersonCreateParams,
     options?: RequestOptions
   ): Promise<Response<AccountPerson>> {
     return this._makeRequest(
       'POST',
-      `/v2/core/accounts/${id}/persons`,
+      `/v2/core/accounts/${encodeURIComponent(accountId)}/persons`,
       params,
       options,
       {
@@ -96,7 +96,9 @@ export class PersonResource extends StripeResource {
   ): Promise<Response<DeletedObject>> {
     return this._makeRequest(
       'DELETE',
-      `/v2/core/accounts/${accountId}/persons/${id}`,
+      `/v2/core/accounts/${encodeURIComponent(
+        accountId
+      )}/persons/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -113,7 +115,9 @@ export class PersonResource extends StripeResource {
   ): Promise<Response<AccountPerson>> {
     return this._makeRequest(
       'GET',
-      `/v2/core/accounts/${accountId}/persons/${id}`,
+      `/v2/core/accounts/${encodeURIComponent(
+        accountId
+      )}/persons/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -141,7 +145,9 @@ export class PersonResource extends StripeResource {
   ): Promise<Response<AccountPerson>> {
     return this._makeRequest(
       'POST',
-      `/v2/core/accounts/${accountId}/persons/${id}`,
+      `/v2/core/accounts/${encodeURIComponent(
+        accountId
+      )}/persons/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -432,9 +438,9 @@ export namespace V2 {
           value: string;
         }
 
-        export type LegalGender = 'female' | 'male';
+        export type LegalGender = 'female' | 'male' | OtherString;
 
-        export type PoliticalExposure = 'existing' | 'none';
+        export type PoliticalExposure = 'existing' | 'none' | OtherString;
 
         export interface Relationship {
           /**
@@ -535,7 +541,7 @@ export namespace V2 {
             /**
              * The format of the document. Currently supports `files` only.
              */
-            type: 'files';
+            type: CompanyAuthorization.Type;
           }
 
           export interface Passport {
@@ -547,7 +553,7 @@ export namespace V2 {
             /**
              * The format of the document. Currently supports `files` only.
              */
-            type: 'files';
+            type: Passport.Type;
           }
 
           export interface PrimaryVerification {
@@ -559,7 +565,7 @@ export namespace V2 {
             /**
              * The format of the verification document. Currently supports `front_back` only.
              */
-            type: 'front_back';
+            type: PrimaryVerification.Type;
           }
 
           export interface SecondaryVerification {
@@ -571,7 +577,7 @@ export namespace V2 {
             /**
              * The format of the verification document. Currently supports `front_back` only.
              */
-            type: 'front_back';
+            type: SecondaryVerification.Type;
           }
 
           export interface Visa {
@@ -583,7 +589,15 @@ export namespace V2 {
             /**
              * The format of the document. Currently supports `files` only.
              */
-            type: 'files';
+            type: Visa.Type;
+          }
+
+          export namespace CompanyAuthorization {
+            export type Type = 'files' | OtherString;
+          }
+
+          export namespace Passport {
+            export type Type = 'files' | OtherString;
           }
 
           export namespace PrimaryVerification {
@@ -598,6 +612,8 @@ export namespace V2 {
                */
               front: string;
             }
+
+            export type Type = 'front_back' | OtherString;
           }
 
           export namespace SecondaryVerification {
@@ -612,6 +628,12 @@ export namespace V2 {
                */
               front: string;
             }
+
+            export type Type = 'front_back' | OtherString;
+          }
+
+          export namespace Visa {
+            export type Type = 'files' | OtherString;
           }
         }
 
@@ -693,7 +715,8 @@ export namespace V2 {
             | 'us_ssn'
             | 'us_ssn_last_4'
             | 'uy_dni'
-            | 'za_id';
+            | 'za_id'
+            | OtherString;
         }
 
         export namespace ScriptAddresses {
@@ -830,7 +853,7 @@ export namespace V2 {
         /**
          * The primary address associated with the person.
          */
-        address?: JapanAddressParam;
+        address?: PersonUpdateParams.Address;
 
         /**
          * The person's date of birth.
@@ -980,6 +1003,43 @@ export namespace V2 {
           account?: AdditionalTermsOfService.Account;
         }
 
+        export interface Address {
+          /**
+           * City, district, suburb, town, or village.
+           */
+          city?: string;
+
+          /**
+           * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+           */
+          country?: string;
+
+          /**
+           * Address line 1 (e.g., street, PO Box, or company name).
+           */
+          line1?: string;
+
+          /**
+           * Address line 2 (e.g., apartment, suite, unit, or building).
+           */
+          line2?: string;
+
+          /**
+           * ZIP or postal code.
+           */
+          postal_code?: string;
+
+          /**
+           * State, county, province, or region.
+           */
+          state?: string;
+
+          /**
+           * Town or district.
+           */
+          town?: string;
+        }
+
         export interface DateOfBirth {
           /**
            * The day of the birth.
@@ -1036,9 +1096,9 @@ export namespace V2 {
           value: string;
         }
 
-        export type LegalGender = 'female' | 'male';
+        export type LegalGender = 'female' | 'male' | OtherString;
 
-        export type PoliticalExposure = 'existing' | 'none';
+        export type PoliticalExposure = 'existing' | 'none' | OtherString;
 
         export interface Relationship {
           /**
@@ -1086,12 +1146,12 @@ export namespace V2 {
           /**
            * Kana Address.
            */
-          kana?: JapanAddressParam;
+          kana?: ScriptAddresses.Kana;
 
           /**
            * Kanji Address.
            */
-          kanji?: JapanAddressParam;
+          kanji?: ScriptAddresses.Kanji;
         }
 
         export interface ScriptNames {
@@ -1139,7 +1199,7 @@ export namespace V2 {
             /**
              * The format of the document. Currently supports `files` only.
              */
-            type: 'files';
+            type: CompanyAuthorization.Type;
           }
 
           export interface Passport {
@@ -1151,7 +1211,7 @@ export namespace V2 {
             /**
              * The format of the document. Currently supports `files` only.
              */
-            type: 'files';
+            type: Passport.Type;
           }
 
           export interface PrimaryVerification {
@@ -1163,7 +1223,7 @@ export namespace V2 {
             /**
              * The format of the verification document. Currently supports `front_back` only.
              */
-            type: 'front_back';
+            type: PrimaryVerification.Type;
           }
 
           export interface SecondaryVerification {
@@ -1175,7 +1235,7 @@ export namespace V2 {
             /**
              * The format of the verification document. Currently supports `front_back` only.
              */
-            type: 'front_back';
+            type: SecondaryVerification.Type;
           }
 
           export interface Visa {
@@ -1187,7 +1247,15 @@ export namespace V2 {
             /**
              * The format of the document. Currently supports `files` only.
              */
-            type: 'files';
+            type: Visa.Type;
+          }
+
+          export namespace CompanyAuthorization {
+            export type Type = 'files' | OtherString;
+          }
+
+          export namespace Passport {
+            export type Type = 'files' | OtherString;
           }
 
           export namespace PrimaryVerification {
@@ -1202,6 +1270,8 @@ export namespace V2 {
                */
               front?: string;
             }
+
+            export type Type = 'front_back' | OtherString;
           }
 
           export namespace SecondaryVerification {
@@ -1216,6 +1286,12 @@ export namespace V2 {
                */
               front?: string;
             }
+
+            export type Type = 'front_back' | OtherString;
+          }
+
+          export namespace Visa {
+            export type Type = 'files' | OtherString;
           }
         }
 
@@ -1297,7 +1373,84 @@ export namespace V2 {
             | 'us_ssn'
             | 'us_ssn_last_4'
             | 'uy_dni'
-            | 'za_id';
+            | 'za_id'
+            | OtherString;
+        }
+
+        export namespace ScriptAddresses {
+          export interface Kana {
+            /**
+             * City, district, suburb, town, or village.
+             */
+            city?: string;
+
+            /**
+             * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+             */
+            country?: string;
+
+            /**
+             * Address line 1 (e.g., street, PO Box, or company name).
+             */
+            line1?: string;
+
+            /**
+             * Address line 2 (e.g., apartment, suite, unit, or building).
+             */
+            line2?: string;
+
+            /**
+             * ZIP or postal code.
+             */
+            postal_code?: string;
+
+            /**
+             * State, county, province, or region.
+             */
+            state?: string;
+
+            /**
+             * Town or district.
+             */
+            town?: string;
+          }
+
+          export interface Kanji {
+            /**
+             * City, district, suburb, town, or village.
+             */
+            city?: string;
+
+            /**
+             * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+             */
+            country?: string;
+
+            /**
+             * Address line 1 (e.g., street, PO Box, or company name).
+             */
+            line1?: string;
+
+            /**
+             * Address line 2 (e.g., apartment, suite, unit, or building).
+             */
+            line2?: string;
+
+            /**
+             * ZIP or postal code.
+             */
+            postal_code?: string;
+
+            /**
+             * State, county, province, or region.
+             */
+            state?: string;
+
+            /**
+             * Town or district.
+             */
+            town?: string;
+          }
         }
 
         export namespace ScriptNames {

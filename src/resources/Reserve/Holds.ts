@@ -2,7 +2,7 @@
 
 import {Plan} from './Plans.js';
 import {Charge} from './../Charges.js';
-import {Metadata} from '../../shared.js';
+import {Metadata, OtherString} from '../../shared.js';
 import {RequestOptions} from '../../lib.js';
 export interface Hold {
   /**
@@ -33,12 +33,17 @@ export interface Hold {
   /**
    * Indicates which party created this ReserveHold.
    */
-  created_by: Reserve.Hold.CreatedBy;
+  created_by: Hold.CreatedBy;
 
   /**
    * Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies).
    */
   currency: string;
+
+  /**
+   * The balance destination to which the reserved funds are sent.
+   */
+  destination: Hold.Destination;
 
   /**
    * Whether there are any funds available to release on this ReserveHold. Note that if the ReserveHold is in the process of being released, this could be false, even though the funds haven't been fully released yet.
@@ -58,9 +63,14 @@ export interface Hold {
   /**
    * The reason for the ReserveHold.
    */
-  reason: Reserve.Hold.Reason;
+  reason: Hold.Reason;
 
-  release_schedule: Reserve.Hold.ReleaseSchedule;
+  /**
+   * List of ReserveReleases and the amounts released from this ReserveHold.
+   */
+  release_details?: Array<Hold.ReleaseDetail>;
+
+  release_schedule: Hold.ReleaseSchedule;
 
   /**
    * The ReservePlan which produced this ReserveHold (i.e., resplan_123)
@@ -75,26 +85,38 @@ export interface Hold {
   /**
    * Which source balance type this ReserveHold reserves funds from. One of `bank_account`, `card`, or `fpx`.
    */
-  source_type: Reserve.Hold.SourceType;
+  source_type: Hold.SourceType;
 }
-export namespace Reserve {
-  export namespace Hold {
-    export type CreatedBy = 'application' | 'stripe';
+export namespace Hold {
+  export type CreatedBy = 'application' | 'stripe' | OtherString;
 
-    export type Reason = 'charge' | 'standalone';
+  export type Destination = 'other' | 'risk_reserved' | 'settlement_reserved';
 
-    export interface ReleaseSchedule {
-      /**
-       * The time after which the ReserveHold is requested to be released.
-       */
-      release_after: number | null;
+  export type Reason = 'charge' | 'standalone' | OtherString;
 
-      /**
-       * The time at which the ReserveHold is scheduled to be released, automatically set to midnight UTC of the day after `release_after`.
-       */
-      scheduled_release: number | null;
-    }
+  export interface ReleaseDetail {
+    /**
+     * The amount released by the ReserveRelease from this ReserveHold. A positive integer representing how much is released in the [smallest currency unit](https://docs.stripe.com/currencies#zero-decimal).
+     */
+    amount: number;
 
-    export type SourceType = 'bank_account' | 'card' | 'fpx';
+    /**
+     * The ReserveRelease which released funds from this ReserveHold (e.g., resrel_123).
+     */
+    reserve_release: string;
   }
+
+  export interface ReleaseSchedule {
+    /**
+     * The time after which the ReserveHold is requested to be released.
+     */
+    release_after: number | null;
+
+    /**
+     * The time at which the ReserveHold is scheduled to be released, automatically set to midnight UTC of the day after `release_after`.
+     */
+    scheduled_release: number | null;
+  }
+
+  export type SourceType = 'bank_account' | 'card' | 'fpx' | OtherString;
 }

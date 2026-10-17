@@ -2,7 +2,7 @@
 
 import {StripeResource} from '../../../StripeResource.js';
 import {Authorization} from './../../Issuing/Authorizations.js';
-import {Decimal} from '../../../shared.js';
+import {OtherString, Decimal} from '../../../shared.js';
 import {RequestOptions, Response} from '../../../lib.js';
 
 export class AuthorizationResource extends StripeResource {
@@ -231,7 +231,9 @@ export class AuthorizationResource extends StripeResource {
   ): Promise<Response<Authorization>> {
     return this._makeRequest(
       'POST',
-      `/v1/test_helpers/issuing/authorizations/${id}/capture`,
+      `/v1/test_helpers/issuing/authorizations/${encodeURIComponent(
+        id
+      )}/capture`,
       params,
       options,
       {
@@ -463,7 +465,9 @@ export class AuthorizationResource extends StripeResource {
   ): Promise<Response<Authorization>> {
     return this._makeRequest(
       'POST',
-      `/v1/test_helpers/issuing/authorizations/${id}/expire`,
+      `/v1/test_helpers/issuing/authorizations/${encodeURIComponent(
+        id
+      )}/expire`,
       params,
       options,
       {
@@ -642,7 +646,9 @@ export class AuthorizationResource extends StripeResource {
   ): Promise<Response<Authorization>> {
     return this._makeRequest(
       'POST',
-      `/v1/test_helpers/issuing/authorizations/${id}/finalize_amount`,
+      `/v1/test_helpers/issuing/authorizations/${encodeURIComponent(
+        id
+      )}/finalize_amount`,
       params,
       options,
       {
@@ -858,7 +864,9 @@ export class AuthorizationResource extends StripeResource {
   ): Promise<Response<Authorization>> {
     return this._makeRequest(
       'POST',
-      `/v1/test_helpers/issuing/authorizations/${id}/fraud_challenges/respond`,
+      `/v1/test_helpers/issuing/authorizations/${encodeURIComponent(
+        id
+      )}/fraud_challenges/respond`,
       params,
       options,
       {
@@ -1037,7 +1045,9 @@ export class AuthorizationResource extends StripeResource {
   ): Promise<Response<Authorization>> {
     return this._makeRequest(
       'POST',
-      `/v1/test_helpers/issuing/authorizations/${id}/increment`,
+      `/v1/test_helpers/issuing/authorizations/${encodeURIComponent(
+        id
+      )}/increment`,
       params,
       options,
       {
@@ -1216,7 +1226,9 @@ export class AuthorizationResource extends StripeResource {
   ): Promise<Response<Authorization>> {
     return this._makeRequest(
       'POST',
-      `/v1/test_helpers/issuing/authorizations/${id}/reverse`,
+      `/v1/test_helpers/issuing/authorizations/${encodeURIComponent(
+        id
+      )}/reverse`,
       params,
       options,
       {
@@ -1493,7 +1505,8 @@ export namespace TestHelpers {
         | 'contactless'
         | 'keyed_in'
         | 'online'
-        | 'swipe';
+        | 'swipe'
+        | OtherString;
 
       export interface Fleet {
         /**
@@ -1521,7 +1534,8 @@ export namespace TestHelpers {
         | 'neutral'
         | 'unknown'
         | 'very_likely'
-        | 'very_unlikely';
+        | 'very_unlikely'
+        | OtherString;
 
       export interface Fuel {
         /**
@@ -1653,7 +1667,11 @@ export namespace TestHelpers {
         three_d_secure?: VerificationData.ThreeDSecure;
       }
 
-      export type Wallet = 'apple_pay' | 'google_pay' | 'samsung_pay';
+      export type Wallet =
+        | 'apple_pay'
+        | 'google_pay'
+        | 'samsung_pay'
+        | OtherString;
 
       export namespace Fleet {
         export interface CardholderPromptData {
@@ -1686,7 +1704,8 @@ export namespace TestHelpers {
         export type PurchaseType =
           | 'fuel_and_non_fuel_purchase'
           | 'fuel_purchase'
-          | 'non_fuel_purchase';
+          | 'non_fuel_purchase'
+          | OtherString;
 
         export interface ReportedBreakdown {
           /**
@@ -1708,12 +1727,13 @@ export namespace TestHelpers {
         export type ServiceType =
           | 'full_service'
           | 'non_fuel_transaction'
-          | 'self_service';
+          | 'self_service'
+          | OtherString;
 
         export namespace ReportedBreakdown {
           export interface Fuel {
             /**
-             * Gross fuel amount that should equal Fuel Volume multipled by Fuel Unit Cost, inclusive of taxes.
+             * Gross fuel amount that should equal Fuel Volume multiplied by Fuel Unit Cost, inclusive of taxes.
              */
             gross_amount_decimal?: Decimal;
           }
@@ -1745,7 +1765,8 @@ export namespace TestHelpers {
           | 'other'
           | 'unleaded_plus'
           | 'unleaded_regular'
-          | 'unleaded_super';
+          | 'unleaded_super'
+          | OtherString;
 
         export type Unit =
           | 'charging_minute'
@@ -1755,7 +1776,8 @@ export namespace TestHelpers {
           | 'liter'
           | 'other'
           | 'pound'
-          | 'us_gallon';
+          | 'us_gallon'
+          | OtherString;
       }
 
       export namespace MerchantData {
@@ -2053,7 +2075,8 @@ export namespace TestHelpers {
           | 'wires_money_orders'
           | 'womens_accessory_and_specialty_shops'
           | 'womens_ready_to_wear_stores'
-          | 'wrecking_and_salvage_yards';
+          | 'wrecking_and_salvage_yards'
+          | OtherString;
       }
 
       export namespace RiskAssessment {
@@ -2105,7 +2128,8 @@ export namespace TestHelpers {
             | 'low'
             | 'normal'
             | 'not_assessed'
-            | 'unknown';
+            | 'unknown'
+            | OtherString;
         }
 
         export namespace FraudRisk {
@@ -2115,7 +2139,8 @@ export namespace TestHelpers {
             | 'low'
             | 'normal'
             | 'not_assessed'
-            | 'unknown';
+            | 'unknown'
+            | OtherString;
         }
 
         export namespace MerchantDisputeRisk {
@@ -2125,17 +2150,23 @@ export namespace TestHelpers {
             | 'low'
             | 'normal'
             | 'not_assessed'
-            | 'unknown';
+            | 'unknown'
+            | OtherString;
         }
       }
 
       export namespace VerificationData {
-        export type AddressLine1Check = 'match' | 'mismatch' | 'not_provided';
+        export type AddressLine1Check =
+          | 'match'
+          | 'mismatch'
+          | 'not_provided'
+          | OtherString;
 
         export type AddressPostalCodeCheck =
           | 'match'
           | 'mismatch'
-          | 'not_provided';
+          | 'not_provided'
+          | OtherString;
 
         export interface AuthenticationExemption {
           /**
@@ -2149,9 +2180,17 @@ export namespace TestHelpers {
           type: AuthenticationExemption.Type;
         }
 
-        export type CvcCheck = 'match' | 'mismatch' | 'not_provided';
+        export type CvcCheck =
+          | 'match'
+          | 'mismatch'
+          | 'not_provided'
+          | OtherString;
 
-        export type ExpiryCheck = 'match' | 'mismatch' | 'not_provided';
+        export type ExpiryCheck =
+          | 'match'
+          | 'mismatch'
+          | 'not_provided'
+          | OtherString;
 
         export interface ThreeDSecure {
           /**
@@ -2161,12 +2200,13 @@ export namespace TestHelpers {
         }
 
         export namespace AuthenticationExemption {
-          export type ClaimedBy = 'acquirer' | 'issuer';
+          export type ClaimedBy = 'acquirer' | 'issuer' | OtherString;
 
           export type Type =
             | 'low_value_transaction'
             | 'transaction_risk_analysis'
-            | 'unknown';
+            | 'unknown'
+            | OtherString;
         }
 
         export namespace ThreeDSecure {
@@ -2174,7 +2214,8 @@ export namespace TestHelpers {
             | 'attempt_acknowledged'
             | 'authenticated'
             | 'failed'
-            | 'required';
+            | 'required'
+            | OtherString;
         }
       }
     }
@@ -2367,7 +2408,8 @@ export namespace TestHelpers {
           export type PurchaseType =
             | 'fuel_and_non_fuel_purchase'
             | 'fuel_purchase'
-            | 'non_fuel_purchase';
+            | 'non_fuel_purchase'
+            | OtherString;
 
           export interface ReportedBreakdown {
             /**
@@ -2389,12 +2431,13 @@ export namespace TestHelpers {
           export type ServiceType =
             | 'full_service'
             | 'non_fuel_transaction'
-            | 'self_service';
+            | 'self_service'
+            | OtherString;
 
           export namespace ReportedBreakdown {
             export interface Fuel {
               /**
-               * Gross fuel amount that should equal Fuel Volume multipled by Fuel Unit Cost, inclusive of taxes.
+               * Gross fuel amount that should equal Fuel Volume multiplied by Fuel Unit Cost, inclusive of taxes.
                */
               gross_amount_decimal?: Decimal;
             }
@@ -2460,7 +2503,8 @@ export namespace TestHelpers {
             | 'other'
             | 'unleaded_plus'
             | 'unleaded_regular'
-            | 'unleaded_super';
+            | 'unleaded_super'
+            | OtherString;
 
           export type Unit =
             | 'charging_minute'
@@ -2470,7 +2514,8 @@ export namespace TestHelpers {
             | 'liter'
             | 'other'
             | 'pound'
-            | 'us_gallon';
+            | 'us_gallon'
+            | OtherString;
         }
       }
     }
@@ -2591,7 +2636,8 @@ export namespace TestHelpers {
         export type PurchaseType =
           | 'fuel_and_non_fuel_purchase'
           | 'fuel_purchase'
-          | 'non_fuel_purchase';
+          | 'non_fuel_purchase'
+          | OtherString;
 
         export interface ReportedBreakdown {
           /**
@@ -2613,12 +2659,13 @@ export namespace TestHelpers {
         export type ServiceType =
           | 'full_service'
           | 'non_fuel_transaction'
-          | 'self_service';
+          | 'self_service'
+          | OtherString;
 
         export namespace ReportedBreakdown {
           export interface Fuel {
             /**
-             * Gross fuel amount that should equal Fuel Volume multipled by Fuel Unit Cost, inclusive of taxes.
+             * Gross fuel amount that should equal Fuel Volume multiplied by Fuel Unit Cost, inclusive of taxes.
              */
             gross_amount_decimal?: Decimal;
           }
@@ -2650,7 +2697,8 @@ export namespace TestHelpers {
           | 'other'
           | 'unleaded_plus'
           | 'unleaded_regular'
-          | 'unleaded_super';
+          | 'unleaded_super'
+          | OtherString;
 
         export type Unit =
           | 'charging_minute'
@@ -2660,7 +2708,8 @@ export namespace TestHelpers {
           | 'liter'
           | 'other'
           | 'pound'
-          | 'us_gallon';
+          | 'us_gallon'
+          | OtherString;
       }
     }
   }

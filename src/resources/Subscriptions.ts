@@ -15,13 +15,17 @@ import {SubscriptionSchedule} from './SubscriptionSchedules.js';
 import {Price} from './Prices.js';
 import {TaxId, DeletedTaxId} from './TaxIds.js';
 import * as TestHelpers from './TestHelpers/index.js';
+import * as Billing from './Billing/index.js';
 import {
   Emptyable,
   MetadataParam,
+  OtherString,
   Decimal,
+  AddressParam,
   PaginationParams,
   RangeQueryParam,
   Metadata,
+  Address,
 } from '../shared.js';
 import {
   RequestOptions,
@@ -35,7 +39,7 @@ export class SubscriptionResource extends StripeResource {
   /**
    * Cancels a customer's subscription immediately. The customer won't be charged again for the subscription. After it's canceled, the subscription is largely immutable. You can still update its [metadata](https://docs.stripe.com/metadata) and cancellation_details.
    *
-   * Any pending invoice items that you've created are still charged at the end of the period, unless manually [deleted](https://docs.stripe.com/api/invoiceitems/delete). If you've set the subscription to cancel at the end of the period, any pending prorations are also left in place and collected at the end of the period. But if the subscription is set to cancel immediately, pending prorations are removed if invoice_now and prorate are both set to true.
+   * Any pending invoice items that you've created are still charged at the end of the period, unless manually [deleted](https://docs.stripe.com/api/invoiceitems/delete). If you've set the subscription to cancel at the end of the period, any pending prorations are also left in place and collected at the end of the period. But if the subscription is set to cancel immediately, pending prorations are removed if invoice_now and prorate are both set to false.
    *
    * By default, upon subscription cancellation, Stripe stops automatic collection of all finalized invoices for the customer. This is intended to prevent unexpected payment attempts after the customer has canceled a subscription. However, you can resume automatic collection of the invoices manually after subscription cancellation to have us proceed. Or, you could check for unpaid invoices before allowing the customer to cancel the subscription at all.
    */
@@ -46,7 +50,7 @@ export class SubscriptionResource extends StripeResource {
   ): Promise<Response<Subscription>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/subscriptions/${id}`,
+      `/v1/subscriptions/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -159,7 +163,7 @@ export class SubscriptionResource extends StripeResource {
   ): Promise<Response<Subscription>> {
     return this._makeRequest(
       'GET',
-      `/v1/subscriptions/${id}`,
+      `/v1/subscriptions/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -267,7 +271,7 @@ export class SubscriptionResource extends StripeResource {
    * When changing prices or quantities, we optionally prorate the price we charge next month to make up for any price changes.
    * To preview how the proration is calculated, use the [create preview](https://docs.stripe.com/docs/api/invoices/create_preview) endpoint.
    *
-   * By default, we prorate subscription changes. For example, if a customer signs up on May 1 for a 100 price, they'll be billed 100 immediately. If on May 15 they switch to a 200 price, then on June 1 they'll be billed 250 (200 for a renewal of her subscription, plus a 50 prorating adjustment for half of the previous month's 100 difference). Similarly, a downgrade generates a credit that is applied to the next invoice. We also prorate when you make quantity changes.
+   * By default, we prorate subscription changes. For example, if a customer signs up on May 1 for a 100 price, they'll be billed 100 immediately. If on May 15 they switch to a 200 price, then on June 1 they'll be billed 250 (200 for a renewal of her subscription, plus a 50 prorating adjustment for half of the previous month's 100 difference). Similarly, a downgrade generates a credit that is applied to the next invoice. We also prorate when you make quantity changes. You can also [use scripts to prorate your billing. To learn more, see <a href="/billing/subscriptions/prorations">Prorations](https://docs.stripe.com/billing/scripts/stripe-authored/proration).
    *
    * Switching prices does not normally change the billing date or generate an immediate charge unless:
    *
@@ -292,7 +296,7 @@ export class SubscriptionResource extends StripeResource {
   ): Promise<Response<Subscription>> {
     return this._makeRequest(
       'POST',
-      `/v1/subscriptions/${id}`,
+      `/v1/subscriptions/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -434,7 +438,7 @@ export class SubscriptionResource extends StripeResource {
   ): Promise<Response<DeletedDiscount>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/subscriptions/${id}/discount`,
+      `/v1/subscriptions/${encodeURIComponent(id)}/discount`,
       params,
       options
     ) as any;
@@ -829,7 +833,120 @@ export class SubscriptionResource extends StripeResource {
   ): Promise<Response<Subscription>> {
     return this._makeRequest(
       'POST',
-      `/v1/subscriptions/${id}/migrate`,
+      `/v1/subscriptions/${encodeURIComponent(id)}/migrate`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            items: {
+              kind: 'object',
+              fields: {
+                data: {
+                  kind: 'array',
+                  element: {
+                    kind: 'object',
+                    fields: {
+                      plan: {
+                        kind: 'object',
+                        fields: {
+                          amount_decimal: {
+                            kind: 'nullable',
+                            inner: {kind: 'decimal_string'},
+                          },
+                          tiers: {
+                            kind: 'array',
+                            element: {
+                              kind: 'object',
+                              fields: {
+                                flat_amount_decimal: {
+                                  kind: 'nullable',
+                                  inner: {kind: 'decimal_string'},
+                                },
+                                unit_amount_decimal: {
+                                  kind: 'nullable',
+                                  inner: {kind: 'decimal_string'},
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      price: {
+                        kind: 'object',
+                        fields: {
+                          currency_options: {
+                            kind: 'array',
+                            element: {
+                              kind: 'object',
+                              fields: {
+                                tiers: {
+                                  kind: 'array',
+                                  element: {
+                                    kind: 'object',
+                                    fields: {
+                                      flat_amount_decimal: {
+                                        kind: 'nullable',
+                                        inner: {kind: 'decimal_string'},
+                                      },
+                                      unit_amount_decimal: {
+                                        kind: 'nullable',
+                                        inner: {kind: 'decimal_string'},
+                                      },
+                                    },
+                                  },
+                                },
+                                unit_amount_decimal: {
+                                  kind: 'nullable',
+                                  inner: {kind: 'decimal_string'},
+                                },
+                              },
+                            },
+                          },
+                          tiers: {
+                            kind: 'array',
+                            element: {
+                              kind: 'object',
+                              fields: {
+                                flat_amount_decimal: {
+                                  kind: 'nullable',
+                                  inner: {kind: 'decimal_string'},
+                                },
+                                unit_amount_decimal: {
+                                  kind: 'nullable',
+                                  inner: {kind: 'decimal_string'},
+                                },
+                              },
+                            },
+                          },
+                          unit_amount_decimal: {
+                            kind: 'nullable',
+                            inner: {kind: 'decimal_string'},
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }
+    ) as any;
+  }
+  /**
+   * Pauses a subscription by transitioning it to the paused status. A paused subscription does not generate invoices and will not advance to new billing periods. The subscription can be resumed later using the resume endpoint. Cannot pause subscriptions with attached schedules.
+   */
+  pause(
+    id: string,
+    params?: SubscriptionPauseParams,
+    options?: RequestOptions
+  ): Promise<Response<Subscription>> {
+    return this._makeRequest(
+      'POST',
+      `/v1/subscriptions/${encodeURIComponent(id)}/pause`,
       params,
       options,
       {
@@ -942,7 +1059,7 @@ export class SubscriptionResource extends StripeResource {
   ): Promise<Response<Subscription>> {
     return this._makeRequest(
       'POST',
-      `/v1/subscriptions/${id}/resume`,
+      `/v1/subscriptions/${encodeURIComponent(id)}/resume`,
       params,
       options,
       {
@@ -1255,13 +1372,18 @@ export interface Subscription {
    *
    * A subscription that is currently in a trial period is `trialing` and moves to `active` when the trial period is over.
    *
-   * A subscription can only enter a `paused` status [when a trial ends without a payment method](https://docs.stripe.com/billing/subscriptions/trials#create-free-trials-without-payment). A `paused` subscription doesn't generate invoices and can be resumed after your customer adds their payment method. The `paused` status is different from [pausing collection](https://docs.stripe.com/billing/subscriptions/pause-payment), which still generates invoices and leaves the subscription's status unchanged.
+   * A subscription can only enter a `paused` status [when a trial ends without a payment method](https://docs.stripe.com/billing/subscriptions/trials/free-trials#create-free-trials-without-payment). A `paused` subscription doesn't generate invoices and can be resumed after your customer adds their payment method. The `paused` status is different from [pausing collection](https://docs.stripe.com/billing/subscriptions/pause-payment), which still generates invoices and leaves the subscription's status unchanged.
    *
    * If subscription `collection_method=charge_automatically`, it becomes `past_due` when payment is required but cannot be paid (due to failed payment or awaiting additional user actions). Once Stripe has exhausted all payment retry attempts, the subscription will become `canceled` or `unpaid` (depending on your subscriptions settings).
    *
    * If subscription `collection_method=send_invoice` it becomes `past_due` when its invoice is not paid by the due date, and `canceled` or `unpaid` if it is still not paid by an additional deadline after that. Note that when a subscription has a status of `unpaid`, no subsequent invoices will be attempted (invoices will be created, but then immediately automatically closed). After receiving updated payment information from a customer, you may choose to reopen and pay their closed invoices.
    */
   status: Subscription.Status;
+
+  /**
+   * Describes changes to the subscription's status.
+   */
+  status_details?: Subscription.StatusDetails;
 
   /**
    * ID of the test clock this subscription belongs to.
@@ -1391,18 +1513,41 @@ export namespace Subscription {
     feedback: CancellationDetails.Feedback | null;
 
     /**
+     * Customized feedback options that provide deeper insight into why the subscription was canceled, if the subscription was canceled explicitly by the user.
+     */
+    feedback_option: string | Billing.FeedbackOption | null;
+
+    /**
      * Why this subscription was canceled.
      */
     reason: CancellationDetails.Reason | null;
   }
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export interface InvoiceSettings {
     /**
      * The account tax IDs associated with the subscription. Will be set on invoices generated by the subscription.
      */
     account_tax_ids: Array<string | TaxId | DeletedTaxId> | null;
+
+    /**
+     * A list of up to 4 custom fields to be displayed on the invoice.
+     */
+    custom_fields: Array<InvoiceSettings.CustomField> | null;
+
+    /**
+     * An arbitrary string attached to the object. Often useful for displaying to users.
+     */
+    description: string | null;
+
+    /**
+     * Footer to be displayed on the invoice.
+     */
+    footer: string | null;
 
     issuer: InvoiceSettings.Issuer;
   }
@@ -1462,6 +1607,11 @@ export namespace Subscription {
     billing_cycle_anchor: number | null;
 
     /**
+     * Indicates whether this subscription should cancel at the end of the current period if the update is applied.
+     */
+    cancel_at_period_end: boolean | null;
+
+    /**
      * The pending subscription-level discount that will be applied when the pending update is applied.
      */
     discount: Discount | null;
@@ -1492,7 +1642,7 @@ export namespace Subscription {
     trial_end: number | null;
 
     /**
-     * Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more.
+     * Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more.
      */
     trial_from_plan: boolean | null;
   }
@@ -1512,7 +1662,15 @@ export namespace Subscription {
     | 'past_due'
     | 'paused'
     | 'trialing'
-    | 'unpaid';
+    | 'unpaid'
+    | OtherString;
+
+  export interface StatusDetails {
+    /**
+     * Indicates when and why the subscription transitioned to the paused status.
+     */
+    paused: StatusDetails.Paused;
+  }
 
   export interface TransferData {
     /**
@@ -1547,7 +1705,7 @@ export namespace Subscription {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -1559,10 +1717,10 @@ export namespace Subscription {
       proration_discounts?: Flexible.ProrationDiscounts;
     }
 
-    export type Type = 'classic' | 'flexible';
+    export type Type = 'classic' | 'flexible' | OtherString;
 
     export namespace Flexible {
-      export type ProrationDiscounts = 'included' | 'itemized';
+      export type ProrationDiscounts = 'included' | 'itemized' | OtherString;
     }
   }
 
@@ -1614,10 +1772,10 @@ export namespace Subscription {
         interval_count: number | null;
       }
 
-      export type Type = 'duration' | 'timestamp';
+      export type Type = 'duration' | 'timestamp' | OtherString;
 
       export namespace Duration {
-        export type Interval = 'day' | 'month' | 'week' | 'year';
+        export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
       }
     }
   }
@@ -1631,16 +1789,30 @@ export namespace Subscription {
       | 'switched_service'
       | 'too_complex'
       | 'too_expensive'
-      | 'unused';
+      | 'unused'
+      | OtherString;
 
     export type Reason =
       | 'canceled_by_retention_policy'
       | 'cancellation_requested'
       | 'payment_disputed'
-      | 'payment_failed';
+      | 'payment_failed'
+      | OtherString;
   }
 
   export namespace InvoiceSettings {
+    export interface CustomField {
+      /**
+       * The name of the custom field.
+       */
+      name: string;
+
+      /**
+       * The value of the custom field.
+       */
+      value: string;
+    }
+
     export interface Issuer {
       /**
        * The connected account being referenced when `type` is `account`.
@@ -1654,12 +1826,16 @@ export namespace Subscription {
     }
 
     export namespace Issuer {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
   export namespace PauseCollection {
-    export type Behavior = 'keep_as_draft' | 'mark_uncollectible' | 'void';
+    export type Behavior =
+      | 'keep_as_draft'
+      | 'mark_uncollectible'
+      | 'void'
+      | OtherString;
   }
 
   export namespace PaymentSettings {
@@ -1673,6 +1849,16 @@ export namespace Subscription {
        * This sub-hash contains details about the Bancontact payment method options to pass to invoices created by the subscription.
        */
       bancontact: PaymentMethodOptions.Bancontact | null;
+
+      /**
+       * This sub-hash contains details about the Billie payment method options to pass to invoices created by the subscription.
+       */
+      billie?: PaymentMethodOptions.Billie | null;
+
+      /**
+       * This sub-hash contains details about the Blik payment method options to pass to invoices created by the subscription.
+       */
+      blik?: PaymentMethodOptions.Blik | null;
 
       /**
        * This sub-hash contains details about the Card payment method options to pass to invoices created by the subscription.
@@ -1720,10 +1906,13 @@ export namespace Subscription {
       | 'ach_debit'
       | 'acss_debit'
       | 'affirm'
+      | 'alipay'
       | 'amazon_pay'
       | 'au_becs_debit'
       | 'bacs_debit'
       | 'bancontact'
+      | 'billie'
+      | 'blik'
       | 'boleto'
       | 'card'
       | 'cashapp'
@@ -1741,6 +1930,7 @@ export namespace Subscription {
       | 'konbini'
       | 'kr_card'
       | 'link'
+      | 'mb_way'
       | 'multibanco'
       | 'naver_pay'
       | 'nz_bank_account'
@@ -1753,6 +1943,7 @@ export namespace Subscription {
       | 'pix'
       | 'promptpay'
       | 'revolut_pay'
+      | 'satispay'
       | 'sepa_credit_transfer'
       | 'sepa_debit'
       | 'sofort'
@@ -1760,9 +1951,13 @@ export namespace Subscription {
       | 'twint'
       | 'upi'
       | 'us_bank_account'
-      | 'wechat_pay';
+      | 'wechat_pay'
+      | OtherString;
 
-    export type SaveDefaultPaymentMethod = 'off' | 'on_subscription';
+    export type SaveDefaultPaymentMethod =
+      | 'off'
+      | 'on_subscription'
+      | OtherString;
 
     export namespace PaymentMethodOptions {
       export interface AcssDebit {
@@ -1779,6 +1974,14 @@ export namespace Subscription {
          * Preferred language of the Bancontact authorization page that the customer is redirected to.
          */
         preferred_language: Bancontact.PreferredLanguage;
+      }
+
+      export interface Billie {
+        company_details?: Billie.CompanyDetails;
+      }
+
+      export interface Blik {
+        mandate_options?: Blik.MandateOptions;
       }
 
       export interface Card {
@@ -1845,15 +2048,69 @@ export namespace Subscription {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace MandateOptions {
-          export type TransactionType = 'business' | 'personal';
+          export type TransactionType = 'business' | 'personal' | OtherString;
         }
       }
 
       export namespace Bancontact {
-        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
+      }
+
+      export namespace Billie {
+        export interface CompanyDetails {
+          registered_address?: Address;
+
+          /**
+           * Company or entity name.
+           */
+          registered_name: string | null;
+
+          /**
+           * The official registration number for the given registration type.
+           */
+          registration_number: string | null;
+
+          /**
+           * Type of registration the company or entity holds in their registered country.
+           */
+          registration_type?: CompanyDetails.RegistrationType;
+
+          /**
+           * VAT ID number.
+           */
+          vat: string | null;
+        }
+
+        export namespace CompanyDetails {
+          export type RegistrationType =
+            | 'ch_ein'
+            | 'de_hrb'
+            | 'dk_cvr'
+            | 'es_cif'
+            | 'fi_tunnus'
+            | 'fr_siren'
+            | 'fr_siret'
+            | 'it_rea'
+            | 'nl_kvk'
+            | 'no_org_number'
+            | 'no_pno'
+            | 'se_org_number'
+            | 'se_pno'
+            | 'uk_crn';
+        }
+      }
+
+      export namespace Blik {
+        export interface MandateOptions {
+          /**
+           * Date when the mandate expires and no further payments will be charged. If not provided, the mandate will be set to be indefinite.
+           */
+          expires_at: number | null;
+        }
       }
 
       export namespace Card {
@@ -1887,12 +2144,17 @@ export namespace Subscription {
           | 'mastercard'
           | 'unionpay'
           | 'unknown'
-          | 'visa';
+          | 'visa'
+          | OtherString;
 
-        export type RequestThreeDSecure = 'any' | 'automatic' | 'challenge';
+        export type RequestThreeDSecure =
+          | 'any'
+          | 'automatic'
+          | 'challenge'
+          | OtherString;
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
         }
       }
 
@@ -1915,7 +2177,14 @@ export namespace Subscription {
           }
 
           export namespace EuBankTransfer {
-            export type Country = 'BE' | 'DE' | 'ES' | 'FR' | 'IE' | 'NL';
+            export type Country =
+              | 'BE'
+              | 'DE'
+              | 'ES'
+              | 'FR'
+              | 'IE'
+              | 'NL'
+              | OtherString;
           }
         }
       }
@@ -1939,7 +2208,7 @@ export namespace Subscription {
         }
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
 
           export type Purpose =
             | 'dependant_support'
@@ -1952,7 +2221,8 @@ export namespace Subscription {
             | 'retail'
             | 'salary'
             | 'tax'
-            | 'utility';
+            | 'utility'
+            | OtherString;
         }
       }
 
@@ -1980,14 +2250,15 @@ export namespace Subscription {
         }
 
         export namespace MandateOptions {
-          export type AmountIncludesIof = 'always' | 'never';
+          export type AmountIncludesIof = 'always' | 'never' | OtherString;
 
           export type PaymentSchedule =
             | 'halfyearly'
             | 'monthly'
             | 'quarterly'
             | 'weekly'
-            | 'yearly';
+            | 'yearly'
+            | OtherString;
         }
       }
 
@@ -2015,7 +2286,7 @@ export namespace Subscription {
         }
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
         }
       }
 
@@ -2037,7 +2308,8 @@ export namespace Subscription {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace FinancialConnections {
           export interface Filters {
@@ -2051,12 +2323,20 @@ export namespace Subscription {
             | 'balances'
             | 'ownership'
             | 'payment_method'
-            | 'transactions';
+            | 'transactions'
+            | OtherString;
 
-          export type Prefetch = 'balances' | 'ownership' | 'transactions';
+          export type Prefetch =
+            | 'balances'
+            | 'ownership'
+            | 'transactions'
+            | OtherString;
 
           export namespace Filters {
-            export type AccountSubcategory = 'checking' | 'savings';
+            export type AccountSubcategory =
+              | 'checking'
+              | 'savings'
+              | OtherString;
           }
         }
       }
@@ -2064,11 +2344,56 @@ export namespace Subscription {
   }
 
   export namespace PendingInvoiceItemInterval {
-    export type Interval = 'day' | 'month' | 'week' | 'year';
+    export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
+  }
+
+  export namespace StatusDetails {
+    export interface Paused {
+      /**
+       * Information on the `type=subscription` pause.
+       */
+      subscription: Paused.Subscription;
+
+      /**
+       * Unix timestamp in seconds of when the subscription status transitioned to `paused`.
+       */
+      transitioned_at: number;
+
+      /**
+       * The type of pause.
+       */
+      type: Paused.Type;
+    }
+
+    export namespace Paused {
+      export interface Subscription {
+        /**
+         * The reason that the subscription was paused.
+         */
+        type: Subscription.Type;
+      }
+
+      export type Type = 'subscription' | OtherString;
+
+      export namespace Subscription {
+        export type Type =
+          | 'final_payment_failure'
+          | 'first_payment_failure'
+          | 'pause_requested'
+          | 'system'
+          | 'trial_end_without_payment_method'
+          | OtherString;
+      }
+    }
   }
 
   export namespace TrialSettings {
     export interface EndBehavior {
+      /**
+       * Indicates how the subscription's billing cycle anchor is reset when a trial ends. If not set, the default is `now`.
+       */
+      billing_cycle_anchor: EndBehavior.BillingCycleAnchor | null;
+
       /**
        * Indicates how the subscription should change when the trial ends if the user did not provide a payment method.
        */
@@ -2076,7 +2401,13 @@ export namespace Subscription {
     }
 
     export namespace EndBehavior {
-      export type MissingPaymentMethod = 'cancel' | 'create_invoice' | 'pause';
+      export type BillingCycleAnchor = 'now' | 'unchanged' | OtherString;
+
+      export type MissingPaymentMethod =
+        | 'cancel'
+        | 'create_invoice'
+        | 'pause'
+        | OtherString;
     }
   }
 }
@@ -2117,7 +2448,7 @@ export interface SubscriptionCreateParams {
   billing_mode?: SubscriptionCreateParams.BillingMode;
 
   /**
-   * Sets the billing schedules for the subscription.
+   * An array of billing schedules, which allow you to bill customers in advance for multiple service periods. Requires flexible billing mode and API version 2026-05-27.dahlia or later. Learn more about [prebilling](https://docs.stripe.com/billing/subscriptions/prebilling).
    */
   billing_schedules?: Array<SubscriptionCreateParams.BillingSchedule>;
 
@@ -2244,17 +2575,17 @@ export interface SubscriptionCreateParams {
   transfer_data?: SubscriptionCreateParams.TransferData;
 
   /**
-   * Unix timestamp representing the end of the trial period the customer will get before being charged for the first time. If set, trial_end will override the default trial period of the plan the customer is being subscribed to. The special value `now` can be provided to end the customer's trial immediately. Can be at most two years from `billing_cycle_anchor`. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more.
+   * Unix timestamp representing the end of the trial period the customer will get before being charged for the first time. If set, trial_end will override the default trial period of the plan the customer is being subscribed to. The special value `now` can be provided to end the customer's trial immediately. Can be at most two years from `billing_cycle_anchor`. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more.
    */
   trial_end?: 'now' | number;
 
   /**
-   * Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more.
+   * Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more.
    */
   trial_from_plan?: boolean;
 
   /**
-   * Integer representing the number of trial period days before the customer is charged for the first time. This will always overwrite any trials that might apply via a subscribed plan. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more.
+   * Integer representing the number of trial period days before the customer is charged for the first time. This will always overwrite any trials that might apply via a subscribed plan. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more.
    */
   trial_period_days?: number;
 
@@ -2364,7 +2695,7 @@ export namespace SubscriptionCreateParams {
     applies_to?: Array<BillingSchedule.AppliesTo>;
 
     /**
-     * The end date for the billing schedule.
+     * The end date for the billing schedule. You must not set this earlier than current period end for every applicable subscription item.
      */
     bill_until: BillingSchedule.BillUntil;
 
@@ -2389,9 +2720,13 @@ export namespace SubscriptionCreateParams {
   export type CancelAt =
     | 'max_billed_until'
     | 'max_period_end'
-    | 'min_period_end';
+    | 'min_period_end'
+    | OtherString;
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export interface Discount {
     /**
@@ -2417,6 +2752,21 @@ export namespace SubscriptionCreateParams {
     account_tax_ids?: Emptyable<Array<string>>;
 
     /**
+     * A list of up to 4 custom fields to be displayed on the invoice.
+     */
+    custom_fields?: Emptyable<Array<InvoiceSettings.CustomField>>;
+
+    /**
+     * An arbitrary string attached to the object. Often useful for displaying to users.
+     */
+    description?: string;
+
+    /**
+     * Footer to be displayed on the invoice.
+     */
+    footer?: string;
+
+    /**
      * The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
      */
     issuer?: InvoiceSettings.Issuer;
@@ -2427,6 +2777,11 @@ export namespace SubscriptionCreateParams {
      * Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period. Pass an empty string to remove previously-defined thresholds.
      */
     billing_thresholds?: Emptyable<Item.BillingThresholds>;
+
+    /**
+     * The trial offer to apply to this subscription item.
+     */
+    current_trial?: Item.CurrentTrial;
 
     /**
      * The coupons to redeem into discounts for the subscription item.
@@ -2468,7 +2823,8 @@ export namespace SubscriptionCreateParams {
     | 'allow_incomplete'
     | 'default_incomplete'
     | 'error_if_incomplete'
-    | 'pending_if_incomplete';
+    | 'pending_if_incomplete'
+    | OtherString;
 
   export interface PaymentSettings {
     /**
@@ -2502,7 +2858,8 @@ export namespace SubscriptionCreateParams {
   export type ProrationBehavior =
     | 'always_invoice'
     | 'create_prorations'
-    | 'none';
+    | 'none'
+    | OtherString;
 
   export interface TransferData {
     /**
@@ -2606,16 +2963,24 @@ export namespace SubscriptionCreateParams {
       }
 
       export namespace End {
-        export type Type = 'min_item_period_end' | 'timestamp';
+        export type Type = 'min_item_period_end' | 'timestamp' | OtherString;
       }
 
       export namespace Start {
-        export type Type = 'max_item_period_start' | 'now' | 'timestamp';
+        export type Type =
+          | 'max_item_period_start'
+          | 'now'
+          | 'timestamp'
+          | OtherString;
       }
     }
 
     export namespace PriceData {
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
     }
   }
 
@@ -2633,7 +2998,7 @@ export namespace SubscriptionCreateParams {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -2645,10 +3010,10 @@ export namespace SubscriptionCreateParams {
       proration_discounts?: Flexible.ProrationDiscounts;
     }
 
-    export type Type = 'classic' | 'flexible';
+    export type Type = 'classic' | 'flexible' | OtherString;
 
     export namespace Flexible {
-      export type ProrationDiscounts = 'included' | 'itemized';
+      export type ProrationDiscounts = 'included' | 'itemized' | OtherString;
     }
   }
 
@@ -2695,15 +3060,27 @@ export namespace SubscriptionCreateParams {
         interval_count?: number;
       }
 
-      export type Type = 'duration' | 'timestamp';
+      export type Type = 'duration' | 'timestamp' | OtherString;
 
       export namespace Duration {
-        export type Interval = 'day' | 'month' | 'week' | 'year';
+        export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
       }
     }
   }
 
   export namespace InvoiceSettings {
+    export interface CustomField {
+      /**
+       * The name of the custom field. This may be up to 40 characters.
+       */
+      name: string;
+
+      /**
+       * The value of the custom field. This may be up to 140 characters.
+       */
+      value: string;
+    }
+
     export interface Issuer {
       /**
        * The connected account being referenced when `type` is `account`.
@@ -2717,7 +3094,7 @@ export namespace SubscriptionCreateParams {
     }
 
     export namespace Issuer {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -2727,6 +3104,13 @@ export namespace SubscriptionCreateParams {
        * Number of units that meets the billing threshold to advance the subscription to a new billing period (e.g., it takes 10 $5 units to meet a $50 [monetary threshold](https://docs.stripe.com/api/subscriptions/update#update_subscription-billing_thresholds-amount_gte))
        */
       usage_gte: number;
+    }
+
+    export interface CurrentTrial {
+      /**
+       * The ID of the trial offer to apply to the subscription item.
+       */
+      trial_offer: string;
     }
 
     export interface Discount {
@@ -2791,10 +3175,14 @@ export namespace SubscriptionCreateParams {
         interval_count?: number;
       }
 
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
 
       export namespace Recurring {
-        export type Interval = 'day' | 'month' | 'week' | 'year';
+        export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
       }
     }
   }
@@ -2810,6 +3198,16 @@ export namespace SubscriptionCreateParams {
        * This sub-hash contains details about the Bancontact payment method options to pass to the invoice's PaymentIntent.
        */
       bancontact?: Emptyable<PaymentMethodOptions.Bancontact>;
+
+      /**
+       * This sub-hash contains details about the Billie payment method options to pass to the invoice's PaymentIntent.
+       */
+      billie?: Emptyable<PaymentMethodOptions.Billie>;
+
+      /**
+       * This sub-hash contains details about the Blik payment method options to pass to the invoice's PaymentIntent.
+       */
+      blik?: Emptyable<PaymentMethodOptions.Blik>;
 
       /**
        * This sub-hash contains details about the Card payment method options to pass to the invoice's PaymentIntent.
@@ -2857,10 +3255,13 @@ export namespace SubscriptionCreateParams {
       | 'ach_debit'
       | 'acss_debit'
       | 'affirm'
+      | 'alipay'
       | 'amazon_pay'
       | 'au_becs_debit'
       | 'bacs_debit'
       | 'bancontact'
+      | 'billie'
+      | 'blik'
       | 'boleto'
       | 'card'
       | 'cashapp'
@@ -2878,6 +3279,7 @@ export namespace SubscriptionCreateParams {
       | 'konbini'
       | 'kr_card'
       | 'link'
+      | 'mb_way'
       | 'multibanco'
       | 'naver_pay'
       | 'nz_bank_account'
@@ -2890,6 +3292,7 @@ export namespace SubscriptionCreateParams {
       | 'pix'
       | 'promptpay'
       | 'revolut_pay'
+      | 'satispay'
       | 'sepa_credit_transfer'
       | 'sepa_debit'
       | 'sofort'
@@ -2897,9 +3300,13 @@ export namespace SubscriptionCreateParams {
       | 'twint'
       | 'upi'
       | 'us_bank_account'
-      | 'wechat_pay';
+      | 'wechat_pay'
+      | OtherString;
 
-    export type SaveDefaultPaymentMethod = 'off' | 'on_subscription';
+    export type SaveDefaultPaymentMethod =
+      | 'off'
+      | 'on_subscription'
+      | OtherString;
 
     export namespace PaymentMethodOptions {
       export interface AcssDebit {
@@ -2919,6 +3326,20 @@ export namespace SubscriptionCreateParams {
          * Preferred language of the Bancontact authorization page that the customer is redirected to.
          */
         preferred_language?: Bancontact.PreferredLanguage;
+      }
+
+      export interface Billie {
+        /**
+         * Registration details about the buyer's organization.
+         */
+        company_details?: Emptyable<Billie.CompanyDetails>;
+      }
+
+      export interface Blik {
+        /**
+         * Configuration options for setting up a mandate
+         */
+        mandate_options?: Blik.MandateOptions;
       }
 
       export interface Card {
@@ -3003,15 +3424,73 @@ export namespace SubscriptionCreateParams {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace MandateOptions {
-          export type TransactionType = 'business' | 'personal';
+          export type TransactionType = 'business' | 'personal' | OtherString;
         }
       }
 
       export namespace Bancontact {
-        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
+      }
+
+      export namespace Billie {
+        export interface CompanyDetails {
+          /**
+           * The address the company or entity is registered with.
+           */
+          registered_address?: Emptyable<AddressParam>;
+
+          /**
+           * Company or entity name.
+           */
+          registered_name?: string;
+
+          /**
+           * The official registration number for the given registration type.
+           */
+          registration_number?: string;
+
+          /**
+           * Type of registration the company or entity holds in their registered country.
+           */
+          registration_type?: Emptyable<CompanyDetails.RegistrationType>;
+
+          /**
+           * VAT ID number.
+           */
+          vat?: string;
+        }
+
+        export namespace CompanyDetails {
+          export type RegistrationType =
+            | 'ch_ein'
+            | 'de_hrb'
+            | 'dk_cvr'
+            | 'es_cif'
+            | 'fi_tunnus'
+            | 'fr_siren'
+            | 'fr_siret'
+            | 'it_rea'
+            | 'nl_kvk'
+            | 'no_org_number'
+            | 'no_pno'
+            | 'se_org_number'
+            | 'se_pno'
+            | 'uk_crn'
+            | OtherString;
+        }
+      }
+
+      export namespace Blik {
+        export interface MandateOptions {
+          /**
+           * Date when the mandate expires and no further payments will be charged. If not provided, the mandate will be set to be indefinite.
+           */
+          expires_at?: number;
+        }
       }
 
       export namespace Card {
@@ -3045,12 +3524,17 @@ export namespace SubscriptionCreateParams {
           | 'mastercard'
           | 'unionpay'
           | 'unknown'
-          | 'visa';
+          | 'visa'
+          | OtherString;
 
-        export type RequestThreeDSecure = 'any' | 'automatic' | 'challenge';
+        export type RequestThreeDSecure =
+          | 'any'
+          | 'automatic'
+          | 'challenge'
+          | OtherString;
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
         }
       }
 
@@ -3102,7 +3586,8 @@ export namespace SubscriptionCreateParams {
             | 'retail'
             | 'salary'
             | 'tax'
-            | 'utility';
+            | 'utility'
+            | OtherString;
         }
       }
 
@@ -3130,14 +3615,15 @@ export namespace SubscriptionCreateParams {
         }
 
         export namespace MandateOptions {
-          export type AmountIncludesIof = 'always' | 'never';
+          export type AmountIncludesIof = 'always' | 'never' | OtherString;
 
           export type PaymentSchedule =
             | 'halfyearly'
             | 'monthly'
             | 'quarterly'
             | 'weekly'
-            | 'yearly';
+            | 'yearly'
+            | OtherString;
         }
       }
 
@@ -3165,7 +3651,7 @@ export namespace SubscriptionCreateParams {
         }
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
         }
       }
 
@@ -3190,7 +3676,8 @@ export namespace SubscriptionCreateParams {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace FinancialConnections {
           export interface Filters {
@@ -3204,12 +3691,20 @@ export namespace SubscriptionCreateParams {
             | 'balances'
             | 'ownership'
             | 'payment_method'
-            | 'transactions';
+            | 'transactions'
+            | OtherString;
 
-          export type Prefetch = 'balances' | 'ownership' | 'transactions';
+          export type Prefetch =
+            | 'balances'
+            | 'ownership'
+            | 'transactions'
+            | OtherString;
 
           export namespace Filters {
-            export type AccountSubcategory = 'checking' | 'savings';
+            export type AccountSubcategory =
+              | 'checking'
+              | 'savings'
+              | OtherString;
           }
         }
       }
@@ -3217,19 +3712,30 @@ export namespace SubscriptionCreateParams {
   }
 
   export namespace PendingInvoiceItemInterval {
-    export type Interval = 'day' | 'month' | 'week' | 'year';
+    export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
   }
 
   export namespace TrialSettings {
     export interface EndBehavior {
       /**
+       * Indicates how the subscription's billing cycle anchor is reset when a trial ends. Defaults to `now`.
+       */
+      billing_cycle_anchor?: EndBehavior.BillingCycleAnchor;
+
+      /**
        * Indicates how the subscription should change when the trial ends if the user did not provide a payment method.
        */
-      missing_payment_method: EndBehavior.MissingPaymentMethod;
+      missing_payment_method?: EndBehavior.MissingPaymentMethod;
     }
 
     export namespace EndBehavior {
-      export type MissingPaymentMethod = 'cancel' | 'create_invoice' | 'pause';
+      export type BillingCycleAnchor = 'now' | 'unchanged' | OtherString;
+
+      export type MissingPaymentMethod =
+        | 'cancel'
+        | 'create_invoice'
+        | 'pause'
+        | OtherString;
     }
   }
 }
@@ -3256,12 +3762,12 @@ export interface SubscriptionUpdateParams {
   automatic_tax?: SubscriptionUpdateParams.AutomaticTax;
 
   /**
-   * Either `now` or `unchanged`. Setting the value to `now` resets the subscription's billing cycle anchor to the current time (in UTC). For more information, see the billing cycle [documentation](https://docs.stripe.com/billing/subscriptions/billing-cycle).
+   * Controls how the subscription's billing cycle anchor changes. Set `type` to `now` to reset the billing cycle anchor to the current time (in UTC), or `unchanged` to preserve it. For more information, see the billing cycle [documentation](https://docs.stripe.com/billing/subscriptions/billing-cycle).
    */
   billing_cycle_anchor?: SubscriptionUpdateParams.BillingCycleAnchor;
 
   /**
-   * Sets the billing schedules for the subscription.
+   * An array of billing schedules, which allow you to bill customers in advance for multiple service periods. Requires flexible billing mode and API version 2026-05-27.dahlia or later. Learn more about [prebilling](https://docs.stripe.com/billing/subscriptions/prebilling).
    */
   billing_schedules?: Emptyable<
     Array<SubscriptionUpdateParams.BillingSchedule>
@@ -3278,7 +3784,7 @@ export interface SubscriptionUpdateParams {
   cancel_at?: Emptyable<number | SubscriptionUpdateParams.CancelAt>;
 
   /**
-   * Indicate whether this subscription should cancel at the end of the current period (`current_period_end`). Defaults to `false`.
+   * Indicate whether this subscription should cancel at the end of the current period (`current_period_end`).
    */
   cancel_at_period_end?: boolean;
 
@@ -3395,7 +3901,7 @@ export interface SubscriptionUpdateParams {
   trial_end?: 'now' | number;
 
   /**
-   * Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more.
+   * Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more.
    */
   trial_from_plan?: boolean;
 
@@ -3459,7 +3965,12 @@ export namespace SubscriptionUpdateParams {
     liability?: AutomaticTax.Liability;
   }
 
-  export type BillingCycleAnchor = 'now' | 'unchanged';
+  export interface BillingCycleAnchor {
+    /**
+     * Determines how the billing cycle anchor changes when the subscription is updated.
+     */
+    type: BillingCycleAnchor.Type;
+  }
 
   export interface BillingSchedule {
     /**
@@ -3468,7 +3979,7 @@ export namespace SubscriptionUpdateParams {
     applies_to?: Array<BillingSchedule.AppliesTo>;
 
     /**
-     * The end date for the billing schedule.
+     * The end date for the billing schedule. You must not set this earlier than current period end for every applicable subscription item.
      */
     bill_until?: BillingSchedule.BillUntil;
 
@@ -3493,7 +4004,8 @@ export namespace SubscriptionUpdateParams {
   export type CancelAt =
     | 'max_billed_until'
     | 'max_period_end'
-    | 'min_period_end';
+    | 'min_period_end'
+    | OtherString;
 
   export interface CancellationDetails {
     /**
@@ -3505,9 +4017,17 @@ export namespace SubscriptionUpdateParams {
      * The customer submitted reason for why they canceled, if the subscription was canceled explicitly by the user.
      */
     feedback?: Emptyable<CancellationDetails.Feedback>;
+
+    /**
+     * Customized feedback options that provide deeper insight into why the subscription was canceled, if the subscription was canceled explicitly by the user.
+     */
+    feedback_option?: string;
   }
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export interface Discount {
     /**
@@ -3533,6 +4053,21 @@ export namespace SubscriptionUpdateParams {
     account_tax_ids?: Emptyable<Array<string>>;
 
     /**
+     * A list of up to 4 custom fields to be displayed on the invoice.
+     */
+    custom_fields?: Emptyable<Array<InvoiceSettings.CustomField>>;
+
+    /**
+     * An arbitrary string attached to the object. Often useful for displaying to users.
+     */
+    description?: Emptyable<string>;
+
+    /**
+     * Footer to be displayed on the invoice.
+     */
+    footer?: Emptyable<string>;
+
+    /**
      * The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
      */
     issuer?: InvoiceSettings.Issuer;
@@ -3550,6 +4085,11 @@ export namespace SubscriptionUpdateParams {
     clear_usage?: boolean;
 
     /**
+     * The trial offer to apply to this subscription item.
+     */
+    current_trial?: Item.CurrentTrial;
+
+    /**
      * A flag that, if set to `true`, will delete the specified item.
      */
     deleted?: boolean;
@@ -3560,7 +4100,7 @@ export namespace SubscriptionUpdateParams {
     discounts?: Emptyable<Array<Item.Discount>>;
 
     /**
-     * Subscription item to update.
+     * Subscription item to update. If you omit `id`, the API adds a new subscription item rather than updating the existing one. See [Changing a subscription's price](https://docs.stripe.com/billing/subscriptions/change-price#changing).
      */
     id?: string;
 
@@ -3575,12 +4115,12 @@ export namespace SubscriptionUpdateParams {
     plan?: string;
 
     /**
-     * The ID of the price object. One of `price` or `price_data` is required. When changing a subscription item's price, `quantity` is set to 1 unless a `quantity` parameter is provided.
+     * The ID of the price object. You can use either `price` or `price_data`, but not both, to set or change this item's price. If you're updating an existing item without changing its price, omit both. When changing a subscription item's price, `quantity` is set to 1 unless a `quantity` parameter is provided.
      */
     price?: string;
 
     /**
-     * Data used to generate a new [Price](https://docs.stripe.com/api/prices) object inline. One of `price` or `price_data` is required.
+     * Data used to generate a new [Price](https://docs.stripe.com/api/prices) object inline. You can use either `price` or `price_data`, but not both, to set or change this item's price. If you're updating an existing item without changing its price, omit both.
      */
     price_data?: Item.PriceData;
 
@@ -3611,7 +4151,8 @@ export namespace SubscriptionUpdateParams {
     | 'allow_incomplete'
     | 'default_incomplete'
     | 'error_if_incomplete'
-    | 'pending_if_incomplete';
+    | 'pending_if_incomplete'
+    | OtherString;
 
   export interface PaymentSettings {
     /**
@@ -3645,7 +4186,8 @@ export namespace SubscriptionUpdateParams {
   export type ProrationBehavior =
     | 'always_invoice'
     | 'create_prorations'
-    | 'none';
+    | 'none'
+    | OtherString;
 
   export interface TransferData {
     /**
@@ -3749,16 +4291,24 @@ export namespace SubscriptionUpdateParams {
       }
 
       export namespace End {
-        export type Type = 'min_item_period_end' | 'timestamp';
+        export type Type = 'min_item_period_end' | 'timestamp' | OtherString;
       }
 
       export namespace Start {
-        export type Type = 'max_item_period_start' | 'now' | 'timestamp';
+        export type Type =
+          | 'max_item_period_start'
+          | 'now'
+          | 'timestamp'
+          | OtherString;
       }
     }
 
     export namespace PriceData {
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
     }
   }
 
@@ -3776,8 +4326,12 @@ export namespace SubscriptionUpdateParams {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
+  }
+
+  export namespace BillingCycleAnchor {
+    export type Type = 'now' | 'unchanged' | OtherString;
   }
 
   export namespace BillingSchedule {
@@ -3823,10 +4377,10 @@ export namespace SubscriptionUpdateParams {
         interval_count?: number;
       }
 
-      export type Type = 'duration' | 'timestamp';
+      export type Type = 'duration' | 'timestamp' | OtherString;
 
       export namespace Duration {
-        export type Interval = 'day' | 'month' | 'week' | 'year';
+        export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
       }
     }
   }
@@ -3840,10 +4394,23 @@ export namespace SubscriptionUpdateParams {
       | 'switched_service'
       | 'too_complex'
       | 'too_expensive'
-      | 'unused';
+      | 'unused'
+      | OtherString;
   }
 
   export namespace InvoiceSettings {
+    export interface CustomField {
+      /**
+       * The name of the custom field. This may be up to 40 characters.
+       */
+      name: string;
+
+      /**
+       * The value of the custom field. This may be up to 140 characters.
+       */
+      value: string;
+    }
+
     export interface Issuer {
       /**
        * The connected account being referenced when `type` is `account`.
@@ -3857,7 +4424,7 @@ export namespace SubscriptionUpdateParams {
     }
 
     export namespace Issuer {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -3867,6 +4434,13 @@ export namespace SubscriptionUpdateParams {
        * Number of units that meets the billing threshold to advance the subscription to a new billing period (e.g., it takes 10 $5 units to meet a $50 [monetary threshold](https://docs.stripe.com/api/subscriptions/update#update_subscription-billing_thresholds-amount_gte))
        */
       usage_gte: number;
+    }
+
+    export interface CurrentTrial {
+      /**
+       * The ID of the trial offer to apply to the subscription item.
+       */
+      trial_offer: string;
     }
 
     export interface Discount {
@@ -3931,16 +4505,24 @@ export namespace SubscriptionUpdateParams {
         interval_count?: number;
       }
 
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
 
       export namespace Recurring {
-        export type Interval = 'day' | 'month' | 'week' | 'year';
+        export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
       }
     }
   }
 
   export namespace PauseCollection {
-    export type Behavior = 'keep_as_draft' | 'mark_uncollectible' | 'void';
+    export type Behavior =
+      | 'keep_as_draft'
+      | 'mark_uncollectible'
+      | 'void'
+      | OtherString;
   }
 
   export namespace PaymentSettings {
@@ -3954,6 +4536,16 @@ export namespace SubscriptionUpdateParams {
        * This sub-hash contains details about the Bancontact payment method options to pass to the invoice's PaymentIntent.
        */
       bancontact?: Emptyable<PaymentMethodOptions.Bancontact>;
+
+      /**
+       * This sub-hash contains details about the Billie payment method options to pass to the invoice's PaymentIntent.
+       */
+      billie?: Emptyable<PaymentMethodOptions.Billie>;
+
+      /**
+       * This sub-hash contains details about the Blik payment method options to pass to the invoice's PaymentIntent.
+       */
+      blik?: Emptyable<PaymentMethodOptions.Blik>;
 
       /**
        * This sub-hash contains details about the Card payment method options to pass to the invoice's PaymentIntent.
@@ -4001,10 +4593,13 @@ export namespace SubscriptionUpdateParams {
       | 'ach_debit'
       | 'acss_debit'
       | 'affirm'
+      | 'alipay'
       | 'amazon_pay'
       | 'au_becs_debit'
       | 'bacs_debit'
       | 'bancontact'
+      | 'billie'
+      | 'blik'
       | 'boleto'
       | 'card'
       | 'cashapp'
@@ -4022,6 +4617,7 @@ export namespace SubscriptionUpdateParams {
       | 'konbini'
       | 'kr_card'
       | 'link'
+      | 'mb_way'
       | 'multibanco'
       | 'naver_pay'
       | 'nz_bank_account'
@@ -4034,6 +4630,7 @@ export namespace SubscriptionUpdateParams {
       | 'pix'
       | 'promptpay'
       | 'revolut_pay'
+      | 'satispay'
       | 'sepa_credit_transfer'
       | 'sepa_debit'
       | 'sofort'
@@ -4041,9 +4638,13 @@ export namespace SubscriptionUpdateParams {
       | 'twint'
       | 'upi'
       | 'us_bank_account'
-      | 'wechat_pay';
+      | 'wechat_pay'
+      | OtherString;
 
-    export type SaveDefaultPaymentMethod = 'off' | 'on_subscription';
+    export type SaveDefaultPaymentMethod =
+      | 'off'
+      | 'on_subscription'
+      | OtherString;
 
     export namespace PaymentMethodOptions {
       export interface AcssDebit {
@@ -4063,6 +4664,20 @@ export namespace SubscriptionUpdateParams {
          * Preferred language of the Bancontact authorization page that the customer is redirected to.
          */
         preferred_language?: Bancontact.PreferredLanguage;
+      }
+
+      export interface Billie {
+        /**
+         * Registration details about the buyer's organization.
+         */
+        company_details?: Emptyable<Billie.CompanyDetails>;
+      }
+
+      export interface Blik {
+        /**
+         * Configuration options for setting up a mandate
+         */
+        mandate_options?: Blik.MandateOptions;
       }
 
       export interface Card {
@@ -4147,15 +4762,73 @@ export namespace SubscriptionUpdateParams {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace MandateOptions {
-          export type TransactionType = 'business' | 'personal';
+          export type TransactionType = 'business' | 'personal' | OtherString;
         }
       }
 
       export namespace Bancontact {
-        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
+      }
+
+      export namespace Billie {
+        export interface CompanyDetails {
+          /**
+           * The address the company or entity is registered with.
+           */
+          registered_address?: Emptyable<AddressParam>;
+
+          /**
+           * Company or entity name.
+           */
+          registered_name?: string;
+
+          /**
+           * The official registration number for the given registration type.
+           */
+          registration_number?: string;
+
+          /**
+           * Type of registration the company or entity holds in their registered country.
+           */
+          registration_type?: Emptyable<CompanyDetails.RegistrationType>;
+
+          /**
+           * VAT ID number.
+           */
+          vat?: string;
+        }
+
+        export namespace CompanyDetails {
+          export type RegistrationType =
+            | 'ch_ein'
+            | 'de_hrb'
+            | 'dk_cvr'
+            | 'es_cif'
+            | 'fi_tunnus'
+            | 'fr_siren'
+            | 'fr_siret'
+            | 'it_rea'
+            | 'nl_kvk'
+            | 'no_org_number'
+            | 'no_pno'
+            | 'se_org_number'
+            | 'se_pno'
+            | 'uk_crn'
+            | OtherString;
+        }
+      }
+
+      export namespace Blik {
+        export interface MandateOptions {
+          /**
+           * Date when the mandate expires and no further payments will be charged. If not provided, the mandate will be set to be indefinite.
+           */
+          expires_at?: number;
+        }
       }
 
       export namespace Card {
@@ -4189,12 +4862,17 @@ export namespace SubscriptionUpdateParams {
           | 'mastercard'
           | 'unionpay'
           | 'unknown'
-          | 'visa';
+          | 'visa'
+          | OtherString;
 
-        export type RequestThreeDSecure = 'any' | 'automatic' | 'challenge';
+        export type RequestThreeDSecure =
+          | 'any'
+          | 'automatic'
+          | 'challenge'
+          | OtherString;
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
         }
       }
 
@@ -4246,7 +4924,8 @@ export namespace SubscriptionUpdateParams {
             | 'retail'
             | 'salary'
             | 'tax'
-            | 'utility';
+            | 'utility'
+            | OtherString;
         }
       }
 
@@ -4274,14 +4953,15 @@ export namespace SubscriptionUpdateParams {
         }
 
         export namespace MandateOptions {
-          export type AmountIncludesIof = 'always' | 'never';
+          export type AmountIncludesIof = 'always' | 'never' | OtherString;
 
           export type PaymentSchedule =
             | 'halfyearly'
             | 'monthly'
             | 'quarterly'
             | 'weekly'
-            | 'yearly';
+            | 'yearly'
+            | OtherString;
         }
       }
 
@@ -4309,7 +4989,7 @@ export namespace SubscriptionUpdateParams {
         }
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
         }
       }
 
@@ -4334,7 +5014,8 @@ export namespace SubscriptionUpdateParams {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace FinancialConnections {
           export interface Filters {
@@ -4348,12 +5029,20 @@ export namespace SubscriptionUpdateParams {
             | 'balances'
             | 'ownership'
             | 'payment_method'
-            | 'transactions';
+            | 'transactions'
+            | OtherString;
 
-          export type Prefetch = 'balances' | 'ownership' | 'transactions';
+          export type Prefetch =
+            | 'balances'
+            | 'ownership'
+            | 'transactions'
+            | OtherString;
 
           export namespace Filters {
-            export type AccountSubcategory = 'checking' | 'savings';
+            export type AccountSubcategory =
+              | 'checking'
+              | 'savings'
+              | OtherString;
           }
         }
       }
@@ -4361,19 +5050,30 @@ export namespace SubscriptionUpdateParams {
   }
 
   export namespace PendingInvoiceItemInterval {
-    export type Interval = 'day' | 'month' | 'week' | 'year';
+    export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
   }
 
   export namespace TrialSettings {
     export interface EndBehavior {
       /**
+       * Indicates how the subscription's billing cycle anchor is reset when a trial ends. Defaults to `now`.
+       */
+      billing_cycle_anchor?: EndBehavior.BillingCycleAnchor;
+
+      /**
        * Indicates how the subscription should change when the trial ends if the user did not provide a payment method.
        */
-      missing_payment_method: EndBehavior.MissingPaymentMethod;
+      missing_payment_method?: EndBehavior.MissingPaymentMethod;
     }
 
     export namespace EndBehavior {
-      export type MissingPaymentMethod = 'cancel' | 'create_invoice' | 'pause';
+      export type BillingCycleAnchor = 'now' | 'unchanged' | OtherString;
+
+      export type MissingPaymentMethod =
+        | 'cancel'
+        | 'create_invoice'
+        | 'pause'
+        | OtherString;
     }
   }
 }
@@ -4446,7 +5146,10 @@ export namespace SubscriptionListParams {
     enabled: boolean;
   }
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export type Status =
     | 'active'
@@ -4458,7 +5161,8 @@ export namespace SubscriptionListParams {
     | 'past_due'
     | 'paused'
     | 'trialing'
-    | 'unpaid';
+    | 'unpaid'
+    | OtherString;
 }
 export interface SubscriptionCancelParams {
   /**
@@ -4492,6 +5196,11 @@ export namespace SubscriptionCancelParams {
      * The customer submitted reason for why they canceled, if the subscription was canceled explicitly by the user.
      */
     feedback?: Emptyable<CancellationDetails.Feedback>;
+
+    /**
+     * Customized feedback options that provide deeper insight into why the subscription was canceled, if the subscription was canceled explicitly by the user.
+     */
+    feedback_option?: string;
   }
 
   export namespace CancellationDetails {
@@ -4503,7 +5212,8 @@ export namespace SubscriptionCancelParams {
       | 'switched_service'
       | 'too_complex'
       | 'too_expensive'
-      | 'unused';
+      | 'unused'
+      | OtherString;
   }
 }
 export interface SubscriptionDeleteDiscountParams {}
@@ -4540,7 +5250,76 @@ export namespace SubscriptionMigrateParams {
     }
 
     export namespace Flexible {
-      export type ProrationDiscounts = 'included' | 'itemized';
+      export type ProrationDiscounts = 'included' | 'itemized' | OtherString;
+    }
+  }
+}
+export interface SubscriptionPauseParams {
+  /**
+   * Controls what to bill for when pausing the subscription.
+   */
+  bill_for?: SubscriptionPauseParams.BillFor;
+
+  /**
+   * Specifies which fields in the response should be expanded.
+   */
+  expand?: Array<string>;
+
+  /**
+   * Determines how to handle debits and credits when pausing. Defaults to `pending_invoice_item`.
+   */
+  invoicing_behavior?: SubscriptionPauseParams.InvoicingBehavior;
+
+  /**
+   * The type of pause to apply. Defaults to `subscription`.
+   */
+  type?: SubscriptionPauseParams.Type;
+}
+export namespace SubscriptionPauseParams {
+  export interface BillFor {
+    /**
+     * Controls when to bill for metered usage in the current period. Defaults to `{ type: "now" }`.
+     */
+    outstanding_usage_through?: BillFor.OutstandingUsageThrough;
+
+    /**
+     * Controls when to credit for unused time on licensed items. Defaults to `{ type: "now" }`.
+     */
+    unused_time_from?: BillFor.UnusedTimeFrom;
+  }
+
+  export type InvoicingBehavior =
+    | 'invoice'
+    | 'pending_invoice_item'
+    | OtherString;
+
+  export type Type = 'subscription' | OtherString;
+
+  export namespace BillFor {
+    export interface OutstandingUsageThrough {
+      /**
+       * When to bill metered usage in the current period.
+       */
+      type: OutstandingUsageThrough.Type;
+    }
+
+    export interface UnusedTimeFrom {
+      /**
+       * When to credit for unused time.
+       */
+      type: UnusedTimeFrom.Type;
+    }
+
+    export namespace OutstandingUsageThrough {
+      export type Type = 'none' | 'now' | OtherString;
+    }
+
+    export namespace UnusedTimeFrom {
+      export type Type =
+        | 'item_current_period_start'
+        | 'none'
+        | 'now'
+        | OtherString;
     }
   }
 }
@@ -4556,6 +5335,11 @@ export interface SubscriptionResumeParams {
   expand?: Array<string>;
 
   /**
+   * Controls whether Stripe attempts payment on the resumption invoice in the resume request, and how payment on that invoice affects the subscription's status. The default is `resume_on_payment_attempt`.
+   */
+  payment_behavior?: SubscriptionResumeParams.PaymentBehavior;
+
+  /**
    * Determines how to handle [prorations](https://docs.stripe.com/billing/subscriptions/prorations) resulting from the `billing_cycle_anchor` being `unchanged`. When the `billing_cycle_anchor` is set to `now` (default value), no prorations are generated. If no value is passed, the default is `create_prorations`.
    */
   proration_behavior?: SubscriptionResumeParams.ProrationBehavior;
@@ -4566,12 +5350,27 @@ export interface SubscriptionResumeParams {
   proration_date?: number;
 }
 export namespace SubscriptionResumeParams {
-  export type BillingCycleAnchor = 'now' | 'unchanged';
+  export interface BillingCycleAnchor {
+    /**
+     * Determines how the billing cycle anchor changes when the subscription resumes.
+     */
+    type: BillingCycleAnchor.Type;
+  }
+
+  export type PaymentBehavior =
+    | 'resume_on_payment_attempt'
+    | 'resume_on_payment_success'
+    | OtherString;
 
   export type ProrationBehavior =
     | 'always_invoice'
     | 'create_prorations'
-    | 'none';
+    | 'none'
+    | OtherString;
+
+  export namespace BillingCycleAnchor {
+    export type Type = 'now' | 'unchanged' | OtherString;
+  }
 }
 export interface SubscriptionSearchParams {
   /**

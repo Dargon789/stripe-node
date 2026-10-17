@@ -9,7 +9,7 @@ import {SetupIntent} from './SetupIntents.js';
 import {Mandate} from './Mandates.js';
 import {PaymentIntent} from './PaymentIntents.js';
 import {CustomerSource} from './CustomerSources.js';
-import {PaginationParams, RangeQueryParam} from '../shared.js';
+import {PaginationParams, RangeQueryParam, OtherString} from '../shared.js';
 import {RequestOptions, ApiListPromise, Response} from '../lib.js';
 
 export class SetupAttemptResource extends StripeResource {
@@ -108,7 +108,7 @@ export interface SetupAttempt {
   usage: string;
 }
 export namespace SetupAttempt {
-  export type FlowDirection = 'inbound' | 'outbound';
+  export type FlowDirection = 'inbound' | 'outbound' | OtherString;
 
   export interface PaymentMethodDetails {
     acss_debit?: PaymentMethodDetails.AcssDebit;
@@ -120,6 +120,8 @@ export namespace SetupAttempt {
     bacs_debit?: PaymentMethodDetails.BacsDebit;
 
     bancontact?: PaymentMethodDetails.Bancontact;
+
+    blik?: PaymentMethodDetails.Blik;
 
     boleto?: PaymentMethodDetails.Boleto;
 
@@ -151,6 +153,8 @@ export namespace SetupAttempt {
 
     revolut_pay?: PaymentMethodDetails.RevolutPay;
 
+    satispay?: PaymentMethodDetails.Satispay;
+
     sepa_debit?: PaymentMethodDetails.SepaDebit;
 
     sofort?: PaymentMethodDetails.Sofort;
@@ -169,7 +173,7 @@ export namespace SetupAttempt {
 
   export interface SetupError {
     /**
-     * For card errors resulting from a card issuer decline, a short string indicating [how to proceed with an error](https://docs.stripe.com/declines#retrying-issuer-declines) if they provide one.
+     * For card errors resulting from a card issuer decline, a short string indicating [how to proceed with an error](https://docs.stripe.com/declines/card#retrying-issuer-declines) if they provide one.
      */
     advice_code?: string;
 
@@ -250,7 +254,7 @@ export namespace SetupAttempt {
     /**
      * A SetupIntent guides you through the process of setting up and saving a customer's payment credentials for future payments.
      * For example, you can use a SetupIntent to set up and save your customer's card without immediately collecting a payment.
-     * Later, you can use [PaymentIntents](https://api.stripe.com#payment_intents) to drive the payment flow.
+     * Later, you can use [PaymentIntents](https://docs.stripe.com/api#payment_intents) to drive the payment flow.
      *
      * Create a SetupIntent when you're ready to collect your customer's payment credentials.
      * Don't maintain long-lived, unconfirmed SetupIntents because they might not be valid.
@@ -261,9 +265,9 @@ export namespace SetupAttempt {
      * For example, cardholders in [certain regions](https://stripe.com/guides/strong-customer-authentication) might need to be run through
      * [Strong Customer Authentication](https://docs.stripe.com/strong-customer-authentication) during payment method collection
      * to streamline later [off-session payments](https://docs.stripe.com/payments/setup-intents).
-     * If you use the SetupIntent with a [Customer](https://api.stripe.com#setup_intent_object-customer),
+     * If you use the SetupIntent with a [Customer](https://docs.stripe.com/api#setup_intent_object-customer),
      * it automatically attaches the resulting payment method to that Customer after successful setup.
-     * We recommend using SetupIntents or [setup_future_usage](https://api.stripe.com#payment_intent_object-setup_future_usage) on
+     * We recommend using SetupIntents or [setup_future_usage](https://docs.stripe.com/api#payment_intent_object-setup_future_usage) on
      * PaymentIntents to save payment methods to prevent saving invalid or unoptimized payment methods.
      *
      * By using SetupIntents, you can reduce friction for your customers, even as regulations change over time.
@@ -331,6 +335,13 @@ export namespace SetupAttempt {
        * (if supported) at the time of authorization or settlement. They cannot be set or mutated.
        */
       verified_name: string | null;
+    }
+
+    export interface Blik {
+      /**
+       * A unique and immutable identifier assigned by BLIK to every buyer.
+       */
+      buyer_id?: string | null;
     }
 
     export interface Boleto {}
@@ -482,9 +493,16 @@ export namespace SetupAttempt {
 
     export interface Payto {}
 
-    export interface Pix {}
+    export interface Pix {
+      /**
+       * Uniquely identifies this particular Pix account. You can use this attribute to check whether two Pix accounts are the same.
+       */
+      fingerprint?: string | null;
+    }
 
     export interface RevolutPay {}
+
+    export interface Satispay {}
 
     export interface SepaDebit {}
 
@@ -539,7 +557,7 @@ export namespace SetupAttempt {
     export interface UsBankAccount {}
 
     export namespace Bancontact {
-      export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+      export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
     }
 
     export namespace Card {
@@ -608,22 +626,28 @@ export namespace SetupAttempt {
       }
 
       export namespace ThreeDSecure {
-        export type AuthenticationFlow = 'challenge' | 'frictionless';
+        export type AuthenticationFlow =
+          | 'challenge'
+          | 'frictionless'
+          | OtherString;
 
         export type ElectronicCommerceIndicator =
           | '01'
           | '02'
           | '05'
           | '06'
-          | '07';
+          | '07'
+          | OtherString;
 
         export type Result =
           | 'attempt_acknowledged'
           | 'authenticated'
+          | 'data_share_only'
           | 'exempted'
           | 'failed'
           | 'not_supported'
-          | 'processing_error';
+          | 'processing_error'
+          | OtherString;
 
         export type ResultReason =
           | 'abandoned'
@@ -632,9 +656,16 @@ export namespace SetupAttempt {
           | 'card_not_enrolled'
           | 'network_not_supported'
           | 'protocol_error'
-          | 'rejected';
+          | 'rejected'
+          | OtherString;
 
-        export type Version = '1.0.2' | '2.1.0' | '2.2.0' | '2.3.0' | '2.3.1';
+        export type Version =
+          | '1.0.2'
+          | '2.1.0'
+          | '2.2.0'
+          | '2.3.0'
+          | '2.3.1'
+          | OtherString;
       }
 
       export namespace Wallet {
@@ -642,7 +673,7 @@ export namespace SetupAttempt {
 
         export interface GooglePay {}
 
-        export type Type = 'apple_pay' | 'google_pay' | 'link';
+        export type Type = 'apple_pay' | 'google_pay' | 'link' | OtherString;
       }
     }
 
@@ -681,7 +712,8 @@ export namespace SetupAttempt {
         | 'sns_bank'
         | 'triodos_bank'
         | 'van_lanschot'
-        | 'yoursafe';
+        | 'yoursafe'
+        | OtherString;
 
       export type Bic =
         | 'ABNANL2A'
@@ -704,11 +736,12 @@ export namespace SetupAttempt {
         | 'REVOIE23'
         | 'REVOLT21'
         | 'SNSBNL2A'
-        | 'TRIONL2U';
+        | 'TRIONL2U'
+        | OtherString;
     }
 
     export namespace Sofort {
-      export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+      export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
     }
   }
 
@@ -726,9 +759,11 @@ export namespace SetupAttempt {
       | 'alipay_upgrade_required'
       | 'amount_too_large'
       | 'amount_too_small'
+      | 'anomalous_money_movement_request'
       | 'api_key_expired'
       | 'application_fees_not_allowed'
       | 'approval_required'
+      | 'authentication_failure'
       | 'authentication_required'
       | 'balance_insufficient'
       | 'balance_invalid_parameter'
@@ -741,6 +776,7 @@ export namespace SetupAttempt {
       | 'bank_account_verification_failed'
       | 'billing_invalid_mandate'
       | 'bitcoin_upgrade_required'
+      | 'capability_not_active'
       | 'capture_charge_authorization_expired'
       | 'capture_unauthorized_payment'
       | 'card_decline_rate_limit_exceeded'
@@ -763,11 +799,19 @@ export namespace SetupAttempt {
       | 'customer_session_expired'
       | 'customer_tax_location_invalid'
       | 'debit_not_authorized'
+      | 'dispute_evidence_page_limit_exceeded'
       | 'email_invalid'
       | 'expired_card'
+      | 'expired_payment_method'
+      | 'failed_tax_calculation'
+      | 'financial_account_balance_does_not_support_currency'
+      | 'financial_account_capability_not_enabled'
+      | 'financial_account_capability_restricted'
       | 'financial_connections_account_inactive'
       | 'financial_connections_account_pending_account_numbers'
       | 'financial_connections_account_unavailable_account_numbers'
+      | 'financial_connections_consent_locale_invalid'
+      | 'financial_connections_consent_locale_unsupported'
       | 'financial_connections_no_successful_transaction_refresh'
       | 'forwarding_api_inactive'
       | 'forwarding_api_invalid_parameter'
@@ -779,6 +823,7 @@ export namespace SetupAttempt {
       | 'incorrect_address'
       | 'incorrect_cvc'
       | 'incorrect_number'
+      | 'incorrect_postal_code'
       | 'incorrect_zip'
       | 'india_recurring_payment_mandate_canceled'
       | 'instant_payouts_config_disabled'
@@ -788,6 +833,7 @@ export namespace SetupAttempt {
       | 'insufficient_funds'
       | 'intent_invalid_state'
       | 'intent_verification_method_missing'
+      | 'invalid_canceled_subscription_fields'
       | 'invalid_card_type'
       | 'invalid_characters'
       | 'invalid_charge_amount'
@@ -819,6 +865,7 @@ export namespace SetupAttempt {
       | 'parameter_missing'
       | 'parameter_unknown'
       | 'parameters_exclusive'
+      | 'payment_evaluation_on_api_version_not_supported'
       | 'payment_intent_action_required'
       | 'payment_intent_authentication_failure'
       | 'payment_intent_incompatible_payment_method'
@@ -847,6 +894,7 @@ export namespace SetupAttempt {
       | 'payment_method_not_available'
       | 'payment_method_provider_decline'
       | 'payment_method_provider_timeout'
+      | 'payment_method_restricted'
       | 'payment_method_unactivated'
       | 'payment_method_unexpected_state'
       | 'payment_method_unsupported_type'
@@ -903,13 +951,15 @@ export namespace SetupAttempt {
       | 'token_in_use'
       | 'transfer_source_balance_parameters_mismatch'
       | 'transfers_not_allowed'
-      | 'url_invalid';
+      | 'url_invalid'
+      | OtherString;
 
     export type Type =
       | 'api_error'
       | 'card_error'
       | 'idempotency_error'
-      | 'invalid_request_error';
+      | 'invalid_request_error'
+      | OtherString;
   }
 }
 export interface SetupAttemptListParams extends PaginationParams {

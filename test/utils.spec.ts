@@ -816,65 +816,6 @@ describe('utils', () => {
     });
   });
 
-  describe('parseHttpHeaderAsNumber', () => {
-    it('returns the number for valid integer strings', () => {
-      expect(utils.parseHttpHeaderAsNumber('30')).to.equal(30);
-      expect(utils.parseHttpHeaderAsNumber('0')).to.equal(0);
-    });
-
-    it('returns the number for valid decimal strings', () => {
-      expect(utils.parseHttpHeaderAsNumber('1.5')).to.equal(1.5);
-    });
-
-    it('returns the number for strings with surrounding whitespace', () => {
-      expect(utils.parseHttpHeaderAsNumber('  42  ')).to.equal(42);
-    });
-
-    it('returns undefined for undefined', () => {
-      expect(utils.parseHttpHeaderAsNumber(undefined)).to.be.undefined;
-    });
-
-    it('returns undefined for null', () => {
-      expect(utils.parseHttpHeaderAsNumber(null)).to.be.undefined;
-    });
-
-    it('returns undefined for empty string', () => {
-      expect(utils.parseHttpHeaderAsNumber('')).to.be.undefined;
-    });
-
-    it('returns undefined for whitespace-only strings', () => {
-      expect(utils.parseHttpHeaderAsNumber('   ')).to.be.undefined;
-    });
-
-    it('returns undefined for non-numeric strings', () => {
-      expect(utils.parseHttpHeaderAsNumber('bad')).to.be.undefined;
-    });
-
-    it('returns undefined for "NaN"', () => {
-      expect(utils.parseHttpHeaderAsNumber('NaN')).to.be.undefined;
-    });
-
-    it('returns undefined for "Infinity"', () => {
-      expect(utils.parseHttpHeaderAsNumber('Infinity')).to.be.undefined;
-    });
-
-    it('returns undefined for "-Infinity"', () => {
-      expect(utils.parseHttpHeaderAsNumber('-Infinity')).to.be.undefined;
-    });
-
-    it('takes the first element for array input', () => {
-      expect(utils.parseHttpHeaderAsNumber(['30', '60'])).to.equal(30);
-    });
-
-    it('returns undefined for array with non-numeric first element', () => {
-      expect(utils.parseHttpHeaderAsNumber(['bad', '30'])).to.be.undefined;
-    });
-
-    it('returns undefined for array with empty string first element', () => {
-      expect(utils.parseHttpHeaderAsNumber(['', '30'])).to.be.undefined;
-    });
-  });
-
   describe('concat', () => {
     it('should return a joined Uint8Array', () => {
       const arr1 = new Uint8Array([1, 2, 3]);
@@ -894,6 +835,50 @@ describe('utils', () => {
         utils.concat([buf1, buf2])
       );
       expect(mergedBufToString).to.equal('foobar');
+    });
+  });
+
+  describe('assertOriginRelativePath', () => {
+    it('accepts origin-relative paths', () => {
+      const valid = [
+        '/v1/customers/cus_123',
+        '/v1/customers',
+        '/v2/core/accounts?page=page_123&limit=2',
+        // '@' is legal inside a path or query string -- it only opens an
+        // authority when it precedes the first '/'.
+        '/v1/customers?email=user%40example.com',
+        '/v1/invoices/in_123@456',
+        // A backslash does not open an authority: the '/' already closed it.
+        '/v1/\\evil.example',
+      ];
+      valid.forEach((path) => {
+        expect(() => utils.validatePath(path)).to.not.throw();
+      });
+    });
+
+    it('rejects paths that could move the request authority', () => {
+      const hostile = [
+        '@evil.example/v1/leak',
+        ':pw@evil.example/v1/leak',
+        ':80@evil.example/v1/leak',
+        // Extends the host into an attacker-owned subdomain
+        // (api.stripe.com.evil.example), which has a valid certificate.
+        '.evil.example/v1/leak',
+        '-evil.example/v1/leak',
+        'https://evil.example/v1/leak',
+        '//evil.example/v1/leak',
+        '',
+        'v1/customers',
+        null,
+        undefined,
+        42,
+      ];
+      hostile.forEach((path) => {
+        expect(
+          () => utils.validatePath(path),
+          `expected to reject ${JSON.stringify(path)}`
+        ).to.throw(/must be a string beginning with a single/);
+      });
     });
   });
 });

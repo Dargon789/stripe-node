@@ -24,7 +24,7 @@ export class ScheduledQueryRunResource extends StripeResource {
     ) as any;
   }
   /**
-   * Retrieves the details of an scheduled query run.
+   * Retrieves the details of a scheduled query run.
    */
   retrieve(
     id: string,
@@ -33,7 +33,7 @@ export class ScheduledQueryRunResource extends StripeResource {
   ): Promise<Response<ScheduledQueryRun>> {
     return this._makeRequest(
       'GET',
-      `/v1/sigma/scheduled_query_runs/${id}`,
+      `/v1/sigma/scheduled_query_runs/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -60,7 +60,7 @@ export interface ScheduledQueryRun {
    */
   data_load_time: number;
 
-  error?: Sigma.ScheduledQueryRun.Error;
+  error?: ScheduledQueryRun.Error;
 
   /**
    * The file object representing the results of the query.
@@ -92,14 +92,12 @@ export interface ScheduledQueryRun {
    */
   title: string;
 }
-export namespace Sigma {
-  export namespace ScheduledQueryRun {
-    export interface Error {
-      /**
-       * Information about the run failure.
-       */
-      message: string;
-    }
+export namespace ScheduledQueryRun {
+  export interface Error {
+    /**
+     * Information about the run failure.
+     */
+    message: string;
   }
 }
 export namespace Sigma {

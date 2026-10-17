@@ -10,6 +10,7 @@ import {
   MetadataParam,
   Decimal,
   Emptyable,
+  OtherString,
   PaginationParams,
   Metadata,
 } from '../shared.js';
@@ -220,7 +221,7 @@ export class PaymentLinkResource extends StripeResource {
   ): Promise<Response<PaymentLink>> {
     return this._makeRequest(
       'GET',
-      `/v1/payment_links/${id}`,
+      `/v1/payment_links/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -311,7 +312,7 @@ export class PaymentLinkResource extends StripeResource {
   ): Promise<Response<PaymentLink>> {
     return this._makeRequest(
       'POST',
-      `/v1/payment_links/${id}`,
+      `/v1/payment_links/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -402,7 +403,7 @@ export class PaymentLinkResource extends StripeResource {
   ): ApiListPromise<LineItem> {
     return this._makeRequest(
       'GET',
-      `/v1/payment_links/${id}/line_items`,
+      `/v1/payment_links/${encodeURIComponent(id)}/line_items`,
       params,
       options,
       {
@@ -536,7 +537,7 @@ export interface PaymentLink {
   currency: string;
 
   /**
-   * Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `custom`.
+   * Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `elements`.
    */
   custom_fields: Array<PaymentLink.CustomField>;
 
@@ -672,7 +673,7 @@ export namespace PaymentLink {
     liability: AutomaticTax.Liability | null;
   }
 
-  export type BillingAddressCollection = 'auto' | 'required';
+  export type BillingAddressCollection = 'auto' | 'required' | OtherString;
 
   export interface ConsentCollection {
     /**
@@ -738,7 +739,7 @@ export namespace PaymentLink {
     terms_of_service_acceptance: CustomText.TermsOfServiceAcceptance | null;
   }
 
-  export type CustomerCreation = 'always' | 'if_required';
+  export type CustomerCreation = 'always' | 'if_required' | OtherString;
 
   export interface InvoiceCreation {
     /**
@@ -810,7 +811,7 @@ export namespace PaymentLink {
     transfer_group: string | null;
   }
 
-  export type PaymentMethodCollection = 'always' | 'if_required';
+  export type PaymentMethodCollection = 'always' | 'if_required' | OtherString;
 
   export interface PaymentMethodOptions {
     /**
@@ -849,11 +850,13 @@ export namespace PaymentLink {
     | 'pay_by_bank'
     | 'paynow'
     | 'paypal'
+    | 'paypay'
     | 'payto'
     | 'pix'
     | 'promptpay'
     | 'satispay'
     | 'sepa_debit'
+    | 'sequra'
     | 'sofort'
     | 'sunbit'
     | 'swish'
@@ -861,7 +864,8 @@ export namespace PaymentLink {
     | 'upi'
     | 'us_bank_account'
     | 'wechat_pay'
-    | 'zip';
+    | 'zip'
+    | OtherString;
 
   export interface PhoneNumberCollection {
     /**
@@ -893,7 +897,13 @@ export namespace PaymentLink {
     shipping_rate: string | ShippingRate;
   }
 
-  export type SubmitType = 'auto' | 'book' | 'donate' | 'pay' | 'subscribe';
+  export type SubmitType =
+    | 'auto'
+    | 'book'
+    | 'donate'
+    | 'pay'
+    | 'subscribe'
+    | OtherString;
 
   export interface SubscriptionData {
     /**
@@ -955,7 +965,7 @@ export namespace PaymentLink {
       url: string;
     }
 
-    export type Type = 'hosted_confirmation' | 'redirect';
+    export type Type = 'hosted_confirmation' | 'redirect' | OtherString;
   }
 
   export namespace AutomaticTax {
@@ -972,7 +982,7 @@ export namespace PaymentLink {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -986,12 +996,12 @@ export namespace PaymentLink {
       position: PaymentMethodReuseAgreement.Position;
     }
 
-    export type Promotions = 'auto' | 'none';
+    export type Promotions = 'auto' | 'none' | OtherString;
 
-    export type TermsOfService = 'none' | 'required';
+    export type TermsOfService = 'none' | 'required' | OtherString;
 
     export namespace PaymentMethodReuseAgreement {
-      export type Position = 'auto' | 'hidden';
+      export type Position = 'auto' | 'hidden' | OtherString;
     }
   }
 
@@ -1010,7 +1020,7 @@ export namespace PaymentLink {
 
     export interface Label {
       /**
-       * Custom text for the label, displayed to the customer. Up to 50 characters.
+       * Custom text for the label, displayed to the customer. Up to 100 characters.
        */
       custom: string | null;
 
@@ -1054,7 +1064,7 @@ export namespace PaymentLink {
       minimum_length: number | null;
     }
 
-    export type Type = 'dropdown' | 'numeric' | 'text';
+    export type Type = 'dropdown' | 'numeric' | 'text' | OtherString;
 
     export namespace Dropdown {
       export interface Option {
@@ -1177,7 +1187,7 @@ export namespace PaymentLink {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
   }
@@ -1228,9 +1238,13 @@ export namespace PaymentLink {
   }
 
   export namespace PaymentIntentData {
-    export type CaptureMethod = 'automatic' | 'automatic_async' | 'manual';
+    export type CaptureMethod =
+      | 'automatic'
+      | 'automatic_async'
+      | 'manual'
+      | OtherString;
 
-    export type SetupFutureUsage = 'off_session' | 'on_session';
+    export type SetupFutureUsage = 'off_session' | 'on_session' | OtherString;
   }
 
   export namespace PaymentMethodOptions {
@@ -1254,7 +1268,8 @@ export namespace PaymentLink {
           | 'american_express'
           | 'discover_global_network'
           | 'mastercard'
-          | 'visa';
+          | 'visa'
+          | OtherString;
       }
     }
   }
@@ -1512,7 +1527,8 @@ export namespace PaymentLink {
       | 'ZA'
       | 'ZM'
       | 'ZW'
-      | 'ZZ';
+      | 'ZZ'
+      | OtherString;
   }
 
   export namespace SubscriptionData {
@@ -1541,7 +1557,7 @@ export namespace PaymentLink {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
@@ -1557,13 +1573,14 @@ export namespace PaymentLink {
         export type MissingPaymentMethod =
           | 'cancel'
           | 'create_invoice'
-          | 'pause';
+          | 'pause'
+          | OtherString;
       }
     }
   }
 
   export namespace TaxIdCollection {
-    export type Required = 'if_supported' | 'never';
+    export type Required = 'if_supported' | 'never' | OtherString;
   }
 }
 export interface PaymentLinkCreateParams {
@@ -1613,12 +1630,12 @@ export interface PaymentLinkCreateParams {
   currency?: string;
 
   /**
-   * Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `custom`.
+   * Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `elements`.
    */
   custom_fields?: Array<PaymentLinkCreateParams.CustomField>;
 
   /**
-   * Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `custom`.
+   * Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `elements`.
    */
   custom_text?: PaymentLinkCreateParams.CustomText;
 
@@ -1683,6 +1700,9 @@ export interface PaymentLinkCreateParams {
    */
   payment_method_collection?: PaymentLinkCreateParams.PaymentMethodCollection;
 
+  /**
+   * Payment-method-specific configuration.
+   */
   payment_method_options?: PaymentLinkCreateParams.PaymentMethodOptions;
 
   /**
@@ -1786,7 +1806,7 @@ export namespace PaymentLinkCreateParams {
     liability?: AutomaticTax.Liability;
   }
 
-  export type BillingAddressCollection = 'auto' | 'required';
+  export type BillingAddressCollection = 'auto' | 'required' | OtherString;
 
   export interface ConsentCollection {
     /**
@@ -1869,7 +1889,7 @@ export namespace PaymentLinkCreateParams {
     >;
   }
 
-  export type CustomerCreation = 'always' | 'if_required';
+  export type CustomerCreation = 'always' | 'if_required' | OtherString;
 
   export interface InvoiceCreation {
     /**
@@ -1968,7 +1988,7 @@ export namespace PaymentLinkCreateParams {
     transfer_group?: string;
   }
 
-  export type PaymentMethodCollection = 'always' | 'if_required';
+  export type PaymentMethodCollection = 'always' | 'if_required' | OtherString;
 
   export interface PaymentMethodOptions {
     /**
@@ -2007,11 +2027,13 @@ export namespace PaymentLinkCreateParams {
     | 'pay_by_bank'
     | 'paynow'
     | 'paypal'
+    | 'paypay'
     | 'payto'
     | 'pix'
     | 'promptpay'
     | 'satispay'
     | 'sepa_debit'
+    | 'sequra'
     | 'sofort'
     | 'sunbit'
     | 'swish'
@@ -2019,7 +2041,8 @@ export namespace PaymentLinkCreateParams {
     | 'upi'
     | 'us_bank_account'
     | 'wechat_pay'
-    | 'zip';
+    | 'zip'
+    | OtherString;
 
   export interface PhoneNumberCollection {
     /**
@@ -2050,7 +2073,13 @@ export namespace PaymentLinkCreateParams {
     shipping_rate?: string;
   }
 
-  export type SubmitType = 'auto' | 'book' | 'donate' | 'pay' | 'subscribe';
+  export type SubmitType =
+    | 'auto'
+    | 'book'
+    | 'donate'
+    | 'pay'
+    | 'subscribe'
+    | OtherString;
 
   export interface SubscriptionData {
     /**
@@ -2086,7 +2115,7 @@ export namespace PaymentLinkCreateParams {
     enabled: boolean;
 
     /**
-     * Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `custom`.
+     * Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `elements`.
      */
     required?: TaxIdCollection.Required;
   }
@@ -2121,7 +2150,7 @@ export namespace PaymentLinkCreateParams {
       url: string;
     }
 
-    export type Type = 'hosted_confirmation' | 'redirect';
+    export type Type = 'hosted_confirmation' | 'redirect' | OtherString;
   }
 
   export namespace AutomaticTax {
@@ -2138,7 +2167,7 @@ export namespace PaymentLinkCreateParams {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -2151,19 +2180,19 @@ export namespace PaymentLinkCreateParams {
       position: PaymentMethodReuseAgreement.Position;
     }
 
-    export type Promotions = 'auto' | 'none';
+    export type Promotions = 'auto' | 'none' | OtherString;
 
-    export type TermsOfService = 'none' | 'required';
+    export type TermsOfService = 'none' | 'required' | OtherString;
 
     export namespace PaymentMethodReuseAgreement {
-      export type Position = 'auto' | 'hidden';
+      export type Position = 'auto' | 'hidden' | OtherString;
     }
   }
 
   export namespace CustomField {
     export interface Dropdown {
       /**
-       * The value that pre-fills the field on the payment page.Must match a `value` in the `options` array.
+       * The value that pre-fills the field on the payment page. Must match a `value` in the `options` array.
        */
       default_value?: string;
 
@@ -2175,7 +2204,7 @@ export namespace PaymentLinkCreateParams {
 
     export interface Label {
       /**
-       * Custom text for the label, displayed to the customer. Up to 50 characters.
+       * Custom text for the label, displayed to the customer. Up to 100 characters.
        */
       custom: string;
 
@@ -2219,7 +2248,7 @@ export namespace PaymentLinkCreateParams {
       minimum_length?: number;
     }
 
-    export type Type = 'dropdown' | 'numeric' | 'text';
+    export type Type = 'dropdown' | 'numeric' | 'text' | OtherString;
 
     export namespace Dropdown {
       export interface Option {
@@ -2342,11 +2371,14 @@ export namespace PaymentLinkCreateParams {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
 
       export namespace RenderingOptions {
-        export type AmountTaxDisplay = 'exclude_tax' | 'include_inclusive_tax';
+        export type AmountTaxDisplay =
+          | 'exclude_tax'
+          | 'include_inclusive_tax'
+          | OtherString;
       }
     }
   }
@@ -2434,6 +2466,11 @@ export namespace PaymentLinkCreateParams {
         tax_code?: string;
 
         /**
+         * Tax details for this product, including the [tax code](https://docs.stripe.com/tax/tax-codes) and an optional performance location.
+         */
+        tax_details?: ProductData.TaxDetails;
+
+        /**
          * A label that represents units of this product. When set, this will be included in customers' receipts, invoices, Checkout, and the customer portal.
          */
         unit_label?: string;
@@ -2451,10 +2488,28 @@ export namespace PaymentLinkCreateParams {
         interval_count?: number;
       }
 
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
+
+      export namespace ProductData {
+        export interface TaxDetails {
+          /**
+           * A tax location ID. Depending on the [tax code](https://docs.stripe.com/tax/tax-for-tickets/reference/tax-location-performance), this is required, optional, or not supported.
+           */
+          performance_location?: string;
+
+          /**
+           * A [tax code](https://docs.stripe.com/tax/tax-categories) ID.
+           */
+          tax_code?: Emptyable<string>;
+        }
+      }
 
       export namespace Recurring {
-        export type Interval = 'day' | 'month' | 'week' | 'year';
+        export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
       }
     }
   }
@@ -2505,9 +2560,13 @@ export namespace PaymentLinkCreateParams {
   }
 
   export namespace PaymentIntentData {
-    export type CaptureMethod = 'automatic' | 'automatic_async' | 'manual';
+    export type CaptureMethod =
+      | 'automatic'
+      | 'automatic_async'
+      | 'manual'
+      | OtherString;
 
-    export type SetupFutureUsage = 'off_session' | 'on_session';
+    export type SetupFutureUsage = 'off_session' | 'on_session' | OtherString;
   }
 
   export namespace PaymentMethodOptions {
@@ -2531,7 +2590,8 @@ export namespace PaymentLinkCreateParams {
           | 'american_express'
           | 'discover_global_network'
           | 'mastercard'
-          | 'visa';
+          | 'visa'
+          | OtherString;
       }
     }
   }
@@ -2784,7 +2844,8 @@ export namespace PaymentLinkCreateParams {
       | 'ZA'
       | 'ZM'
       | 'ZW'
-      | 'ZZ';
+      | 'ZZ'
+      | OtherString;
   }
 
   export namespace SubscriptionData {
@@ -2816,7 +2877,7 @@ export namespace PaymentLinkCreateParams {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
@@ -2832,13 +2893,14 @@ export namespace PaymentLinkCreateParams {
         export type MissingPaymentMethod =
           | 'cancel'
           | 'create_invoice'
-          | 'pause';
+          | 'pause'
+          | OtherString;
       }
     }
   }
 
   export namespace TaxIdCollection {
-    export type Required = 'if_supported' | 'never';
+    export type Required = 'if_supported' | 'never' | OtherString;
   }
 }
 export interface PaymentLinkRetrieveParams {
@@ -2864,6 +2926,16 @@ export interface PaymentLinkUpdateParams {
   allow_promotion_codes?: boolean;
 
   /**
+   * The amount of the application fee (if any) that will be requested to be applied to the payment and transferred to the application owner's Stripe account. Can only be applied when there are no line items with recurring prices.
+   */
+  application_fee_amount?: Emptyable<number>;
+
+  /**
+   * A non-negative decimal between 0 and 100, with at most two decimal places. This represents the percentage of the subscription invoice total that will be transferred to the application owner's Stripe account. There must be at least 1 line item with a recurring price to use this field.
+   */
+  application_fee_percent?: Emptyable<number>;
+
+  /**
    * Configuration for automatic tax collection.
    */
   automatic_tax?: PaymentLinkUpdateParams.AutomaticTax;
@@ -2874,12 +2946,17 @@ export interface PaymentLinkUpdateParams {
   billing_address_collection?: PaymentLinkUpdateParams.BillingAddressCollection;
 
   /**
-   * Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `custom`.
+   * Configure fields to gather active consent from customers.
+   */
+  consent_collection?: PaymentLinkUpdateParams.ConsentCollection;
+
+  /**
+   * Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `elements`.
    */
   custom_fields?: Emptyable<Array<PaymentLinkUpdateParams.CustomField>>;
 
   /**
-   * Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `custom`.
+   * Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `elements`.
    */
   custom_text?: PaymentLinkUpdateParams.CustomText;
 
@@ -2917,6 +2994,11 @@ export interface PaymentLinkUpdateParams {
    * Controls settings applied for collecting the customer's name.
    */
   name_collection?: Emptyable<PaymentLinkUpdateParams.NameCollection>;
+
+  /**
+   * The account on behalf of which to charge.
+   */
+  on_behalf_of?: Emptyable<string>;
 
   /**
    * A list of optional items the customer can add to their order at checkout. Use this parameter to pass one-time or recurring [Prices](https://docs.stripe.com/api/prices).
@@ -2973,6 +3055,11 @@ export interface PaymentLinkUpdateParams {
   >;
 
   /**
+   * The shipping rate options to apply to [checkout sessions](https://docs.stripe.com/api/checkout/sessions) created by this payment link.
+   */
+  shipping_options?: Emptyable<Array<PaymentLinkUpdateParams.ShippingOption>>;
+
+  /**
    * Describes the type of transaction being performed in order to customize relevant text on the page, such as the submit button. Changing this value will also affect the hostname in the [url](https://docs.stripe.com/api/payment_links/payment_links/object#url) property (example: `donate.stripe.com`).
    */
   submit_type?: PaymentLinkUpdateParams.SubmitType;
@@ -2986,6 +3073,11 @@ export interface PaymentLinkUpdateParams {
    * Controls tax ID collection during checkout.
    */
   tax_id_collection?: PaymentLinkUpdateParams.TaxIdCollection;
+
+  /**
+   * The account (if any) the payments will be attributed to for tax reporting, and where funds from each payment will be transferred to.
+   */
+  transfer_data?: Emptyable<PaymentLinkUpdateParams.TransferData>;
 }
 export namespace PaymentLinkUpdateParams {
   export interface AfterCompletion {
@@ -3019,7 +3111,27 @@ export namespace PaymentLinkUpdateParams {
     liability?: AutomaticTax.Liability;
   }
 
-  export type BillingAddressCollection = 'auto' | 'required';
+  export type BillingAddressCollection = 'auto' | 'required' | OtherString;
+
+  export interface ConsentCollection {
+    /**
+     * Determines the display of payment method reuse agreement text in the UI. If set to `hidden`, it will hide legal text related to the reuse of a payment method.
+     */
+    payment_method_reuse_agreement?: ConsentCollection.PaymentMethodReuseAgreement;
+
+    /**
+     * If set to `auto`, enables the collection of customer consent for promotional communications. The Checkout
+     * Session will determine whether to display an option to opt into promotional communication
+     * from the merchant depending on the customer's locale. Only available to US merchants and US customers.
+     */
+    promotions?: ConsentCollection.Promotions;
+
+    /**
+     * If set to `required`, it requires customers to check a terms of service checkbox before being able to pay.
+     * There must be a valid terms of service URL set in your [Dashboard settings](https://dashboard.stripe.com/settings/public).
+     */
+    terms_of_service?: ConsentCollection.TermsOfService;
+  }
 
   export interface CustomField {
     /**
@@ -3082,7 +3194,7 @@ export namespace PaymentLinkUpdateParams {
     >;
   }
 
-  export type CustomerCreation = 'always' | 'if_required';
+  export type CustomerCreation = 'always' | 'if_required' | OtherString;
 
   export interface InvoiceCreation {
     /**
@@ -3154,6 +3266,21 @@ export namespace PaymentLinkUpdateParams {
     metadata?: Emptyable<MetadataParam>;
 
     /**
+     * Indicates that you intend to [make future payments](https://docs.stripe.com/payments/payment-intents#future-usage) with the payment method collected by this Checkout Session.
+     *
+     * When setting this to `on_session`, Checkout will show a notice to the customer that their payment details will be saved.
+     *
+     * When setting this to `off_session`, Checkout will show a notice to the customer that their payment details will be saved and used for future payments.
+     *
+     * If a Customer has been provided or Checkout creates a new Customer,Checkout will attach the payment method to the Customer.
+     *
+     * If Checkout does not create a Customer, the payment method is not attached to a Customer. To reuse the payment method, you can retrieve it from the Checkout Session's PaymentIntent.
+     *
+     * When processing card payments, Checkout also uses `setup_future_usage` to dynamically optimize your payment flow and comply with regional legislation and network rules, such as SCA.
+     */
+    setup_future_usage?: Emptyable<PaymentIntentData.SetupFutureUsage>;
+
+    /**
      * Text that appears on the customer's statement as the statement descriptor for a non-card charge. This value overrides the account's default statement descriptor. For information about requirements, including the 22-character limit, see [the Statement Descriptor docs](https://docs.stripe.com/get-started/account/statement-descriptors).
      *
      * Setting this value for a card charge returns an error. For card charges, set the [statement_descriptor_suffix](https://docs.stripe.com/get-started/account/statement-descriptors#dynamic) instead.
@@ -3171,7 +3298,7 @@ export namespace PaymentLinkUpdateParams {
     transfer_group?: Emptyable<string>;
   }
 
-  export type PaymentMethodCollection = 'always' | 'if_required';
+  export type PaymentMethodCollection = 'always' | 'if_required' | OtherString;
 
   export interface PaymentMethodOptions {
     /**
@@ -3210,11 +3337,13 @@ export namespace PaymentLinkUpdateParams {
     | 'pay_by_bank'
     | 'paynow'
     | 'paypal'
+    | 'paypay'
     | 'payto'
     | 'pix'
     | 'promptpay'
     | 'satispay'
     | 'sepa_debit'
+    | 'sequra'
     | 'sofort'
     | 'sunbit'
     | 'swish'
@@ -3222,7 +3351,8 @@ export namespace PaymentLinkUpdateParams {
     | 'upi'
     | 'us_bank_account'
     | 'wechat_pay'
-    | 'zip';
+    | 'zip'
+    | OtherString;
 
   export interface PhoneNumberCollection {
     /**
@@ -3246,7 +3376,20 @@ export namespace PaymentLinkUpdateParams {
     allowed_countries: Array<ShippingAddressCollection.AllowedCountry>;
   }
 
-  export type SubmitType = 'auto' | 'book' | 'donate' | 'pay' | 'subscribe';
+  export interface ShippingOption {
+    /**
+     * The ID of the Shipping Rate to use for this shipping option.
+     */
+    shipping_rate?: string;
+  }
+
+  export type SubmitType =
+    | 'auto'
+    | 'book'
+    | 'donate'
+    | 'pay'
+    | 'subscribe'
+    | OtherString;
 
   export interface SubscriptionData {
     /**
@@ -3277,9 +3420,24 @@ export namespace PaymentLinkUpdateParams {
     enabled: boolean;
 
     /**
-     * Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `custom`.
+     * Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `elements`.
      */
     required?: TaxIdCollection.Required;
+  }
+
+  export interface TransferData {
+    /**
+     * The amount that will be transferred automatically when a charge succeeds.
+     */
+    amount?: Emptyable<number>;
+
+    /**
+     * If specified, successful charges will be attributed to the destination
+     *  account for tax reporting, and the funds from charges will be transferred
+     *  to the destination account. The ID of the resulting transfer will be
+     *  returned on the successful charge's `transfer` field.
+     */
+    destination: string;
   }
 
   export namespace AfterCompletion {
@@ -3297,7 +3455,7 @@ export namespace PaymentLinkUpdateParams {
       url: string;
     }
 
-    export type Type = 'hosted_confirmation' | 'redirect';
+    export type Type = 'hosted_confirmation' | 'redirect' | OtherString;
   }
 
   export namespace AutomaticTax {
@@ -3314,14 +3472,32 @@ export namespace PaymentLinkUpdateParams {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
+    }
+  }
+
+  export namespace ConsentCollection {
+    export interface PaymentMethodReuseAgreement {
+      /**
+       * Determines the position and visibility of the payment method reuse agreement in the UI. When set to `auto`, Stripe's
+       * defaults will be used. When set to `hidden`, the payment method reuse agreement text will always be hidden in the UI.
+       */
+      position: PaymentMethodReuseAgreement.Position;
+    }
+
+    export type Promotions = 'auto' | 'none' | OtherString;
+
+    export type TermsOfService = 'none' | 'required' | OtherString;
+
+    export namespace PaymentMethodReuseAgreement {
+      export type Position = 'auto' | 'hidden' | OtherString;
     }
   }
 
   export namespace CustomField {
     export interface Dropdown {
       /**
-       * The value that pre-fills the field on the payment page.Must match a `value` in the `options` array.
+       * The value that pre-fills the field on the payment page. Must match a `value` in the `options` array.
        */
       default_value?: string;
 
@@ -3333,7 +3509,7 @@ export namespace PaymentLinkUpdateParams {
 
     export interface Label {
       /**
-       * Custom text for the label, displayed to the customer. Up to 50 characters.
+       * Custom text for the label, displayed to the customer. Up to 100 characters.
        */
       custom: string;
 
@@ -3377,7 +3553,7 @@ export namespace PaymentLinkUpdateParams {
       minimum_length?: number;
     }
 
-    export type Type = 'dropdown' | 'numeric' | 'text';
+    export type Type = 'dropdown' | 'numeric' | 'text' | OtherString;
 
     export namespace Dropdown {
       export interface Option {
@@ -3500,11 +3676,14 @@ export namespace PaymentLinkUpdateParams {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
 
       export namespace RenderingOptions {
-        export type AmountTaxDisplay = 'exclude_tax' | 'include_inclusive_tax';
+        export type AmountTaxDisplay =
+          | 'exclude_tax'
+          | 'include_inclusive_tax'
+          | OtherString;
       }
     }
   }
@@ -3573,6 +3752,10 @@ export namespace PaymentLinkUpdateParams {
     }
   }
 
+  export namespace PaymentIntentData {
+    export type SetupFutureUsage = 'off_session' | 'on_session' | OtherString;
+  }
+
   export namespace PaymentMethodOptions {
     export interface Card {
       /**
@@ -3594,7 +3777,8 @@ export namespace PaymentLinkUpdateParams {
           | 'american_express'
           | 'discover_global_network'
           | 'mastercard'
-          | 'visa';
+          | 'visa'
+          | OtherString;
       }
     }
   }
@@ -3847,7 +4031,8 @@ export namespace PaymentLinkUpdateParams {
       | 'ZA'
       | 'ZM'
       | 'ZW'
-      | 'ZZ';
+      | 'ZZ'
+      | OtherString;
   }
 
   export namespace SubscriptionData {
@@ -3879,7 +4064,7 @@ export namespace PaymentLinkUpdateParams {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
@@ -3895,13 +4080,14 @@ export namespace PaymentLinkUpdateParams {
         export type MissingPaymentMethod =
           | 'cancel'
           | 'create_invoice'
-          | 'pause';
+          | 'pause'
+          | OtherString;
       }
     }
   }
 
   export namespace TaxIdCollection {
-    export type Required = 'if_supported' | 'never';
+    export type Required = 'if_supported' | 'never' | OtherString;
   }
 }
 export interface PaymentLinkListParams extends PaginationParams {

@@ -11,6 +11,7 @@ import {
   Emptyable,
   MetadataParam,
   AddressParam,
+  OtherString,
   JapanAddressParam,
   PaginationParams,
   RangeQueryParam,
@@ -36,7 +37,7 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<DeletedAccount>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/accounts/${id}`,
+      `/v1/accounts/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -52,7 +53,7 @@ export class AccountResource extends StripeResource {
     if (typeof id === 'string') {
       return this._makeRequest(
         'GET',
-        `/v1/accounts/${id}`,
+        `/v1/accounts/${encodeURIComponent(id)}`,
         params,
         options
       ) as any;
@@ -82,7 +83,7 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<Account>> {
     return this._makeRequest(
       'POST',
-      `/v1/accounts/${id}`,
+      `/v1/accounts/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -111,7 +112,7 @@ export class AccountResource extends StripeResource {
    * With [Connect](https://docs.stripe.com/docs/connect), you can create Stripe accounts for your users.
    * To do this, you'll first need to [register your platform](https://dashboard.stripe.com/account/applications/settings).
    *
-   * If you've already collected information for your connected accounts, you [can prefill that information](https://docs.stripe.com/docs/connect/best-practices#onboarding) when
+   * If you've already collected information for your connected accounts, you [can prefill that information](https://docs.stripe.com/connect/marketplace/tasks/create#prefill-account-information) when
    * creating the account. Connect Onboarding won't ask for the prefilled information during account onboarding.
    * You can prefill any information on the account.
    */
@@ -124,7 +125,7 @@ export class AccountResource extends StripeResource {
   /**
    * With [Connect](https://docs.stripe.com/connect), you can reject accounts that you have flagged as suspicious.
    *
-   * Only accounts where your platform is liable for negative account balances, which includes Custom and Express accounts, can be rejected. Test-mode accounts can be rejected at any time. Live-mode accounts can only be rejected after all balances are zero.
+   * Only accounts where your platform is liable for negative account balances, which includes Custom and Express accounts, can be rejected.
    */
   reject(
     id: string,
@@ -133,7 +134,26 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<Account>> {
     return this._makeRequest(
       'POST',
-      `/v1/accounts/${id}/reject`,
+      `/v1/accounts/${encodeURIComponent(id)}/reject`,
+      params,
+      options
+    ) as any;
+  }
+  /**
+   * With Connect, you can unreject accounts that you have previously rejected.
+   *
+   * Only accounts that were rejected by your platform can be unrejected. This API cannot be used to unreject accounts that were rejected by Stripe.
+   *
+   * Unreject will only enable charges and/or payouts if there are no other restrictions other than those placed by a previous rejection. If you have separately paused charges and/or payouts outside of rejection, those pauses will remain in place after unrejection.
+   */
+  unreject(
+    id: string,
+    params?: AccountUnrejectParams,
+    options?: RequestOptions
+  ): Promise<Response<Account>> {
+    return this._makeRequest(
+      'POST',
+      `/v1/accounts/${encodeURIComponent(id)}/unreject`,
       params,
       options
     ) as any;
@@ -148,7 +168,7 @@ export class AccountResource extends StripeResource {
   ): ApiListPromise<Capability> {
     return this._makeRequest(
       'GET',
-      `/v1/accounts/${id}/capabilities`,
+      `/v1/accounts/${encodeURIComponent(id)}/capabilities`,
       params,
       options,
       {
@@ -167,7 +187,9 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<Capability>> {
     return this._makeRequest(
       'GET',
-      `/v1/accounts/${accountId}/capabilities/${id}`,
+      `/v1/accounts/${encodeURIComponent(
+        accountId
+      )}/capabilities/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -183,7 +205,9 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<Capability>> {
     return this._makeRequest(
       'POST',
-      `/v1/accounts/${accountId}/capabilities/${id}`,
+      `/v1/accounts/${encodeURIComponent(
+        accountId
+      )}/capabilities/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -199,7 +223,9 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<DeletedExternalAccount>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/accounts/${accountId}/external_accounts/${id}`,
+      `/v1/accounts/${encodeURIComponent(
+        accountId
+      )}/external_accounts/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -215,7 +241,9 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<ExternalAccount>> {
     return this._makeRequest(
       'GET',
-      `/v1/accounts/${accountId}/external_accounts/${id}`,
+      `/v1/accounts/${encodeURIComponent(
+        accountId
+      )}/external_accounts/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -238,7 +266,9 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<ExternalAccount>> {
     return this._makeRequest(
       'POST',
-      `/v1/accounts/${accountId}/external_accounts/${id}`,
+      `/v1/accounts/${encodeURIComponent(
+        accountId
+      )}/external_accounts/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -253,7 +283,7 @@ export class AccountResource extends StripeResource {
   ): ApiListPromise<ExternalAccount> {
     return this._makeRequest(
       'GET',
-      `/v1/accounts/${id}/external_accounts`,
+      `/v1/accounts/${encodeURIComponent(id)}/external_accounts`,
       params,
       options,
       {
@@ -271,7 +301,7 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<ExternalAccount>> {
     return this._makeRequest(
       'POST',
-      `/v1/accounts/${id}/external_accounts`,
+      `/v1/accounts/${encodeURIComponent(id)}/external_accounts`,
       params,
       options
     ) as any;
@@ -288,13 +318,13 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<LoginLink>> {
     return this._makeRequest(
       'POST',
-      `/v1/accounts/${id}/login_links`,
+      `/v1/accounts/${encodeURIComponent(id)}/login_links`,
       params,
       options
     ) as any;
   }
   /**
-   * Deletes an existing person's relationship to the account's legal entity. Any person with a relationship for an account can be deleted through the API, except if the person is the account_opener. If your integration is using the executive parameter, you cannot delete the only verified executive on file.
+   * Deletes an existing person's relationship to the account's legal entity. Any person with a relationship for an account can be deleted through the API, except if the person is the representative. If your integration is using the executive parameter, you cannot delete the only verified executive on file.
    */
   deletePerson(
     accountId: string,
@@ -304,7 +334,9 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<DeletedPerson>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/accounts/${accountId}/persons/${id}`,
+      `/v1/accounts/${encodeURIComponent(
+        accountId
+      )}/persons/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -320,7 +352,9 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<Person>> {
     return this._makeRequest(
       'GET',
-      `/v1/accounts/${accountId}/persons/${id}`,
+      `/v1/accounts/${encodeURIComponent(
+        accountId
+      )}/persons/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -336,7 +370,9 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<Person>> {
     return this._makeRequest(
       'POST',
-      `/v1/accounts/${accountId}/persons/${id}`,
+      `/v1/accounts/${encodeURIComponent(
+        accountId
+      )}/persons/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -351,7 +387,7 @@ export class AccountResource extends StripeResource {
   ): ApiListPromise<Person> {
     return this._makeRequest(
       'GET',
-      `/v1/accounts/${id}/persons`,
+      `/v1/accounts/${encodeURIComponent(id)}/persons`,
       params,
       options,
       {
@@ -369,7 +405,7 @@ export class AccountResource extends StripeResource {
   ): Promise<Response<Person>> {
     return this._makeRequest(
       'POST',
-      `/v1/accounts/${id}/persons`,
+      `/v1/accounts/${encodeURIComponent(id)}/persons`,
       params,
       options
     ) as any;
@@ -535,6 +571,11 @@ export namespace Account {
     product_description?: string | null;
 
     /**
+     * A link to the business's publicly available terms related to the Specified Commercial Transaction Act. Only used for accounts in Japan.
+     */
+    specified_commercial_transactions_act_url: string | null;
+
+    /**
      * A publicly available mailing address for sending support issues to.
      */
     support_address: Address | null;
@@ -564,7 +605,8 @@ export namespace Account {
     | 'company'
     | 'government_entity'
     | 'individual'
-    | 'non_profit';
+    | 'non_profit'
+    | OtherString;
 
   export interface Capabilities {
     /**
@@ -631,6 +673,11 @@ export namespace Account {
      * The status of the blik payments capability of the account, or whether the account can directly process blik charges.
      */
     blik_payments?: Capabilities.BlikPayments;
+
+    /**
+     * The status of the BLIK recurring payments capability of the account, or whether the account can accept recurring and subscription BLIK payments.
+     */
+    blik_recurring_payments?: Capabilities.BlikRecurringPayments;
 
     /**
      * The status of the boleto payments capability of the account, or whether the account can directly process boleto charges.
@@ -793,6 +840,11 @@ export namespace Account {
     paynow_payments?: Capabilities.PaynowPayments;
 
     /**
+     * The status of the Paypay capability of the account, or whether the account can directly process Paypay payments.
+     */
+    paypay_payments?: Capabilities.PaypayPayments;
+
+    /**
      * The status of the PayTo capability of the account, or whether the account can directly process PayTo charges.
      */
     payto_payments?: Capabilities.PaytoPayments;
@@ -836,6 +888,11 @@ export namespace Account {
      * The status of the SEPA Direct Debits payments capability of the account, or whether the account can directly process SEPA Direct Debits charges.
      */
     sepa_debit_payments?: Capabilities.SepaDebitPayments;
+
+    /**
+     * The status of the SeQura capability of the account, or whether the account can directly process SeQura payments.
+     */
+    sequra_payments?: Capabilities.SequraPayments;
 
     /**
      * The status of the Sofort payments capability of the account, or whether the account can directly process Sofort charges.
@@ -911,6 +968,8 @@ export namespace Account {
      */
     address_kanji?: Company.AddressKanji | null;
 
+    administrative_address?: Address;
+
     /**
      * Whether the company's directors have been provided. This Boolean will be `true` if you've manually indicated that all directors are provided via [the `directors_provided` parameter](https://docs.stripe.com/api/accounts/update#update_account-company-directors_provided).
      */
@@ -970,6 +1029,8 @@ export namespace Account {
      * The company's phone number (used for verification).
      */
     phone?: string | null;
+
+    principal_place_of_business?: Address;
 
     registration_date?: Company.RegistrationDate;
 
@@ -1049,7 +1110,7 @@ export namespace Account {
     disabled_reason: FutureRequirements.DisabledReason | null;
 
     /**
-     * Details about validation and verification failures for `due` requirements that must be resolved.
+     * Fields that are `currently_due` and need to be collected again because validation or verification failed.
      */
     errors: Array<FutureRequirements.Error> | null;
 
@@ -1088,7 +1149,7 @@ export namespace Account {
     current_deadline: number | null;
 
     /**
-     * Fields that need to be resolved to keep the account enabled. If not resolved by `current_deadline`, these fields will appear in `past_due` as well, and the account is disabled.
+     * Fields that need to be resolved to keep the account enabled. If not resolved by `current_deadline`, these fields will appear in `past_due` as well, and the account will be disabled.
      */
     currently_due: Array<string> | null;
 
@@ -1098,7 +1159,7 @@ export namespace Account {
     disabled_reason: Requirements.DisabledReason | null;
 
     /**
-     * Details about validation and verification failures for `due` requirements that must be resolved.
+     * Fields that are `currently_due` and need to be collected again because validation or verification failed.
      */
     errors: Array<Requirements.Error> | null;
 
@@ -1135,6 +1196,8 @@ export namespace Account {
 
     payouts?: Settings.Payouts;
 
+    paypay_payments?: Settings.PaypayPayments;
+
     sepa_debit_payments?: Settings.SepaDebitPayments;
 
     treasury?: Settings.Treasury;
@@ -1162,7 +1225,7 @@ export namespace Account {
     user_agent?: string | null;
   }
 
-  export type Type = 'custom' | 'express' | 'none' | 'standard';
+  export type Type = 'custom' | 'express' | 'none' | 'standard' | OtherString;
 
   export namespace BusinessProfile {
     export interface AnnualRevenue {
@@ -1187,7 +1250,8 @@ export namespace Account {
       | 'minority_owned_business'
       | 'none_of_these_apply'
       | 'prefer_not_to_answer'
-      | 'women_owned_business';
+      | 'women_owned_business'
+      | OtherString;
 
     export interface MonthlyEstimatedRevenue {
       /**
@@ -1203,140 +1267,331 @@ export namespace Account {
   }
 
   export namespace Capabilities {
-    export type AcssDebitPayments = 'active' | 'inactive' | 'pending';
+    export type AcssDebitPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type AffirmPayments = 'active' | 'inactive' | 'pending';
+    export type AffirmPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type AfterpayClearpayPayments = 'active' | 'inactive' | 'pending';
+    export type AfterpayClearpayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type AlmaPayments = 'active' | 'inactive' | 'pending';
+    export type AlmaPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type AmazonPayPayments = 'active' | 'inactive' | 'pending';
+    export type AmazonPayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type AppDistribution = 'active' | 'inactive' | 'pending';
+    export type AppDistribution =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type AuBecsDebitPayments = 'active' | 'inactive' | 'pending';
+    export type AuBecsDebitPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type BacsDebitPayments = 'active' | 'inactive' | 'pending';
+    export type BacsDebitPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type BancontactPayments = 'active' | 'inactive' | 'pending';
+    export type BancontactPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type BankTransferPayments = 'active' | 'inactive' | 'pending';
+    export type BankTransferPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type BilliePayments = 'active' | 'inactive' | 'pending';
+    export type BilliePayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type BizumPayments = 'active' | 'inactive' | 'pending';
+    export type BizumPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type BlikPayments = 'active' | 'inactive' | 'pending';
+    export type BlikPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type BoletoPayments = 'active' | 'inactive' | 'pending';
+    export type BlikRecurringPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type CardIssuing = 'active' | 'inactive' | 'pending';
+    export type BoletoPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type CardPayments = 'active' | 'inactive' | 'pending';
+    export type CardIssuing = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type CartesBancairesPayments = 'active' | 'inactive' | 'pending';
+    export type CardPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type CashappPayments = 'active' | 'inactive' | 'pending';
+    export type CartesBancairesPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type CryptoPayments = 'active' | 'inactive' | 'pending';
+    export type CashappPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type EpsPayments = 'active' | 'inactive' | 'pending';
+    export type CryptoPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type FpxPayments = 'active' | 'inactive' | 'pending';
+    export type EpsPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type GbBankTransferPayments = 'active' | 'inactive' | 'pending';
+    export type FpxPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type GiropayPayments = 'active' | 'inactive' | 'pending';
+    export type GbBankTransferPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type GrabpayPayments = 'active' | 'inactive' | 'pending';
+    export type GiropayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type IdealPayments = 'active' | 'inactive' | 'pending';
+    export type GrabpayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type IndiaInternationalPayments = 'active' | 'inactive' | 'pending';
+    export type IdealPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type JcbPayments = 'active' | 'inactive' | 'pending';
+    export type IndiaInternationalPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type JpBankTransferPayments = 'active' | 'inactive' | 'pending';
+    export type JcbPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type KakaoPayPayments = 'active' | 'inactive' | 'pending';
+    export type JpBankTransferPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type KlarnaPayments = 'active' | 'inactive' | 'pending';
+    export type KakaoPayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type KonbiniPayments = 'active' | 'inactive' | 'pending';
+    export type KlarnaPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type KrCardPayments = 'active' | 'inactive' | 'pending';
+    export type KonbiniPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type LegacyPayments = 'active' | 'inactive' | 'pending';
+    export type KrCardPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type LinkPayments = 'active' | 'inactive' | 'pending';
+    export type LegacyPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type MbWayPayments = 'active' | 'inactive' | 'pending';
+    export type LinkPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type MobilepayPayments = 'active' | 'inactive' | 'pending';
+    export type MbWayPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type MultibancoPayments = 'active' | 'inactive' | 'pending';
+    export type MobilepayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type MxBankTransferPayments = 'active' | 'inactive' | 'pending';
+    export type MultibancoPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type NaverPayPayments = 'active' | 'inactive' | 'pending';
+    export type MxBankTransferPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
+
+    export type NaverPayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
     export type NzBankAccountBecsDebitPayments =
       | 'active'
       | 'inactive'
-      | 'pending';
+      | 'pending'
+      | OtherString;
 
-    export type OxxoPayments = 'active' | 'inactive' | 'pending';
+    export type OxxoPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type P24Payments = 'active' | 'inactive' | 'pending';
+    export type P24Payments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type PayByBankPayments = 'active' | 'inactive' | 'pending';
+    export type PayByBankPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type PaycoPayments = 'active' | 'inactive' | 'pending';
+    export type PaycoPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type PaynowPayments = 'active' | 'inactive' | 'pending';
+    export type PaynowPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type PaytoPayments = 'active' | 'inactive' | 'pending';
+    export type PaypayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type PixPayments = 'active' | 'inactive' | 'pending';
+    export type PaytoPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type PromptpayPayments = 'active' | 'inactive' | 'pending';
+    export type PixPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type RevolutPayPayments = 'active' | 'inactive' | 'pending';
+    export type PromptpayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type SamsungPayPayments = 'active' | 'inactive' | 'pending';
+    export type RevolutPayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type SatispayPayments = 'active' | 'inactive' | 'pending';
+    export type SamsungPayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type ScalapayPayments = 'active' | 'inactive' | 'pending';
+    export type SatispayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type SepaBankTransferPayments = 'active' | 'inactive' | 'pending';
+    export type ScalapayPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type SepaDebitPayments = 'active' | 'inactive' | 'pending';
+    export type SepaBankTransferPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type SofortPayments = 'active' | 'inactive' | 'pending';
+    export type SepaDebitPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type SunbitPayments = 'active' | 'inactive' | 'pending';
+    export type SequraPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type SwishPayments = 'active' | 'inactive' | 'pending';
+    export type SofortPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type TaxReportingUs1099K = 'active' | 'inactive' | 'pending';
+    export type SunbitPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type TaxReportingUs1099Misc = 'active' | 'inactive' | 'pending';
+    export type SwishPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type Transfers = 'active' | 'inactive' | 'pending';
+    export type TaxReportingUs1099K =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type Treasury = 'active' | 'inactive' | 'pending';
+    export type TaxReportingUs1099Misc =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
 
-    export type TwintPayments = 'active' | 'inactive' | 'pending';
+    export type Transfers = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type UpiPayments = 'active' | 'inactive' | 'pending';
+    export type Treasury = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type UsBankAccountAchPayments = 'active' | 'inactive' | 'pending';
+    export type TwintPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type UsBankTransferPayments = 'active' | 'inactive' | 'pending';
+    export type UpiPayments = 'active' | 'inactive' | 'pending' | OtherString;
 
-    export type ZipPayments = 'active' | 'inactive' | 'pending';
+    export type UsBankAccountAchPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
+
+    export type UsBankTransferPayments =
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | OtherString;
+
+    export type ZipPayments = 'active' | 'inactive' | 'pending' | OtherString;
   }
 
   export namespace Company {
@@ -1450,7 +1705,8 @@ export namespace Account {
 
     export type OwnershipExemptionReason =
       | 'qualified_entity_exceeds_ownership_threshold'
-      | 'qualifies_as_financial_institution';
+      | 'qualifies_as_financial_institution'
+      | OtherString;
 
     export interface RegistrationDate {
       /**
@@ -1509,7 +1765,8 @@ export namespace Account {
       | 'tax_exempt_government_instrumentality'
       | 'unincorporated_association'
       | 'unincorporated_non_profit'
-      | 'unincorporated_partnership';
+      | 'unincorporated_partnership'
+      | OtherString;
 
     export interface Verification {
       document: Verification.Document;
@@ -1518,7 +1775,7 @@ export namespace Account {
     export namespace Verification {
       export interface Document {
         /**
-         * The back of a document returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `additional_verification`. Note that `additional_verification` files are [not downloadable](https://docs.stripe.com/file-upload#uploading-a-file).
+         * The back of a document returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `additional_verification`. Note that `additional_verification` files are [not downloadable](https://docs.stripe.com/file-upload#uploading-a-file).
          */
         back: string | File | null;
 
@@ -1533,7 +1790,7 @@ export namespace Account {
         details_code: string | null;
 
         /**
-         * The front of a document returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `additional_verification`. Note that `additional_verification` files are [not downloadable](https://docs.stripe.com/file-upload#uploading-a-file).
+         * The front of a document returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `additional_verification`. Note that `additional_verification` files are [not downloadable](https://docs.stripe.com/file-upload#uploading-a-file).
          */
         front: string | File | null;
       }
@@ -1555,7 +1812,7 @@ export namespace Account {
       payments: Losses.Payments;
     }
 
-    export type RequirementCollection = 'application' | 'stripe';
+    export type RequirementCollection = 'application' | 'stripe' | OtherString;
 
     export interface StripeDashboard {
       /**
@@ -1564,22 +1821,23 @@ export namespace Account {
       type: StripeDashboard.Type;
     }
 
-    export type Type = 'account' | 'application';
+    export type Type = 'account' | 'application' | OtherString;
 
     export namespace Fees {
       export type Payer =
         | 'account'
         | 'application'
         | 'application_custom'
-        | 'application_express';
+        | 'application_express'
+        | OtherString;
     }
 
     export namespace Losses {
-      export type Payments = 'application' | 'stripe';
+      export type Payments = 'application' | 'stripe' | OtherString;
     }
 
     export namespace StripeDashboard {
-      export type Type = 'express' | 'full' | 'none';
+      export type Type = 'express' | 'full' | 'none' | OtherString;
     }
   }
 
@@ -1635,8 +1893,10 @@ export namespace Account {
         | 'external_request'
         | 'information_missing'
         | 'invalid_address_city_state_postal_code'
+        | 'invalid_address_cmra_address'
         | 'invalid_address_highway_contract_box'
         | 'invalid_address_private_mailbox'
+        | 'invalid_address_registered_agent_address'
         | 'invalid_business_profile_name'
         | 'invalid_business_profile_name_denylisted'
         | 'invalid_company_name_denylisted'
@@ -1784,8 +2044,10 @@ export namespace Account {
         | 'external_request'
         | 'information_missing'
         | 'invalid_address_city_state_postal_code'
+        | 'invalid_address_cmra_address'
         | 'invalid_address_highway_contract_box'
         | 'invalid_address_private_mailbox'
+        | 'invalid_address_registered_agent_address'
         | 'invalid_business_profile_name'
         | 'invalid_business_profile_name_denylisted'
         | 'invalid_company_name_denylisted'
@@ -2004,6 +2266,20 @@ export namespace Account {
       statement_descriptor: string | null;
     }
 
+    export interface PaypayPayments {
+      /**
+       * Additional files that are required to support the onboarding process of your business.
+       */
+      additional_files?: Array<string>;
+
+      /**
+       * The type of goods your business sells. Use `digital_content` if you sell digital content. Use `other` for all other types of goods or services.
+       */
+      goods_type?: PaypayPayments.GoodsType;
+
+      site?: PaypayPayments.Site;
+    }
+
     export interface SepaDebitPayments {
       /**
        * SEPA creditor identifier that identifies the company making the payment.
@@ -2049,7 +2325,11 @@ export namespace Account {
     }
 
     export namespace Invoices {
-      export type HostedPaymentMethodSave = 'always' | 'never' | 'offer';
+      export type HostedPaymentMethodSave =
+        | 'always'
+        | 'never'
+        | 'offer'
+        | OtherString;
     }
 
     export namespace Payouts {
@@ -2091,7 +2371,50 @@ export namespace Account {
           | 'monday'
           | 'thursday'
           | 'tuesday'
-          | 'wednesday';
+          | 'wednesday'
+          | OtherString;
+      }
+    }
+
+    export namespace PaypayPayments {
+      export type GoodsType = 'digital_content' | 'other';
+
+      export interface Site {
+        accessible?: Site.Accessible;
+
+        in_development?: Site.InDevelopment;
+
+        restricted?: Site.Restricted;
+
+        /**
+         * The status of your business's website.
+         */
+        type?: Site.Type;
+      }
+
+      export namespace Site {
+        export interface Accessible {}
+
+        export interface InDevelopment {
+          /**
+           * Field to indicate that the website password has been provided.
+           */
+          password_provided?: boolean;
+
+          /**
+           * The username needed to access your business's website.
+           */
+          username: string | null;
+        }
+
+        export interface Restricted {
+          /**
+           * File explaining the payment flow for your business.
+           */
+          payment_flow_file: string | null;
+        }
+
+        export type Type = 'accessible' | 'in_development' | 'restricted';
       }
     }
 
@@ -2117,7 +2440,7 @@ export namespace Account {
 }
 export interface AccountCreateParams {
   /**
-   * An [account token](https://api.stripe.com#create_account_token), used to securely provide details to the account.
+   * An [account token](https://docs.stripe.com/api#create_account_token), used to securely provide details to the account.
    */
   account_token?: string;
 
@@ -2255,6 +2578,11 @@ export namespace AccountCreateParams {
     product_description?: string;
 
     /**
+     * A link to the business's publicly available terms related to the Specified Commercial Transaction Act. Used by the Checkout product and for Japanese payment methods.
+     */
+    specified_commercial_transactions_act_url?: Emptyable<string>;
+
+    /**
      * A publicly available mailing address for sending support issues to.
      */
     support_address?: AddressParam;
@@ -2284,7 +2612,8 @@ export namespace AccountCreateParams {
     | 'company'
     | 'government_entity'
     | 'individual'
-    | 'non_profit';
+    | 'non_profit'
+    | OtherString;
 
   export interface Capabilities {
     /**
@@ -2351,6 +2680,11 @@ export namespace AccountCreateParams {
      * The blik_payments capability.
      */
     blik_payments?: Capabilities.BlikPayments;
+
+    /**
+     * The blik_recurring_payments capability.
+     */
+    blik_recurring_payments?: Capabilities.BlikRecurringPayments;
 
     /**
      * The boleto_payments capability.
@@ -2513,6 +2847,11 @@ export namespace AccountCreateParams {
     paynow_payments?: Capabilities.PaynowPayments;
 
     /**
+     * The paypay_payments capability.
+     */
+    paypay_payments?: Capabilities.PaypayPayments;
+
+    /**
      * The payto_payments capability.
      */
     payto_payments?: Capabilities.PaytoPayments;
@@ -2556,6 +2895,11 @@ export namespace AccountCreateParams {
      * The sepa_debit_payments capability.
      */
     sepa_debit_payments?: Capabilities.SepaDebitPayments;
+
+    /**
+     * The sequra_payments capability.
+     */
+    sequra_payments?: Capabilities.SequraPayments;
 
     /**
      * The sofort_payments capability.
@@ -2635,6 +2979,11 @@ export namespace AccountCreateParams {
     address_kanji?: JapanAddressParam;
 
     /**
+     * The location where the business is administered.
+     */
+    administrative_address?: AddressParam;
+
+    /**
      * Whether the company's directors have been provided. Set this Boolean to `true` after creating all the company's directors with [the Persons API](https://docs.stripe.com/api/persons) for accounts with a `relationship.director` requirement. This value is not automatically set to `true` after creating directors, so it needs to be updated to indicate all directors have been provided.
      */
     directors_provided?: boolean;
@@ -2695,6 +3044,11 @@ export namespace AccountCreateParams {
     phone?: string;
 
     /**
+     * The primary location where the business conducts operations.
+     */
+    principal_place_of_business?: AddressParam;
+
+    /**
      * When the business was incorporated or registered.
      */
     registration_date?: Emptyable<Company.RegistrationDate>;
@@ -2716,6 +3070,8 @@ export namespace AccountCreateParams {
 
     /**
      * The business ID number of the company, as appropriate for the company's country. (Examples are an Employer ID Number in the U.S., a Business Number in Canada, or a Company Number in the UK.)
+     *
+     * Changing this value requires that the account re-accept the [terms of service](https://docs.stripe.com/api/accounts/object#account_object-tos_acceptance).
      */
     tax_id?: string;
 
@@ -2769,7 +3125,7 @@ export namespace AccountCreateParams {
     company_license?: Documents.CompanyLicense;
 
     /**
-     * One or more documents showing the company's Memorandum of Association.
+     * One or more documents showing the company's governing document (for example, a memorandum of association, constitution, or articles of association).
      */
     company_memorandum_of_association?: Documents.CompanyMemorandumOfAssociation;
 
@@ -2792,11 +3148,6 @@ export namespace AccountCreateParams {
      * One or more documents that demonstrate proof of address.
      */
     proof_of_address?: Documents.ProofOfAddress;
-
-    /**
-     * One or more documents showing the company's proof of registration with the national business registry.
-     */
-    proof_of_registration?: Documents.ProofOfRegistration;
 
     /**
      * One or more documents that demonstrate proof of ultimate beneficial ownership.
@@ -3002,6 +3353,16 @@ export namespace AccountCreateParams {
     payouts?: Settings.Payouts;
 
     /**
+     * Settings specific to the PayPay payments method.
+     */
+    paypay_payments?: Settings.PaypayPayments;
+
+    /**
+     * Settings specific to SEPA Direct Debit payments.
+     */
+    sepa_debit_payments?: Settings.SepaDebitPayments;
+
+    /**
      * Settings specific to the account's Treasury FinancialAccounts.
      */
     treasury?: Settings.Treasury;
@@ -3029,7 +3390,7 @@ export namespace AccountCreateParams {
     user_agent?: string;
   }
 
-  export type Type = 'custom' | 'express' | 'standard';
+  export type Type = 'custom' | 'express' | 'standard' | OtherString;
 
   export namespace BusinessProfile {
     export interface AnnualRevenue {
@@ -3054,7 +3415,8 @@ export namespace AccountCreateParams {
       | 'minority_owned_business'
       | 'none_of_these_apply'
       | 'prefer_not_to_answer'
-      | 'women_owned_business';
+      | 'women_owned_business'
+      | OtherString;
 
     export interface MonthlyEstimatedRevenue {
       /**
@@ -3155,6 +3517,13 @@ export namespace AccountCreateParams {
     }
 
     export interface BlikPayments {
+      /**
+       * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
+       */
+      requested?: boolean;
+    }
+
+    export interface BlikRecurringPayments {
       /**
        * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
        */
@@ -3385,6 +3754,13 @@ export namespace AccountCreateParams {
       requested?: boolean;
     }
 
+    export interface PaypayPayments {
+      /**
+       * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
+       */
+      requested?: boolean;
+    }
+
     export interface PaytoPayments {
       /**
        * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
@@ -3442,6 +3818,13 @@ export namespace AccountCreateParams {
     }
 
     export interface SepaDebitPayments {
+      /**
+       * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
+       */
+      requested?: boolean;
+    }
+
+    export interface SequraPayments {
       /**
        * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
        */
@@ -3570,7 +3953,8 @@ export namespace AccountCreateParams {
 
     export type OwnershipExemptionReason =
       | 'qualified_entity_exceeds_ownership_threshold'
-      | 'qualifies_as_financial_institution';
+      | 'qualifies_as_financial_institution'
+      | OtherString;
 
     export interface RegistrationDate {
       /**
@@ -3629,7 +4013,8 @@ export namespace AccountCreateParams {
       | 'tax_exempt_government_instrumentality'
       | 'unincorporated_association'
       | 'unincorporated_non_profit'
-      | 'unincorporated_partnership';
+      | 'unincorporated_partnership'
+      | OtherString;
 
     export interface Verification {
       /**
@@ -3641,12 +4026,12 @@ export namespace AccountCreateParams {
     export namespace Verification {
       export interface Document {
         /**
-         * The back of a document returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `additional_verification`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The back of a document returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `additional_verification`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         back?: string;
 
         /**
-         * The front of a document returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `additional_verification`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The front of a document returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `additional_verification`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         front?: string;
       }
@@ -3668,7 +4053,7 @@ export namespace AccountCreateParams {
       payments?: Losses.Payments;
     }
 
-    export type RequirementCollection = 'application' | 'stripe';
+    export type RequirementCollection = 'application' | 'stripe' | OtherString;
 
     export interface StripeDashboard {
       /**
@@ -3678,83 +4063,71 @@ export namespace AccountCreateParams {
     }
 
     export namespace Fees {
-      export type Payer = 'account' | 'application';
+      export type Payer = 'account' | 'application' | OtherString;
     }
 
     export namespace Losses {
-      export type Payments = 'application' | 'stripe';
+      export type Payments = 'application' | 'stripe' | OtherString;
     }
 
     export namespace StripeDashboard {
-      export type Type = 'express' | 'full' | 'none';
+      export type Type = 'express' | 'full' | 'none' | OtherString;
     }
   }
 
   export namespace Documents {
     export interface BankAccountOwnershipVerification {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyLicense {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyMemorandumOfAssociation {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyMinisterialDecree {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyRegistrationVerification {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyTaxIdVerification {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface ProofOfAddress {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
-    }
-
-    export interface ProofOfRegistration {
-      /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
-       */
-      files?: Array<string>;
-
-      /**
-       * Information regarding the person signing the document if applicable.
-       */
-      signer?: ProofOfRegistration.Signer;
     }
 
     export interface ProofOfUltimateBeneficialOwnership {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
 
@@ -3762,15 +4135,6 @@ export namespace AccountCreateParams {
        * Information regarding the person signing the document if applicable.
        */
       signer?: ProofOfUltimateBeneficialOwnership.Signer;
-    }
-
-    export namespace ProofOfRegistration {
-      export interface Signer {
-        /**
-         * The token of the person signing the document, if applicable.
-         */
-        person?: string;
-      }
     }
 
     export namespace ProofOfUltimateBeneficialOwnership {
@@ -3801,7 +4165,7 @@ export namespace AccountCreateParams {
       year: number;
     }
 
-    export type PoliticalExposure = 'existing' | 'none';
+    export type PoliticalExposure = 'existing' | 'none' | OtherString;
 
     export interface Relationship {
       /**
@@ -3845,24 +4209,24 @@ export namespace AccountCreateParams {
     export namespace Verification {
       export interface AdditionalDocument {
         /**
-         * The back of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The back of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         back?: string;
 
         /**
-         * The front of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The front of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         front?: string;
       }
 
       export interface Document {
         /**
-         * The back of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The back of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         back?: string;
 
         /**
-         * The front of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The front of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         front?: string;
       }
@@ -3969,6 +4333,30 @@ export namespace AccountCreateParams {
       statement_descriptor?: string;
     }
 
+    export interface PaypayPayments {
+      /**
+       * Additional files that are required to support the onboarding process of your business.
+       */
+      additional_files?: Array<string>;
+
+      /**
+       * The type of goods your business sells. Use `digital_content` if you sell digital content. Use `other` for all other types of goods or services.
+       */
+      goods_type?: PaypayPayments.GoodsType;
+
+      /**
+       * Details regarding your business's website.
+       */
+      site?: PaypayPayments.Site;
+    }
+
+    export interface SepaDebitPayments {
+      /**
+       * The business creditor id for european payments.
+       */
+      creditor_id?: string;
+    }
+
     export interface Treasury {
       /**
        * Details on the account's acceptance of the Stripe Treasury Services Agreement.
@@ -4010,7 +4398,11 @@ export namespace AccountCreateParams {
     }
 
     export namespace Invoices {
-      export type HostedPaymentMethodSave = 'always' | 'never' | 'offer';
+      export type HostedPaymentMethodSave =
+        | 'always'
+        | 'never'
+        | 'offer'
+        | OtherString;
     }
 
     export namespace Payouts {
@@ -4047,7 +4439,12 @@ export namespace AccountCreateParams {
       }
 
       export namespace Schedule {
-        export type Interval = 'daily' | 'manual' | 'monthly' | 'weekly';
+        export type Interval =
+          | 'daily'
+          | 'manual'
+          | 'monthly'
+          | 'weekly'
+          | OtherString;
 
         export type WeeklyAnchor =
           | 'friday'
@@ -4056,14 +4453,67 @@ export namespace AccountCreateParams {
           | 'sunday'
           | 'thursday'
           | 'tuesday'
-          | 'wednesday';
+          | 'wednesday'
+          | OtherString;
 
         export type WeeklyPayoutDay =
           | 'friday'
           | 'monday'
           | 'thursday'
           | 'tuesday'
-          | 'wednesday';
+          | 'wednesday'
+          | OtherString;
+      }
+    }
+
+    export namespace PaypayPayments {
+      export type GoodsType = 'digital_content' | 'other';
+
+      export interface Site {
+        /**
+         * Additional information about your business's website.
+         */
+        accessible?: Site.Accessible;
+
+        /**
+         * Additional information about your business's website.
+         */
+        in_development?: Site.InDevelopment;
+
+        /**
+         * Additional information about your business's website.
+         */
+        restricted?: Site.Restricted;
+
+        /**
+         * The status of your business's website.
+         */
+        type?: Site.Type;
+      }
+
+      export namespace Site {
+        export interface Accessible {}
+
+        export interface InDevelopment {
+          /**
+           * The password needed to access your business's website.
+           */
+          password: string;
+
+          /**
+           * The username needed to access your business's website.
+           */
+          username?: string;
+        }
+
+        export interface Restricted {
+          /**
+           * The file explaining the payment flow for your business.
+           */
+          payment_flow_file?: string;
+        }
+
+        export type Type = 'accessible' | 'in_development' | 'restricted';
       }
     }
 
@@ -4095,7 +4545,7 @@ export interface AccountRetrieveParams {
 }
 export interface AccountUpdateParams {
   /**
-   * An [account token](https://api.stripe.com#create_account_token), used to securely provide details to the account.
+   * An [account token](https://docs.stripe.com/api#create_account_token), used to securely provide details to the account.
    */
   account_token?: string;
 
@@ -4223,6 +4673,11 @@ export namespace AccountUpdateParams {
     product_description?: string;
 
     /**
+     * A link to the business's publicly available terms related to the Specified Commercial Transaction Act. Only used for accounts in Japan.
+     */
+    specified_commercial_transactions_act_url?: Emptyable<string>;
+
+    /**
      * A publicly available mailing address for sending support issues to.
      */
     support_address?: AddressParam;
@@ -4252,7 +4707,8 @@ export namespace AccountUpdateParams {
     | 'company'
     | 'government_entity'
     | 'individual'
-    | 'non_profit';
+    | 'non_profit'
+    | OtherString;
 
   export interface Capabilities {
     /**
@@ -4319,6 +4775,11 @@ export namespace AccountUpdateParams {
      * The blik_payments capability.
      */
     blik_payments?: Capabilities.BlikPayments;
+
+    /**
+     * The blik_recurring_payments capability.
+     */
+    blik_recurring_payments?: Capabilities.BlikRecurringPayments;
 
     /**
      * The boleto_payments capability.
@@ -4481,6 +4942,11 @@ export namespace AccountUpdateParams {
     paynow_payments?: Capabilities.PaynowPayments;
 
     /**
+     * The paypay_payments capability.
+     */
+    paypay_payments?: Capabilities.PaypayPayments;
+
+    /**
      * The payto_payments capability.
      */
     payto_payments?: Capabilities.PaytoPayments;
@@ -4524,6 +4990,11 @@ export namespace AccountUpdateParams {
      * The sepa_debit_payments capability.
      */
     sepa_debit_payments?: Capabilities.SepaDebitPayments;
+
+    /**
+     * The sequra_payments capability.
+     */
+    sequra_payments?: Capabilities.SequraPayments;
 
     /**
      * The sofort_payments capability.
@@ -4603,6 +5074,11 @@ export namespace AccountUpdateParams {
     address_kanji?: JapanAddressParam;
 
     /**
+     * The location where the business is administered.
+     */
+    administrative_address?: AddressParam;
+
+    /**
      * Whether the company's directors have been provided. Set this Boolean to `true` after creating all the company's directors with [the Persons API](https://docs.stripe.com/api/persons) for accounts with a `relationship.director` requirement. This value is not automatically set to `true` after creating directors, so it needs to be updated to indicate all directors have been provided.
      */
     directors_provided?: boolean;
@@ -4662,6 +5138,11 @@ export namespace AccountUpdateParams {
      */
     phone?: string;
 
+    /**
+     * The primary location where the business conducts operations.
+     */
+    principal_place_of_business?: AddressParam;
+
     registration_date?: Emptyable<Company.RegistrationDate>;
 
     /**
@@ -4681,6 +5162,8 @@ export namespace AccountUpdateParams {
 
     /**
      * The business ID number of the company, as appropriate for the company's country. (Examples are an Employer ID Number in the U.S., a Business Number in Canada, or a Company Number in the UK.)
+     *
+     * Changing this value requires that the account re-accept the [terms of service](https://docs.stripe.com/api/accounts/object#account_object-tos_acceptance).
      */
     tax_id?: string;
 
@@ -4712,7 +5195,7 @@ export namespace AccountUpdateParams {
     company_license?: Documents.CompanyLicense;
 
     /**
-     * One or more documents showing the company's Memorandum of Association.
+     * One or more documents showing the company's governing document (for example, a memorandum of association, constitution, or articles of association).
      */
     company_memorandum_of_association?: Documents.CompanyMemorandumOfAssociation;
 
@@ -4985,6 +5468,16 @@ export namespace AccountUpdateParams {
     payouts?: Settings.Payouts;
 
     /**
+     * Settings specific to the PayPay payments method.
+     */
+    paypay_payments?: Settings.PaypayPayments;
+
+    /**
+     * Settings specific to SEPA Direct Debit payments.
+     */
+    sepa_debit_payments?: Settings.SepaDebitPayments;
+
+    /**
      * Settings specific to the account's Treasury FinancialAccounts.
      */
     treasury?: Settings.Treasury;
@@ -5013,7 +5506,7 @@ export namespace AccountUpdateParams {
   }
 
   export namespace BankAccount {
-    export type AccountHolderType = 'company' | 'individual';
+    export type AccountHolderType = 'company' | 'individual' | OtherString;
   }
 
   export namespace BusinessProfile {
@@ -5039,7 +5532,8 @@ export namespace AccountUpdateParams {
       | 'minority_owned_business'
       | 'none_of_these_apply'
       | 'prefer_not_to_answer'
-      | 'women_owned_business';
+      | 'women_owned_business'
+      | OtherString;
 
     export interface MonthlyEstimatedRevenue {
       /**
@@ -5140,6 +5634,13 @@ export namespace AccountUpdateParams {
     }
 
     export interface BlikPayments {
+      /**
+       * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
+       */
+      requested?: boolean;
+    }
+
+    export interface BlikRecurringPayments {
       /**
        * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
        */
@@ -5370,6 +5871,13 @@ export namespace AccountUpdateParams {
       requested?: boolean;
     }
 
+    export interface PaypayPayments {
+      /**
+       * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
+       */
+      requested?: boolean;
+    }
+
     export interface PaytoPayments {
       /**
        * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
@@ -5427,6 +5935,13 @@ export namespace AccountUpdateParams {
     }
 
     export interface SepaDebitPayments {
+      /**
+       * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
+       */
+      requested?: boolean;
+    }
+
+    export interface SequraPayments {
       /**
        * Passing true requests the capability for the account, if it is not already requested. A requested capability may not immediately become active. Any requirements to activate the capability are returned in the `requirements` arrays.
        */
@@ -5555,7 +6070,8 @@ export namespace AccountUpdateParams {
 
     export type OwnershipExemptionReason =
       | 'qualified_entity_exceeds_ownership_threshold'
-      | 'qualifies_as_financial_institution';
+      | 'qualifies_as_financial_institution'
+      | OtherString;
 
     export interface RegistrationDate {
       /**
@@ -5614,7 +6130,8 @@ export namespace AccountUpdateParams {
       | 'tax_exempt_government_instrumentality'
       | 'unincorporated_association'
       | 'unincorporated_non_profit'
-      | 'unincorporated_partnership';
+      | 'unincorporated_partnership'
+      | OtherString;
 
     export interface Verification {
       /**
@@ -5626,12 +6143,12 @@ export namespace AccountUpdateParams {
     export namespace Verification {
       export interface Document {
         /**
-         * The back of a document returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `additional_verification`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The back of a document returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `additional_verification`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         back?: string;
 
         /**
-         * The front of a document returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `additional_verification`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The front of a document returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `additional_verification`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         front?: string;
       }
@@ -5641,56 +6158,56 @@ export namespace AccountUpdateParams {
   export namespace Documents {
     export interface BankAccountOwnershipVerification {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyLicense {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyMemorandumOfAssociation {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyMinisterialDecree {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyRegistrationVerification {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface CompanyTaxIdVerification {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface ProofOfAddress {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface ProofOfRegistration {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
 
@@ -5702,7 +6219,7 @@ export namespace AccountUpdateParams {
 
     export interface ProofOfUltimateBeneficialOwnership {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
 
@@ -5749,7 +6266,7 @@ export namespace AccountUpdateParams {
       year: number;
     }
 
-    export type PoliticalExposure = 'existing' | 'none';
+    export type PoliticalExposure = 'existing' | 'none' | OtherString;
 
     export interface Relationship {
       /**
@@ -5793,24 +6310,24 @@ export namespace AccountUpdateParams {
     export namespace Verification {
       export interface AdditionalDocument {
         /**
-         * The back of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The back of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         back?: string;
 
         /**
-         * The front of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The front of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         front?: string;
       }
 
       export interface Document {
         /**
-         * The back of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The back of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         back?: string;
 
         /**
-         * The front of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+         * The front of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
          */
         front?: string;
       }
@@ -5922,6 +6439,30 @@ export namespace AccountUpdateParams {
       statement_descriptor?: string;
     }
 
+    export interface PaypayPayments {
+      /**
+       * Additional files that are required to support the onboarding process of your business.
+       */
+      additional_files?: Array<string>;
+
+      /**
+       * The type of goods your business sells. Use `digital_content` if you sell digital content. Use `other` for all other types of goods or services.
+       */
+      goods_type?: PaypayPayments.GoodsType;
+
+      /**
+       * Details regarding your business's website.
+       */
+      site?: PaypayPayments.Site;
+    }
+
+    export interface SepaDebitPayments {
+      /**
+       * The business creditor id for european payments.
+       */
+      creditor_id?: string;
+    }
+
     export interface Treasury {
       /**
        * Details on the account's acceptance of the Stripe Treasury Services Agreement.
@@ -5963,7 +6504,11 @@ export namespace AccountUpdateParams {
     }
 
     export namespace Invoices {
-      export type HostedPaymentMethodSave = 'always' | 'never' | 'offer';
+      export type HostedPaymentMethodSave =
+        | 'always'
+        | 'never'
+        | 'offer'
+        | OtherString;
     }
 
     export namespace Payouts {
@@ -6000,7 +6545,12 @@ export namespace AccountUpdateParams {
       }
 
       export namespace Schedule {
-        export type Interval = 'daily' | 'manual' | 'monthly' | 'weekly';
+        export type Interval =
+          | 'daily'
+          | 'manual'
+          | 'monthly'
+          | 'weekly'
+          | OtherString;
 
         export type WeeklyAnchor =
           | 'friday'
@@ -6009,14 +6559,67 @@ export namespace AccountUpdateParams {
           | 'sunday'
           | 'thursday'
           | 'tuesday'
-          | 'wednesday';
+          | 'wednesday'
+          | OtherString;
 
         export type WeeklyPayoutDay =
           | 'friday'
           | 'monday'
           | 'thursday'
           | 'tuesday'
-          | 'wednesday';
+          | 'wednesday'
+          | OtherString;
+      }
+    }
+
+    export namespace PaypayPayments {
+      export type GoodsType = 'digital_content' | 'other';
+
+      export interface Site {
+        /**
+         * Additional information about your business's website.
+         */
+        accessible?: Site.Accessible;
+
+        /**
+         * Additional information about your business's website.
+         */
+        in_development?: Site.InDevelopment;
+
+        /**
+         * Additional information about your business's website.
+         */
+        restricted?: Site.Restricted;
+
+        /**
+         * The status of your business's website.
+         */
+        type?: Site.Type;
+      }
+
+      export namespace Site {
+        export interface Accessible {}
+
+        export interface InDevelopment {
+          /**
+           * The password needed to access your business's website.
+           */
+          password: string;
+
+          /**
+           * The username needed to access your business's website.
+           */
+          username?: string;
+        }
+
+        export interface Restricted {
+          /**
+           * The file explaining the payment flow for your business.
+           */
+          payment_flow_file?: string;
+        }
+
+        export type Type = 'accessible' | 'in_development' | 'restricted';
       }
     }
 
@@ -6154,7 +6757,7 @@ export namespace AccountCreateExternalAccountParams {
   }
 
   export namespace BankAccount {
-    export type AccountHolderType = 'company' | 'individual';
+    export type AccountHolderType = 'company' | 'individual' | OtherString;
   }
 }
 export interface AccountCreateLoginLinkParams {
@@ -6231,11 +6834,15 @@ export interface AccountCreatePersonParams {
 
   /**
    * The person's ID number, as appropriate for their country. For example, a social security number in the U.S., social insurance number in Canada, etc. Instead of the number itself, you can also provide a [PII token provided by Stripe.js](https://docs.stripe.com/js/tokens/create_token?type=pii).
+   *
+   * Changing this value for the account's representative requires that the account re-accept the [terms of service](https://docs.stripe.com/api/accounts/object#account_object-tos_acceptance).
    */
   id_number?: string;
 
   /**
    * The person's secondary ID number, as appropriate for their country, will be used for enhanced verification checks. In Thailand, this would be the laser code found on the back of an ID card. Instead of the number itself, you can also provide a [PII token provided by Stripe.js](https://docs.stripe.com/js/tokens/create_token?type=pii).
+   *
+   * Changing this value for the account's representative requires that the account re-accept the [terms of service](https://docs.stripe.com/api/accounts/object#account_object-tos_acceptance).
    */
   id_number_secondary?: string;
 
@@ -6296,6 +6903,8 @@ export interface AccountCreatePersonParams {
 
   /**
    * The last four digits of the person's Social Security number (U.S. only).
+   *
+   * Changing this value for the account's representative requires that the account re-accept the [terms of service](https://docs.stripe.com/api/accounts/object#account_object-tos_acceptance).
    */
   ssn_last_4?: string;
 
@@ -6351,7 +6960,7 @@ export namespace AccountCreatePersonParams {
     visa?: Documents.Visa;
   }
 
-  export type PoliticalExposure = 'existing' | 'none';
+  export type PoliticalExposure = 'existing' | 'none' | OtherString;
 
   export interface Relationship {
     /**
@@ -6446,21 +7055,21 @@ export namespace AccountCreatePersonParams {
   export namespace Documents {
     export interface CompanyAuthorization {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface Passport {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface Visa {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
@@ -6499,7 +7108,8 @@ export namespace AccountCreatePersonParams {
         | 'not_hispanic_or_latino'
         | 'other_hispanic_or_latino'
         | 'prefer_not_to_answer'
-        | 'puerto_rican';
+        | 'puerto_rican'
+        | OtherString;
     }
 
     export namespace RaceDetails {
@@ -6527,31 +7137,32 @@ export namespace AccountCreatePersonParams {
         | 'samoan'
         | 'somali'
         | 'vietnamese'
-        | 'white';
+        | 'white'
+        | OtherString;
     }
   }
 
   export namespace Verification {
     export interface AdditionalDocument {
       /**
-       * The back of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+       * The back of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
        */
       back?: string;
 
       /**
-       * The front of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+       * The front of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
        */
       front?: string;
     }
 
     export interface Document {
       /**
-       * The back of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+       * The back of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
        */
       back?: string;
 
       /**
-       * The front of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+       * The front of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
        */
       front?: string;
     }
@@ -6577,7 +7188,7 @@ export interface AccountListExternalAccountsParams extends PaginationParams {
   object?: AccountListExternalAccountsParams.Object;
 }
 export namespace AccountListExternalAccountsParams {
-  export type Object = 'bank_account' | 'card';
+  export type Object = 'bank_account' | 'card' | OtherString;
 }
 export interface AccountListPersonsParams extends PaginationParams {
   /**
@@ -6625,14 +7236,32 @@ export namespace AccountListPersonsParams {
 }
 export interface AccountRejectParams {
   /**
-   * The reason for rejecting the account. Can be `fraud`, `terms_of_service`, or `other`.
+   * The reason for rejecting the account. Can be `fraud_payment_method_casher`, `fraud_payment_method_tester`, `fraud_no_intent_to_fulfill`, `fraud_other`, `credit`, `terms_of_service`, or `other`.
    */
-  reason: string;
+  reason: AccountRejectParams.Reason;
 
   /**
    * Specifies which fields in the response should be expanded.
    */
   expand?: Array<string>;
+
+  /**
+   * Whether to pause payouts on the account as part of the rejection. Defaults to `pause`. Use `none` to leave payouts enabled.
+   */
+  payouts_action?: AccountRejectParams.PayoutsAction;
+}
+export namespace AccountRejectParams {
+  export type Reason =
+    | 'credit'
+    | 'fraud_no_intent_to_fulfill'
+    | 'fraud_other'
+    | 'fraud_payment_method_casher'
+    | 'fraud_payment_method_tester'
+    | 'other'
+    | 'terms_of_service'
+    | OtherString;
+
+  export type PayoutsAction = 'none' | 'pause';
 }
 export interface AccountRetrieveCurrentParams {
   /**
@@ -6653,6 +7282,12 @@ export interface AccountRetrieveExternalAccountParams {
   expand?: Array<string>;
 }
 export interface AccountRetrievePersonParams {
+  /**
+   * Specifies which fields in the response should be expanded.
+   */
+  expand?: Array<string>;
+}
+export interface AccountUnrejectParams {
   /**
    * Specifies which fields in the response should be expanded.
    */
@@ -6755,9 +7390,14 @@ export interface AccountUpdateExternalAccountParams {
   name?: string;
 }
 export namespace AccountUpdateExternalAccountParams {
-  export type AccountHolderType = 'company' | 'individual';
+  export type AccountHolderType = 'company' | 'individual' | OtherString;
 
-  export type AccountType = 'checking' | 'futsu' | 'savings' | 'toza';
+  export type AccountType =
+    | 'checking'
+    | 'futsu'
+    | 'savings'
+    | 'toza'
+    | OtherString;
 
   export interface Documents {
     /**
@@ -6769,7 +7409,7 @@ export namespace AccountUpdateExternalAccountParams {
   export namespace Documents {
     export interface BankAccountOwnershipVerification {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
@@ -6843,11 +7483,15 @@ export interface AccountUpdatePersonParams {
 
   /**
    * The person's ID number, as appropriate for their country. For example, a social security number in the U.S., social insurance number in Canada, etc. Instead of the number itself, you can also provide a [PII token provided by Stripe.js](https://docs.stripe.com/js/tokens/create_token?type=pii).
+   *
+   * Changing this value for the account's representative requires that the account re-accept the [terms of service](https://docs.stripe.com/api/accounts/object#account_object-tos_acceptance).
    */
   id_number?: string;
 
   /**
    * The person's secondary ID number, as appropriate for their country, will be used for enhanced verification checks. In Thailand, this would be the laser code found on the back of an ID card. Instead of the number itself, you can also provide a [PII token provided by Stripe.js](https://docs.stripe.com/js/tokens/create_token?type=pii).
+   *
+   * Changing this value for the account's representative requires that the account re-accept the [terms of service](https://docs.stripe.com/api/accounts/object#account_object-tos_acceptance).
    */
   id_number_secondary?: string;
 
@@ -6908,6 +7552,8 @@ export interface AccountUpdatePersonParams {
 
   /**
    * The last four digits of the person's Social Security number (U.S. only).
+   *
+   * Changing this value for the account's representative requires that the account re-accept the [terms of service](https://docs.stripe.com/api/accounts/object#account_object-tos_acceptance).
    */
   ssn_last_4?: string;
 
@@ -6963,7 +7609,7 @@ export namespace AccountUpdatePersonParams {
     visa?: Documents.Visa;
   }
 
-  export type PoliticalExposure = 'existing' | 'none';
+  export type PoliticalExposure = 'existing' | 'none' | OtherString;
 
   export interface Relationship {
     /**
@@ -7058,21 +7704,21 @@ export namespace AccountUpdatePersonParams {
   export namespace Documents {
     export interface CompanyAuthorization {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface Passport {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
 
     export interface Visa {
       /**
-       * One or more document ids returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `account_requirement`.
+       * One or more document ids returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `account_requirement`.
        */
       files?: Array<string>;
     }
@@ -7111,7 +7757,8 @@ export namespace AccountUpdatePersonParams {
         | 'not_hispanic_or_latino'
         | 'other_hispanic_or_latino'
         | 'prefer_not_to_answer'
-        | 'puerto_rican';
+        | 'puerto_rican'
+        | OtherString;
     }
 
     export namespace RaceDetails {
@@ -7139,31 +7786,32 @@ export namespace AccountUpdatePersonParams {
         | 'samoan'
         | 'somali'
         | 'vietnamese'
-        | 'white';
+        | 'white'
+        | OtherString;
     }
   }
 
   export namespace Verification {
     export interface AdditionalDocument {
       /**
-       * The back of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+       * The back of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
        */
       back?: string;
 
       /**
-       * The front of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+       * The front of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
        */
       front?: string;
     }
 
     export interface Document {
       /**
-       * The back of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+       * The back of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
        */
       back?: string;
 
       /**
-       * The front of an ID returned by a [file upload](https://api.stripe.com#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
+       * The front of an ID returned by a [file upload](https://docs.stripe.com/api#create_file) with a `purpose` value of `identity_document`. The uploaded file needs to be a color image (smaller than 8,000px by 8,000px), in JPG, PNG, or PDF format, and less than 10 MB in size.
        */
       front?: string;
     }

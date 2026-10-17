@@ -1,6 +1,11 @@
 import {RequestData, StripeResourceObject, MakeRequestSpec} from './Types.js';
-import {attachCallSiteToError, getAPIMode} from './utils.js';
+import {
+  attachCallSiteToError,
+  getAPIMode,
+  jsonStringifyRequestData,
+} from './utils.js';
 import {RequestOptions} from './lib.js';
+import {coerceV2RequestData} from './V2Coercion.js';
 
 type IterationDoneCallback = (err?: any, result?: any) => void;
 type IterationItemCallback<T> = (
@@ -173,21 +178,39 @@ class V2ListIterator<T> implements AsyncIterator<T> {
   private firstPagePromise: Promise<PageResult<T>> | null;
   private currentPageIterator: Iterator<T> | null;
   private nextPageUrl: string | null;
+  private promiseCache: PromiseCache;
   private options: RequestOptions | undefined;
   private spec: MakeRequestSpec | undefined;
   private stripeResource: StripeResourceObject;
+  private method: string;
+  private params: RequestData | undefined;
   constructor(
     firstPagePromise: Promise<PageResult<T>>,
     options: RequestOptions | undefined,
     spec: MakeRequestSpec | undefined,
-    stripeResource: StripeResourceObject
+    stripeResource: StripeResourceObject,
+    method = 'GET',
+    params?: RequestData
   ) {
     this.firstPagePromise = firstPagePromise;
     this.currentPageIterator = null;
     this.nextPageUrl = null;
+    this.promiseCache = {currentPromise: null};
     this.options = options;
     this.spec = spec;
     this.stripeResource = stripeResource;
+    this.method = method;
+    // Snapshot params so later mutations by the caller don't leak into
+    // subsequent page requests.
+    this.params = params
+      ? (JSON.parse(
+          jsonStringifyRequestData(
+            spec?.requestSchema
+              ? (coerceV2RequestData(params, spec.requestSchema) as RequestData)
+              : params
+          )
+        ) as RequestData)
+      : undefined;
   }
   private async initFirstPage(): Promise<void> {
     if (this.firstPagePromise) {
@@ -200,9 +223,9 @@ class V2ListIterator<T> implements AsyncIterator<T> {
   private async turnPage(): Promise<Iterator<T> | null> {
     if (!this.nextPageUrl) return null;
     const page = await this.stripeResource._makeRequest(
-      'GET',
+      this.method,
       this.nextPageUrl,
-      undefined,
+      this.params,
       this.options,
       this.spec
     );
@@ -210,19 +233,45 @@ class V2ListIterator<T> implements AsyncIterator<T> {
     this.currentPageIterator = page.data[Symbol.iterator]();
     return this.currentPageIterator;
   }
-  async next(): Promise<IteratorResult<T>> {
+  private async _next(): Promise<IteratorResult<T>> {
     await this.initFirstPage();
     if (this.currentPageIterator) {
       const result = this.currentPageIterator.next();
       if (!result.done) return {done: false, value: result.value};
     }
+    return this.nextFromNewPage();
+  }
+  private async nextFromNewPage(): Promise<IteratorResult<T>> {
     const nextPageIterator = await this.turnPage();
     if (!nextPageIterator) {
       return {done: true, value: undefined};
     }
     const result = nextPageIterator.next();
     if (!result.done) return {done: false, value: result.value};
-    return {done: true, value: undefined};
+    // Empty intermediate page — recurse to try the next page.
+    return this.nextFromNewPage();
+  }
+  next(): Promise<IteratorResult<T>> {
+    /**
+     * If a user calls `.next()` multiple times in parallel,
+     * return the same result until something has resolved
+     * to prevent page-turning race conditions.
+     */
+    if (this.promiseCache.currentPromise) {
+      return this.promiseCache.currentPromise;
+    }
+
+    const nextPromise = (async (): Promise<IteratorResult<T>> => {
+      try {
+        return await this._next();
+      } finally {
+        this.promiseCache.currentPromise = null;
+      }
+    })();
+
+    this.promiseCache.currentPromise = nextPromise;
+
+    return nextPromise;
   }
 }
 
@@ -266,6 +315,18 @@ export const makeAutoPaginationMethods = <TItem extends {id: string}>(
   if (apiMode === 'v2' && methodType === 'list') {
     return makeAutoPaginationMethodsFromIterator(
       new V2ListIterator(firstPagePromise, options, spec, stripeResource)
+    );
+  }
+  if (apiMode === 'v2' && methodType === 'search') {
+    return makeAutoPaginationMethodsFromIterator(
+      new V2ListIterator(
+        firstPagePromise,
+        options,
+        spec,
+        stripeResource,
+        'POST',
+        params
+      )
     );
   }
   return null;

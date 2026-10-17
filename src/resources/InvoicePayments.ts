@@ -5,7 +5,7 @@ import {Invoice, DeletedInvoice} from './Invoices.js';
 import {Charge} from './Charges.js';
 import {PaymentIntent} from './PaymentIntents.js';
 import {PaymentRecord} from './PaymentRecords.js';
-import {PaginationParams, RangeQueryParam} from '../shared.js';
+import {PaginationParams, RangeQueryParam, OtherString} from '../shared.js';
 import {RequestOptions, ApiListPromise, Response} from '../lib.js';
 
 export class InvoicePaymentResource extends StripeResource {
@@ -30,7 +30,7 @@ export class InvoicePaymentResource extends StripeResource {
   ): Promise<Response<InvoicePayment>> {
     return this._makeRequest(
       'GET',
-      `/v1/invoice_payments/${id}`,
+      `/v1/invoice_payments/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -94,7 +94,7 @@ export interface InvoicePayment {
 export namespace InvoicePayment {
   export interface Payment {
     /**
-     * ID of the successful charge for this payment when `type` is `charge`.Note: charge is only surfaced if the charge object is not associated with a payment intent. If the charge object does have a payment intent, the Invoice Payment surfaces the payment intent instead.
+     * ID of the successful charge for this payment when `type` is `charge`. Note: charge is only surfaced if the charge object is not associated with a payment intent. If the charge object does have a payment intent, the Invoice Payment surfaces the payment intent instead.
      */
     charge?: string | Charge;
 
@@ -127,7 +127,11 @@ export namespace InvoicePayment {
   }
 
   export namespace Payment {
-    export type Type = 'charge' | 'payment_intent' | 'payment_record';
+    export type Type =
+      | 'charge'
+      | 'payment_intent'
+      | 'payment_record'
+      | OtherString;
   }
 }
 export interface InvoicePaymentRetrieveParams {
@@ -180,9 +184,9 @@ export namespace InvoicePaymentListParams {
     type: Payment.Type;
   }
 
-  export type Status = 'canceled' | 'open' | 'paid';
+  export type Status = 'canceled' | 'open' | 'paid' | OtherString;
 
   export namespace Payment {
-    export type Type = 'payment_intent' | 'payment_record';
+    export type Type = 'payment_intent' | 'payment_record' | OtherString;
   }
 }

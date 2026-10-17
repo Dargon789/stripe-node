@@ -3,7 +3,7 @@
 import {StripeResource} from '../StripeResource.js';
 import {Charge} from './Charges.js';
 import {PaymentIntent} from './PaymentIntents.js';
-import {PaginationParams, RangeQueryParam} from '../shared.js';
+import {PaginationParams, RangeQueryParam, OtherString} from '../shared.js';
 import {RequestOptions, ApiListPromise, Response} from '../lib.js';
 
 export class ReviewResource extends StripeResource {
@@ -28,7 +28,7 @@ export class ReviewResource extends StripeResource {
   ): Promise<Response<Review>> {
     return this._makeRequest(
       'GET',
-      `/v1/reviews/${id}`,
+      `/v1/reviews/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -43,7 +43,7 @@ export class ReviewResource extends StripeResource {
   ): Promise<Response<Review>> {
     return this._makeRequest(
       'POST',
-      `/v1/reviews/${id}/approve`,
+      `/v1/reviews/${encodeURIComponent(id)}/approve`,
       params,
       options
     ) as any;
@@ -158,7 +158,7 @@ export namespace Review {
     region: string | null;
   }
 
-  export type OpenedReason = 'manual' | 'rule';
+  export type OpenedReason = 'manual' | 'rule' | OtherString;
 
   export interface Session {
     /**

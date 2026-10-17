@@ -1,7 +1,7 @@
 // File generated from our OpenAPI spec
 
 import {StripeResource} from '../../StripeResource.js';
-import {AddressParam, Address} from '../../shared.js';
+import {OtherString, AddressParam, Address} from '../../shared.js';
 import {RequestOptions, Response} from '../../lib.js';
 
 export class SettingResource extends StripeResource {
@@ -15,7 +15,7 @@ export class SettingResource extends StripeResource {
     return this._makeRequest('GET', '/v1/tax/settings', params, options) as any;
   }
   /**
-   * Updates Tax Settings parameters used in tax calculations. All parameters are editable but none can be removed once set.
+   * Updates Tax Settings parameters used in tax calculations. All parameters are editable but none can be removed once set. Check the returned Tax Settings object and validate that its status is active.
    */
   update(
     params?: Tax.SettingsUpdateParams,
@@ -35,12 +35,12 @@ export interface Settings {
    */
   object: 'tax.settings';
 
-  defaults: Tax.Settings.Defaults;
+  defaults: Settings.Defaults;
 
   /**
    * The place where your business is located.
    */
-  head_office: Tax.Settings.HeadOffice | null;
+  head_office: Settings.HeadOffice | null;
 
   /**
    * If the object exists in live mode, the value is `true`. If the object exists in test mode, the value is `false`.
@@ -48,61 +48,65 @@ export interface Settings {
   livemode: boolean;
 
   /**
-   * The status of the Tax `Settings`.
+   * Whether these settings have the information Stripe Tax needs to calculate tax. It doesn't reflect whether your integration is ready to collect tax.
    */
-  status: Tax.Settings.Status;
+  status: Settings.Status;
 
-  status_details: Tax.Settings.StatusDetails;
+  status_details: Settings.StatusDetails;
 }
-export namespace Tax {
-  export namespace Settings {
-    export interface Defaults {
+export namespace Settings {
+  export interface Defaults {
+    /**
+     * The tax calculation provider this account uses. Defaults to `stripe` when not using a [third-party provider](https://docs.stripe.com/tax/third-party-apps).
+     */
+    provider: Defaults.Provider;
+
+    /**
+     * Default [tax behavior](https://stripe.com/docs/tax/products-prices-tax-categories-tax-behavior#tax-behavior) used to specify whether the price is considered inclusive of taxes or exclusive of taxes. If the item's price has a tax behavior set, it will take precedence over the default tax behavior.
+     */
+    tax_behavior: Defaults.TaxBehavior | null;
+
+    /**
+     * Default [tax code](https://stripe.com/docs/tax/tax-categories) used to classify your products and prices.
+     */
+    tax_code: string | null;
+  }
+
+  export interface HeadOffice {
+    address: Address;
+  }
+
+  export type Status = 'active' | 'pending' | OtherString;
+
+  export interface StatusDetails {
+    active?: StatusDetails.Active;
+
+    pending?: StatusDetails.Pending;
+  }
+
+  export namespace Defaults {
+    export type Provider =
+      | 'anrok'
+      | 'avalara'
+      | 'sphere'
+      | 'stripe'
+      | OtherString;
+
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'inferred_by_currency'
+      | OtherString;
+  }
+
+  export namespace StatusDetails {
+    export interface Active {}
+
+    export interface Pending {
       /**
-       * The tax calculation provider this account uses. Defaults to `stripe` when not using a [third-party provider](https://docs.stripe.com/tax/third-party-apps).
+       * The list of missing fields that are required to perform calculations. It includes the entry `head_office` when the status is `pending`. It is recommended to set the optional values even if they aren't listed as required for calculating taxes. Calculations can fail if missing fields aren't explicitly provided on every call.
        */
-      provider: Defaults.Provider;
-
-      /**
-       * Default [tax behavior](https://stripe.com/docs/tax/products-prices-tax-categories-tax-behavior#tax-behavior) used to specify whether the price is considered inclusive of taxes or exclusive of taxes. If the item's price has a tax behavior set, it will take precedence over the default tax behavior.
-       */
-      tax_behavior: Defaults.TaxBehavior | null;
-
-      /**
-       * Default [tax code](https://stripe.com/docs/tax/tax-categories) used to classify your products and prices.
-       */
-      tax_code: string | null;
-    }
-
-    export interface HeadOffice {
-      address: Address;
-    }
-
-    export type Status = 'active' | 'pending';
-
-    export interface StatusDetails {
-      active?: StatusDetails.Active;
-
-      pending?: StatusDetails.Pending;
-    }
-
-    export namespace Defaults {
-      export type Provider = 'anrok' | 'avalara' | 'sphere' | 'stripe';
-
-      export type TaxBehavior =
-        | 'exclusive'
-        | 'inclusive'
-        | 'inferred_by_currency';
-    }
-
-    export namespace StatusDetails {
-      export interface Active {}
-
-      export interface Pending {
-        /**
-         * The list of missing fields that are required to perform calculations. It includes the entry `head_office` when the status is `pending`. It is recommended to set the optional values even if they aren't listed as required for calculating taxes. Calculations can fail if missing fields aren't explicitly provided on every call.
-         */
-        missing_fields: Array<string> | null;
-      }
+      missing_fields: Array<string> | null;
     }
   }
 }
@@ -156,7 +160,8 @@ export namespace Tax {
       export type TaxBehavior =
         | 'exclusive'
         | 'inclusive'
-        | 'inferred_by_currency';
+        | 'inferred_by_currency'
+        | OtherString;
     }
   }
 }

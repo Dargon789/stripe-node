@@ -3,6 +3,7 @@
 import {StripeResource} from '../StripeResource.js';
 import {
   MetadataParam,
+  OtherString,
   Emptyable,
   PaginationParams,
   RangeQueryParam,
@@ -41,7 +42,7 @@ export class TaxRateResource extends StripeResource {
   ): Promise<Response<TaxRate>> {
     return this._makeRequest(
       'GET',
-      `/v1/tax_rates/${id}`,
+      `/v1/tax_rates/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -56,7 +57,7 @@ export class TaxRateResource extends StripeResource {
   ): Promise<Response<TaxRate>> {
     return this._makeRequest(
       'POST',
-      `/v1/tax_rates/${id}`,
+      `/v1/tax_rates/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -174,25 +175,31 @@ export namespace TaxRate {
     | 'county'
     | 'district'
     | 'multiple'
-    | 'state';
+    | 'state'
+    | OtherString;
 
-  export type RateType = 'flat_amount' | 'percentage';
+  export type RateType = 'flat_amount' | 'percentage' | OtherString;
 
   export type TaxType =
     | 'amusement_tax'
     | 'communications_tax'
+    | 'digital_excise_tax'
     | 'gst'
     | 'hst'
     | 'igst'
     | 'jct'
     | 'lease_tax'
+    | 'mass_transit_parking_tax'
+    | 'parking_tax'
     | 'pst'
     | 'qst'
     | 'retail_delivery_fee'
     | 'rst'
     | 'sales_tax'
     | 'service_tax'
-    | 'vat';
+    | 'utility_users_tax'
+    | 'vat'
+    | OtherString;
 }
 export interface TaxRateCreateParams {
   /**
@@ -254,18 +261,23 @@ export namespace TaxRateCreateParams {
   export type TaxType =
     | 'amusement_tax'
     | 'communications_tax'
+    | 'digital_excise_tax'
     | 'gst'
     | 'hst'
     | 'igst'
     | 'jct'
     | 'lease_tax'
+    | 'mass_transit_parking_tax'
+    | 'parking_tax'
     | 'pst'
     | 'qst'
     | 'retail_delivery_fee'
     | 'rst'
     | 'sales_tax'
     | 'service_tax'
-    | 'vat';
+    | 'utility_users_tax'
+    | 'vat'
+    | OtherString;
 }
 export interface TaxRateRetrieveParams {
   /**
@@ -323,18 +335,23 @@ export namespace TaxRateUpdateParams {
   export type TaxType =
     | 'amusement_tax'
     | 'communications_tax'
+    | 'digital_excise_tax'
     | 'gst'
     | 'hst'
     | 'igst'
     | 'jct'
     | 'lease_tax'
+    | 'mass_transit_parking_tax'
+    | 'parking_tax'
     | 'pst'
     | 'qst'
     | 'retail_delivery_fee'
     | 'rst'
     | 'sales_tax'
     | 'service_tax'
-    | 'vat';
+    | 'utility_users_tax'
+    | 'vat'
+    | OtherString;
 }
 export interface TaxRateListParams extends PaginationParams {
   /**

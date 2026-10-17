@@ -24,7 +24,12 @@ export class EventResource extends StripeResource {
     params?: EventRetrieveParams,
     options?: RequestOptions
   ): Promise<Response<Event>> {
-    return this._makeRequest('GET', `/v1/events/${id}`, params, options) as any;
+    return this._makeRequest(
+      'GET',
+      `/v1/events/${encodeURIComponent(id)}`,
+      params,
+      options
+    ) as any;
   }
 }
 export interface EventBase {
@@ -83,7 +88,7 @@ export interface EventBase {
 export namespace Event {
   export interface Data {
     /**
-     * Object containing the API resource relevant to the event. For example, an `invoice.created` event will have a full [invoice object](https://api.stripe.com#invoice_object) as the value of the object key.
+     * Object containing the API resource relevant to the event. For example, an `invoice.created` event will have a full [invoice object](https://docs.stripe.com/api#invoice_object) as the value of the object key.
      */
     object: Data.Object;
 
@@ -115,10 +120,19 @@ export namespace Event {
     | 'application_fee.created'
     | 'application_fee.refund.updated'
     | 'application_fee.refunded'
+    | 'apps.install.created'
+    | 'apps.install.deleted'
+    | 'apps.install.updated'
     | 'balance.available'
     | 'balance_settings.updated'
     | 'billing.alert.triggered'
+    | 'billing.credit_balance_transaction.created'
     | 'billing.credit_grant.created'
+    | 'billing.credit_grant.updated'
+    | 'billing.meter.created'
+    | 'billing.meter.deactivated'
+    | 'billing.meter.reactivated'
+    | 'billing.meter.updated'
     | 'billing_portal.configuration.created'
     | 'billing_portal.configuration.updated'
     | 'billing_portal.session.created'
@@ -182,11 +196,16 @@ export namespace Event {
     | 'financial_connections.account.created'
     | 'financial_connections.account.deactivated'
     | 'financial_connections.account.disconnected'
+    | 'financial_connections.account.expected_deactivation_date_updated'
     | 'financial_connections.account.reactivated'
     | 'financial_connections.account.refreshed_balance'
     | 'financial_connections.account.refreshed_ownership'
     | 'financial_connections.account.refreshed_transactions'
+    | 'financial_connections.account.supported_payment_method_types_updated'
     | 'financial_connections.account.upcoming_account_number_expiry'
+    | 'financial_connections.account.upcoming_deactivation'
+    | 'financial_connections.authorization.expected_deactivation_date_updated'
+    | 'financial_connections.authorization.upcoming_deactivation'
     | 'identity.verification_session.canceled'
     | 'identity.verification_session.created'
     | 'identity.verification_session.processing'
@@ -359,13 +378,7 @@ export namespace Event {
     | 'treasury.received_credit.created'
     | 'treasury.received_credit.failed'
     | 'treasury.received_credit.succeeded'
-    | 'treasury.received_debit.created'
-    | 'billing.credit_balance_transaction.created'
-    | 'billing.credit_grant.updated'
-    | 'billing.meter.created'
-    | 'billing.meter.deactivated'
-    | 'billing.meter.reactivated'
-    | 'billing.meter.updated';
+    | 'treasury.received_debit.created';
 
   export namespace Data {
     export interface Object {}
@@ -405,6 +418,7 @@ export interface EventListParams extends PaginationParams {
    */
   types?: Array<string>;
 }
+import {Apps} from './Apps/index.js';
 import {Billing} from './Billing/index.js';
 import {BillingPortal} from './BillingPortal/index.js';
 import {Checkout} from './Checkout/index.js';
@@ -475,6 +489,9 @@ export type Event =
   | ApplicationFeeCreatedEvent
   | ApplicationFeeRefundUpdatedEvent
   | ApplicationFeeRefundedEvent
+  | AppsInstallCreatedEvent
+  | AppsInstallDeletedEvent
+  | AppsInstallUpdatedEvent
   | BalanceAvailableEvent
   | BalanceSettingsUpdatedEvent
   | BillingAlertTriggeredEvent
@@ -548,11 +565,16 @@ export type Event =
   | FinancialConnectionsAccountCreatedEvent
   | FinancialConnectionsAccountDeactivatedEvent
   | FinancialConnectionsAccountDisconnectedEvent
+  | FinancialConnectionsAccountExpectedDeactivationDateUpdatedEvent
   | FinancialConnectionsAccountReactivatedEvent
   | FinancialConnectionsAccountRefreshedBalanceEvent
   | FinancialConnectionsAccountRefreshedOwnershipEvent
   | FinancialConnectionsAccountRefreshedTransactionsEvent
+  | FinancialConnectionsAccountSupportedPaymentMethodTypesUpdatedEvent
   | FinancialConnectionsAccountUpcomingAccountNumberExpiryEvent
+  | FinancialConnectionsAccountUpcomingDeactivationEvent
+  | FinancialConnectionsAuthorizationExpectedDeactivationDateUpdatedEvent
+  | FinancialConnectionsAuthorizationUpcomingDeactivationEvent
   | IdentityVerificationSessionCanceledEvent
   | IdentityVerificationSessionCreatedEvent
   | IdentityVerificationSessionProcessingEvent
@@ -868,6 +890,54 @@ export namespace ApplicationFeeRefundedEvent {
     object: ApplicationFee;
 
     previous_attributes?: Partial<ApplicationFee>;
+  }
+}
+
+/**
+ * Occurs whenever a user installs a Stripe app. Sent to the app developer, embedding platform, and installing merchant.
+ */
+export interface AppsInstallCreatedEvent extends EventBase {
+  type: 'apps.install.created';
+  data: AppsInstallCreatedEvent.Data;
+}
+
+export namespace AppsInstallCreatedEvent {
+  export interface Data extends Event.Data {
+    object: Apps.Install;
+
+    previous_attributes?: Partial<Apps.Install>;
+  }
+}
+
+/**
+ * Occurs whenever a user uninstalls a Stripe app. Sent to the app developer, embedding platform, and installing merchant.
+ */
+export interface AppsInstallDeletedEvent extends EventBase {
+  type: 'apps.install.deleted';
+  data: AppsInstallDeletedEvent.Data;
+}
+
+export namespace AppsInstallDeletedEvent {
+  export interface Data extends Event.Data {
+    object: Apps.Install;
+
+    previous_attributes?: Partial<Apps.Install>;
+  }
+}
+
+/**
+ * Occurs whenever a user updates a Stripe app. Sent to the app developer, embedding platform, and installing merchant.
+ */
+export interface AppsInstallUpdatedEvent extends EventBase {
+  type: 'apps.install.updated';
+  data: AppsInstallUpdatedEvent.Data;
+}
+
+export namespace AppsInstallUpdatedEvent {
+  export interface Data extends Event.Data {
+    object: Apps.Install;
+
+    previous_attributes?: Partial<Apps.Install>;
   }
 }
 
@@ -1834,7 +1904,7 @@ export namespace CustomerSubscriptionResumedEvent {
 }
 
 /**
- * Occurs three days before a subscription's trial period is scheduled to end, or when a trial is ended immediately (using `trial_end=now`).
+ * Occurs three days before a subscription's trial period is scheduled to end, or immediately when a trial is ended early (for example, with `trial_end=now` or when a Customer Portal plan change ends a trial). If a trial is shortened so that fewer than three days remain, this event can fire immediately, including during the same transaction that collects payment. Before sending payment-reminder communications from this webhook, check the subscription status and latest invoice to determine whether payment has already been collected.
  */
 export interface CustomerSubscriptionTrialWillEndEvent extends EventBase {
   type: 'customer.subscription.trial_will_end';
@@ -2045,6 +2115,23 @@ export namespace FinancialConnectionsAccountDisconnectedEvent {
 }
 
 /**
+ * Occurs when a Financial Connections account’s `expected_deactivation_date` changes.
+ */
+export interface FinancialConnectionsAccountExpectedDeactivationDateUpdatedEvent
+  extends EventBase {
+  type: 'financial_connections.account.expected_deactivation_date_updated';
+  data: FinancialConnectionsAccountExpectedDeactivationDateUpdatedEvent.Data;
+}
+
+export namespace FinancialConnectionsAccountExpectedDeactivationDateUpdatedEvent {
+  export interface Data extends Event.Data {
+    object: FinancialConnections.Account;
+
+    previous_attributes?: Partial<FinancialConnections.Account>;
+  }
+}
+
+/**
  * Occurs when a Financial Connections account's status is updated from `inactive` to `active`.
  */
 export interface FinancialConnectionsAccountReactivatedEvent extends EventBase {
@@ -2112,6 +2199,23 @@ export namespace FinancialConnectionsAccountRefreshedTransactionsEvent {
 }
 
 /**
+ * Occurs when the supported_payment_method_types array on a Financial Connections account changes.
+ */
+export interface FinancialConnectionsAccountSupportedPaymentMethodTypesUpdatedEvent
+  extends EventBase {
+  type: 'financial_connections.account.supported_payment_method_types_updated';
+  data: FinancialConnectionsAccountSupportedPaymentMethodTypesUpdatedEvent.Data;
+}
+
+export namespace FinancialConnectionsAccountSupportedPaymentMethodTypesUpdatedEvent {
+  export interface Data extends Event.Data {
+    object: FinancialConnections.Account;
+
+    previous_attributes?: Partial<FinancialConnections.Account>;
+  }
+}
+
+/**
  * Occurs when an Account’s tokenized account number is about to expire.
  */
 export interface FinancialConnectionsAccountUpcomingAccountNumberExpiryEvent
@@ -2125,6 +2229,57 @@ export namespace FinancialConnectionsAccountUpcomingAccountNumberExpiryEvent {
     object: FinancialConnections.Account;
 
     previous_attributes?: Partial<FinancialConnections.Account>;
+  }
+}
+
+/**
+ * Occurs when a Financial Connections account is about to become `inactive`.
+ */
+export interface FinancialConnectionsAccountUpcomingDeactivationEvent
+  extends EventBase {
+  type: 'financial_connections.account.upcoming_deactivation';
+  data: FinancialConnectionsAccountUpcomingDeactivationEvent.Data;
+}
+
+export namespace FinancialConnectionsAccountUpcomingDeactivationEvent {
+  export interface Data extends Event.Data {
+    object: FinancialConnections.Account;
+
+    previous_attributes?: Partial<FinancialConnections.Account>;
+  }
+}
+
+/**
+ * Occurs when a Financial Connections authorization’s `expected_deactivation_date` changes.
+ */
+export interface FinancialConnectionsAuthorizationExpectedDeactivationDateUpdatedEvent
+  extends EventBase {
+  type: 'financial_connections.authorization.expected_deactivation_date_updated';
+  data: FinancialConnectionsAuthorizationExpectedDeactivationDateUpdatedEvent.Data;
+}
+
+export namespace FinancialConnectionsAuthorizationExpectedDeactivationDateUpdatedEvent {
+  export interface Data extends Event.Data {
+    object: FinancialConnections.Authorization;
+
+    previous_attributes?: Partial<FinancialConnections.Authorization>;
+  }
+}
+
+/**
+ * Occurs when a Financial Connections authorization is about to become `inactive`.
+ */
+export interface FinancialConnectionsAuthorizationUpcomingDeactivationEvent
+  extends EventBase {
+  type: 'financial_connections.authorization.upcoming_deactivation';
+  data: FinancialConnectionsAuthorizationUpcomingDeactivationEvent.Data;
+}
+
+export namespace FinancialConnectionsAuthorizationUpcomingDeactivationEvent {
+  export interface Data extends Event.Data {
+    object: FinancialConnections.Authorization;
+
+    previous_attributes?: Partial<FinancialConnections.Authorization>;
   }
 }
 
@@ -2546,7 +2701,7 @@ export namespace InvoiceItemDeletedEvent {
 }
 
 /**
- * Occurs whenever an authorization is created.
+ * Occurs whenever an authorization is created. For verification authorizations, this event is only accessible via private preview.
  */
 export interface IssuingAuthorizationCreatedEvent extends EventBase {
   type: 'issuing_authorization.created';
@@ -2578,7 +2733,7 @@ export namespace IssuingAuthorizationRequestEvent {
 }
 
 /**
- * Occurs whenever an authorization is updated.
+ * Occurs whenever an authorization is updated. For verification authorizations, this event is only accessible via private preview.
  */
 export interface IssuingAuthorizationUpdatedEvent extends EventBase {
   type: 'issuing_authorization.updated';
@@ -3860,7 +4015,7 @@ export namespace SetupIntentSetupFailedEvent {
 }
 
 /**
- * Occurs when an SetupIntent has successfully setup a payment method.
+ * Occurs when a SetupIntent has successfully setup a payment method.
  */
 export interface SetupIntentSucceededEvent extends EventBase {
   type: 'setup_intent.succeeded';
@@ -4420,7 +4575,7 @@ export namespace TransferUpdatedEvent {
 }
 
 /**
- * Occurs whenever an CreditReversal is submitted and created.
+ * Occurs whenever a CreditReversal is submitted and created.
  */
 export interface TreasuryCreditReversalCreatedEvent extends EventBase {
   type: 'treasury.credit_reversal.created';
@@ -4436,7 +4591,7 @@ export namespace TreasuryCreditReversalCreatedEvent {
 }
 
 /**
- * Occurs whenever an CreditReversal post is posted.
+ * Occurs whenever a CreditReversal post is posted.
  */
 export interface TreasuryCreditReversalPostedEvent extends EventBase {
   type: 'treasury.credit_reversal.posted';

@@ -6,6 +6,7 @@ import {BalanceTransaction} from './BalanceTransactions.js';
 import {ExternalAccount, DeletedExternalAccount} from './ExternalAccounts.js';
 import {
   MetadataParam,
+  OtherString,
   Emptyable,
   PaginationParams,
   RangeQueryParam,
@@ -48,7 +49,7 @@ export class PayoutResource extends StripeResource {
   ): Promise<Response<Payout>> {
     return this._makeRequest(
       'GET',
-      `/v1/payouts/${id}`,
+      `/v1/payouts/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -63,7 +64,7 @@ export class PayoutResource extends StripeResource {
   ): Promise<Response<Payout>> {
     return this._makeRequest(
       'POST',
-      `/v1/payouts/${id}`,
+      `/v1/payouts/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -78,7 +79,7 @@ export class PayoutResource extends StripeResource {
   ): Promise<Response<Payout>> {
     return this._makeRequest(
       'POST',
-      `/v1/payouts/${id}/cancel`,
+      `/v1/payouts/${encodeURIComponent(id)}/cancel`,
       params,
       options
     ) as any;
@@ -95,7 +96,7 @@ export class PayoutResource extends StripeResource {
   ): Promise<Response<Payout>> {
     return this._makeRequest(
       'POST',
-      `/v1/payouts/${id}/reverse`,
+      `/v1/payouts/${encodeURIComponent(id)}/reverse`,
       params,
       options
     ) as any;
@@ -241,7 +242,8 @@ export namespace Payout {
   export type ReconciliationStatus =
     | 'completed'
     | 'in_progress'
-    | 'not_applicable';
+    | 'not_applicable'
+    | OtherString;
 
   export interface TraceId {
     /**
@@ -255,11 +257,11 @@ export namespace Payout {
     value: string | null;
   }
 
-  export type Type = 'bank_account' | 'card';
+  export type Type = 'bank_account' | 'card' | OtherString;
 }
 export interface PayoutCreateParams {
   /**
-   * A positive integer in cents representing how much to payout.
+   * A positive integer in cents representing how much to pay out.
    */
   amount: number;
 
@@ -309,9 +311,9 @@ export interface PayoutCreateParams {
   statement_descriptor?: string;
 }
 export namespace PayoutCreateParams {
-  export type Method = 'instant' | 'standard';
+  export type Method = 'instant' | 'standard' | OtherString;
 
-  export type SourceType = 'bank_account' | 'card' | 'fpx';
+  export type SourceType = 'bank_account' | 'card' | 'fpx' | OtherString;
 }
 export interface PayoutRetrieveParams {
   /**

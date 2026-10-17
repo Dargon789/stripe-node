@@ -5,6 +5,7 @@ import {Product, DeletedProduct} from './Products.js';
 import {
   MetadataParam,
   Decimal,
+  OtherString,
   Emptyable,
   PaginationParams,
   RangeQueryParam,
@@ -196,61 +197,67 @@ export class PriceResource extends StripeResource {
     params?: PriceRetrieveParams,
     options?: RequestOptions
   ): Promise<Response<Price>> {
-    return this._makeRequest('GET', `/v1/prices/${id}`, params, options, {
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          currency_options: {
-            kind: 'array',
-            element: {
-              kind: 'object',
-              fields: {
-                tiers: {
-                  kind: 'array',
-                  element: {
-                    kind: 'object',
-                    fields: {
-                      flat_amount_decimal: {
-                        kind: 'nullable',
-                        inner: {kind: 'decimal_string'},
-                      },
-                      unit_amount_decimal: {
-                        kind: 'nullable',
-                        inner: {kind: 'decimal_string'},
+    return this._makeRequest(
+      'GET',
+      `/v1/prices/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            currency_options: {
+              kind: 'array',
+              element: {
+                kind: 'object',
+                fields: {
+                  tiers: {
+                    kind: 'array',
+                    element: {
+                      kind: 'object',
+                      fields: {
+                        flat_amount_decimal: {
+                          kind: 'nullable',
+                          inner: {kind: 'decimal_string'},
+                        },
+                        unit_amount_decimal: {
+                          kind: 'nullable',
+                          inner: {kind: 'decimal_string'},
+                        },
                       },
                     },
                   },
-                },
-                unit_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
-                },
-              },
-            },
-          },
-          tiers: {
-            kind: 'array',
-            element: {
-              kind: 'object',
-              fields: {
-                flat_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
-                },
-                unit_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
+                  unit_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
                 },
               },
             },
-          },
-          unit_amount_decimal: {
-            kind: 'nullable',
-            inner: {kind: 'decimal_string'},
+            tiers: {
+              kind: 'array',
+              element: {
+                kind: 'object',
+                fields: {
+                  flat_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
+                  unit_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
+                },
+              },
+            },
+            unit_amount_decimal: {
+              kind: 'nullable',
+              inner: {kind: 'decimal_string'},
+            },
           },
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * Updates the specified price by setting the values of the parameters passed. Any parameters not provided are left unchanged.
@@ -260,61 +267,67 @@ export class PriceResource extends StripeResource {
     params?: PriceUpdateParams,
     options?: RequestOptions
   ): Promise<Response<Price>> {
-    return this._makeRequest('POST', `/v1/prices/${id}`, params, options, {
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          currency_options: {
-            kind: 'array',
-            element: {
-              kind: 'object',
-              fields: {
-                tiers: {
-                  kind: 'array',
-                  element: {
-                    kind: 'object',
-                    fields: {
-                      flat_amount_decimal: {
-                        kind: 'nullable',
-                        inner: {kind: 'decimal_string'},
-                      },
-                      unit_amount_decimal: {
-                        kind: 'nullable',
-                        inner: {kind: 'decimal_string'},
+    return this._makeRequest(
+      'POST',
+      `/v1/prices/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            currency_options: {
+              kind: 'array',
+              element: {
+                kind: 'object',
+                fields: {
+                  tiers: {
+                    kind: 'array',
+                    element: {
+                      kind: 'object',
+                      fields: {
+                        flat_amount_decimal: {
+                          kind: 'nullable',
+                          inner: {kind: 'decimal_string'},
+                        },
+                        unit_amount_decimal: {
+                          kind: 'nullable',
+                          inner: {kind: 'decimal_string'},
+                        },
                       },
                     },
                   },
-                },
-                unit_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
-                },
-              },
-            },
-          },
-          tiers: {
-            kind: 'array',
-            element: {
-              kind: 'object',
-              fields: {
-                flat_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
-                },
-                unit_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
+                  unit_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
                 },
               },
             },
-          },
-          unit_amount_decimal: {
-            kind: 'nullable',
-            inner: {kind: 'decimal_string'},
+            tiers: {
+              kind: 'array',
+              element: {
+                kind: 'object',
+                fields: {
+                  flat_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
+                  unit_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
+                },
+              },
+            },
+            unit_amount_decimal: {
+              kind: 'nullable',
+              inner: {kind: 'decimal_string'},
+            },
           },
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * Search for prices you've previously created using Stripe's [Search Query Language](https://docs.stripe.com/docs/search#search-query-language).
@@ -522,7 +535,7 @@ export interface DeletedPrice {
   deleted: true;
 }
 export namespace Price {
-  export type BillingScheme = 'per_unit' | 'tiered';
+  export type BillingScheme = 'per_unit' | 'tiered' | OtherString;
 
   export interface CurrencyOptions {
     /**
@@ -595,7 +608,11 @@ export namespace Price {
     usage_type: Recurring.UsageType;
   }
 
-  export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+  export type TaxBehavior =
+    | 'exclusive'
+    | 'inclusive'
+    | 'unspecified'
+    | OtherString;
 
   export interface Tier {
     /**
@@ -624,7 +641,7 @@ export namespace Price {
     up_to: number | null;
   }
 
-  export type TiersMode = 'graduated' | 'volume';
+  export type TiersMode = 'graduated' | 'volume' | OtherString;
 
   export interface TransformQuantity {
     /**
@@ -638,7 +655,7 @@ export namespace Price {
     round: TransformQuantity.Round;
   }
 
-  export type Type = 'one_time' | 'recurring';
+  export type Type = 'one_time' | 'recurring' | OtherString;
 
   export namespace CurrencyOptions {
     export interface CustomUnitAmount {
@@ -658,7 +675,11 @@ export namespace Price {
       preset: number | null;
     }
 
-    export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'unspecified'
+      | OtherString;
 
     export interface Tier {
       /**
@@ -689,13 +710,13 @@ export namespace Price {
   }
 
   export namespace Recurring {
-    export type Interval = 'day' | 'month' | 'week' | 'year';
+    export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
 
-    export type UsageType = 'licensed' | 'metered';
+    export type UsageType = 'licensed' | 'metered' | OtherString;
   }
 
   export namespace TransformQuantity {
-    export type Round = 'down' | 'up';
+    export type Round = 'down' | 'up' | OtherString;
   }
 }
 export interface PriceCreateParams {
@@ -797,7 +818,7 @@ export interface PriceCreateParams {
   unit_amount_decimal?: Decimal;
 }
 export namespace PriceCreateParams {
-  export type BillingScheme = 'per_unit' | 'tiered';
+  export type BillingScheme = 'per_unit' | 'tiered' | OtherString;
 
   export interface CurrencyOptions {
     /**
@@ -882,6 +903,11 @@ export namespace PriceCreateParams {
     tax_code?: string;
 
     /**
+     * Tax details for this product, including the [tax code](https://docs.stripe.com/tax/tax-codes) and an optional performance location.
+     */
+    tax_details?: ProductData.TaxDetails;
+
+    /**
      * A label that represents units of this product. When set, this will be included in customers' receipts, invoices, Checkout, and the customer portal.
      */
     unit_label?: string;
@@ -914,7 +940,11 @@ export namespace PriceCreateParams {
     usage_type?: Recurring.UsageType;
   }
 
-  export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+  export type TaxBehavior =
+    | 'exclusive'
+    | 'inclusive'
+    | 'unspecified'
+    | OtherString;
 
   export interface Tier {
     /**
@@ -943,7 +973,7 @@ export namespace PriceCreateParams {
     up_to: 'inf' | number;
   }
 
-  export type TiersMode = 'graduated' | 'volume';
+  export type TiersMode = 'graduated' | 'volume' | OtherString;
 
   export interface TransformQuantity {
     /**
@@ -980,7 +1010,11 @@ export namespace PriceCreateParams {
       preset?: number;
     }
 
-    export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'unspecified'
+      | OtherString;
 
     export interface Tier {
       /**
@@ -1010,14 +1044,28 @@ export namespace PriceCreateParams {
     }
   }
 
-  export namespace Recurring {
-    export type Interval = 'day' | 'month' | 'week' | 'year';
+  export namespace ProductData {
+    export interface TaxDetails {
+      /**
+       * A tax location ID. Depending on the [tax code](https://docs.stripe.com/tax/tax-for-tickets/reference/tax-location-performance), this is required, optional, or not supported.
+       */
+      performance_location?: string;
 
-    export type UsageType = 'licensed' | 'metered';
+      /**
+       * A [tax code](https://docs.stripe.com/tax/tax-categories) ID.
+       */
+      tax_code?: Emptyable<string>;
+    }
+  }
+
+  export namespace Recurring {
+    export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
+
+    export type UsageType = 'licensed' | 'metered' | OtherString;
   }
 
   export namespace TransformQuantity {
-    export type Round = 'down' | 'up';
+    export type Round = 'down' | 'up' | OtherString;
   }
 }
 export interface PriceRetrieveParams {
@@ -1097,7 +1145,11 @@ export namespace PriceUpdateParams {
     unit_amount_decimal?: Decimal;
   }
 
-  export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+  export type TaxBehavior =
+    | 'exclusive'
+    | 'inclusive'
+    | 'unspecified'
+    | OtherString;
 
   export namespace CurrencyOptions {
     export interface CustomUnitAmount {
@@ -1122,7 +1174,11 @@ export namespace PriceUpdateParams {
       preset?: number;
     }
 
-    export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'unspecified'
+      | OtherString;
 
     export interface Tier {
       /**
@@ -1211,12 +1267,12 @@ export namespace PriceListParams {
     usage_type?: Recurring.UsageType;
   }
 
-  export type Type = 'one_time' | 'recurring';
+  export type Type = 'one_time' | 'recurring' | OtherString;
 
   export namespace Recurring {
-    export type Interval = 'day' | 'month' | 'week' | 'year';
+    export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
 
-    export type UsageType = 'licensed' | 'metered';
+    export type UsageType = 'licensed' | 'metered' | OtherString;
   }
 }
 export interface PriceSearchParams {

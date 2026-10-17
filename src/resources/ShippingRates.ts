@@ -4,6 +4,7 @@ import {StripeResource} from '../StripeResource.js';
 import {TaxCode} from './TaxCodes.js';
 import {
   MetadataParam,
+  OtherString,
   Emptyable,
   PaginationParams,
   RangeQueryParam,
@@ -47,7 +48,7 @@ export class ShippingRateResource extends StripeResource {
   ): Promise<Response<ShippingRate>> {
     return this._makeRequest(
       'GET',
-      `/v1/shipping_rates/${id}`,
+      `/v1/shipping_rates/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -62,7 +63,7 @@ export class ShippingRateResource extends StripeResource {
   ): Promise<Response<ShippingRate>> {
     return this._makeRequest(
       'POST',
-      `/v1/shipping_rates/${id}`,
+      `/v1/shipping_rates/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -158,7 +159,11 @@ export namespace ShippingRate {
     };
   }
 
-  export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+  export type TaxBehavior =
+    | 'exclusive'
+    | 'inclusive'
+    | 'unspecified'
+    | OtherString;
 
   export namespace DeliveryEstimate {
     export interface Maximum {
@@ -186,11 +191,23 @@ export namespace ShippingRate {
     }
 
     export namespace Maximum {
-      export type Unit = 'business_day' | 'day' | 'hour' | 'month' | 'week';
+      export type Unit =
+        | 'business_day'
+        | 'day'
+        | 'hour'
+        | 'month'
+        | 'week'
+        | OtherString;
     }
 
     export namespace Minimum {
-      export type Unit = 'business_day' | 'day' | 'hour' | 'month' | 'week';
+      export type Unit =
+        | 'business_day'
+        | 'day'
+        | 'hour'
+        | 'month'
+        | 'week'
+        | OtherString;
     }
   }
 
@@ -208,7 +225,11 @@ export namespace ShippingRate {
     }
 
     export namespace CurrencyOptions {
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
     }
   }
 }
@@ -285,7 +306,11 @@ export namespace ShippingRateCreateParams {
     };
   }
 
-  export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+  export type TaxBehavior =
+    | 'exclusive'
+    | 'inclusive'
+    | 'unspecified'
+    | OtherString;
 
   export namespace DeliveryEstimate {
     export interface Maximum {
@@ -313,11 +338,23 @@ export namespace ShippingRateCreateParams {
     }
 
     export namespace Maximum {
-      export type Unit = 'business_day' | 'day' | 'hour' | 'month' | 'week';
+      export type Unit =
+        | 'business_day'
+        | 'day'
+        | 'hour'
+        | 'month'
+        | 'week'
+        | OtherString;
     }
 
     export namespace Minimum {
-      export type Unit = 'business_day' | 'day' | 'hour' | 'month' | 'week';
+      export type Unit =
+        | 'business_day'
+        | 'day'
+        | 'hour'
+        | 'month'
+        | 'week'
+        | OtherString;
     }
   }
 
@@ -335,7 +372,11 @@ export namespace ShippingRateCreateParams {
     }
 
     export namespace CurrencyOptions {
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
     }
   }
 }
@@ -381,7 +422,11 @@ export namespace ShippingRateUpdateParams {
     };
   }
 
-  export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+  export type TaxBehavior =
+    | 'exclusive'
+    | 'inclusive'
+    | 'unspecified'
+    | OtherString;
 
   export namespace FixedAmount {
     export interface CurrencyOptions {
@@ -397,7 +442,11 @@ export namespace ShippingRateUpdateParams {
     }
 
     export namespace CurrencyOptions {
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
     }
   }
 }

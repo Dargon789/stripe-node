@@ -11,6 +11,7 @@ import {
   Emptyable,
   MetadataParam,
   Decimal,
+  OtherString,
   PaginationParams,
   RangeQueryParam,
   Metadata,
@@ -28,7 +29,7 @@ export class InvoiceItemResource extends StripeResource {
   ): Promise<Response<DeletedInvoiceItem>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/invoiceitems/${id}`,
+      `/v1/invoiceitems/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -41,26 +42,32 @@ export class InvoiceItemResource extends StripeResource {
     params?: InvoiceItemRetrieveParams,
     options?: RequestOptions
   ): Promise<Response<InvoiceItem>> {
-    return this._makeRequest('GET', `/v1/invoiceitems/${id}`, params, options, {
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          pricing: {
-            kind: 'nullable',
-            inner: {
-              kind: 'object',
-              fields: {
-                unit_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
+    return this._makeRequest(
+      'GET',
+      `/v1/invoiceitems/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            pricing: {
+              kind: 'nullable',
+              inner: {
+                kind: 'object',
+                fields: {
+                  unit_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
                 },
               },
             },
+            quantity_decimal: {kind: 'decimal_string'},
           },
-          quantity_decimal: {kind: 'decimal_string'},
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * Updates the amount or description of an invoice item on an upcoming invoice. Updating an invoice item is only possible before the invoice it's attached to is closed.
@@ -72,7 +79,7 @@ export class InvoiceItemResource extends StripeResource {
   ): Promise<Response<InvoiceItem>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoiceitems/${id}`,
+      `/v1/invoiceitems/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -242,9 +249,19 @@ export interface InvoiceItem {
   discounts: Array<string | Discount> | null;
 
   /**
+   * Array of field names that can't be modified. Attempting to update a frozen field returns an error.
+   */
+  frozen_fields?: Array<InvoiceItem.FrozenField>;
+
+  /**
    * The ID of the invoice this invoice item belongs to.
    */
   invoice: string | Invoice | null;
+
+  /**
+   * The rules that control when this invoice item is eligible for invoicing. All rules must be satisfied for the item to be invoiced.
+   */
+  invoicing_rules?: Array<InvoiceItem.InvoicingRule>;
 
   /**
    * If the object exists in live mode, the value is `true`. If the object exists in test mode, the value is `false`.
@@ -317,6 +334,15 @@ export interface DeletedInvoiceItem {
   deleted: true;
 }
 export namespace InvoiceItem {
+  export type FrozenField = 'discounts' | 'pricing' | 'quantity' | OtherString;
+
+  export interface InvoicingRule {
+    /**
+     * The type of invoicing rule.
+     */
+    type: InvoicingRule.Type;
+  }
+
   export interface Parent {
     /**
      * Details about the subscription that generated this invoice item
@@ -362,9 +388,13 @@ export namespace InvoiceItem {
     credited_items: ProrationDetails.CreditedItems | null;
 
     /**
-     * Discount amounts applied when the proration was created.
+     * Discount amounts applied when the proration was created. This field is only populated for prorations created from subscriptions with `billing_mode=flexible`.
      */
     discount_amounts: Array<ProrationDetails.DiscountAmount>;
+  }
+
+  export namespace InvoicingRule {
+    export type Type = 'defer_until_credited_items_resolved' | OtherString;
   }
 
   export namespace Parent {
@@ -435,7 +465,7 @@ export namespace InvoiceItem {
         invoice_line_items: Array<string>;
       }
 
-      export type Type = 'invoice_item' | 'invoice_line_items';
+      export type Type = 'invoice_item' | 'invoice_line_items' | OtherString;
     }
   }
 }
@@ -604,10 +634,18 @@ export namespace InvoiceItemCreateParams {
     price?: string;
   }
 
-  export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+  export type TaxBehavior =
+    | 'exclusive'
+    | 'inclusive'
+    | 'unspecified'
+    | OtherString;
 
   export namespace PriceData {
-    export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'unspecified'
+      | OtherString;
   }
 }
 export interface InvoiceItemRetrieveParams {
@@ -641,6 +679,11 @@ export interface InvoiceItemUpdateParams {
    * Specifies which fields in the response should be expanded.
    */
   expand?: Array<string>;
+
+  /**
+   * Pass an empty string to remove previously-defined invoicing rules. Setting invoicing rules is not supported.
+   */
+  invoicing_rules?: '';
 
   /**
    * Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
@@ -756,10 +799,18 @@ export namespace InvoiceItemUpdateParams {
     price?: string;
   }
 
-  export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+  export type TaxBehavior =
+    | 'exclusive'
+    | 'inclusive'
+    | 'unspecified'
+    | OtherString;
 
   export namespace PriceData {
-    export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'unspecified'
+      | OtherString;
   }
 }
 export interface InvoiceItemListParams extends PaginationParams {

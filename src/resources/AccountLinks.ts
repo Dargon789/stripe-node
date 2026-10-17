@@ -1,6 +1,7 @@
 // File generated from our OpenAPI spec
 
 import {StripeResource} from '../StripeResource.js';
+import {OtherString} from '../shared.js';
 import {RequestOptions, Response} from '../lib.js';
 
 export class AccountLinkResource extends StripeResource {
@@ -79,9 +80,9 @@ export interface AccountLinkCreateParams {
   return_url?: string;
 }
 export namespace AccountLinkCreateParams {
-  export type Type = 'account_onboarding' | 'account_update';
+  export type Type = 'account_onboarding' | 'account_update' | OtherString;
 
-  export type Collect = 'currently_due' | 'eventually_due';
+  export type Collect = 'currently_due' | 'eventually_due' | OtherString;
 
   export interface CollectionOptions {
     /**
@@ -96,8 +97,8 @@ export namespace AccountLinkCreateParams {
   }
 
   export namespace CollectionOptions {
-    export type Fields = 'currently_due' | 'eventually_due';
+    export type Fields = 'currently_due' | 'eventually_due' | OtherString;
 
-    export type FutureRequirements = 'include' | 'omit';
+    export type FutureRequirements = 'include' | 'omit' | OtherString;
   }
 }

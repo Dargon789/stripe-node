@@ -6,6 +6,7 @@ import {
   Decimal,
   Emptyable,
   MetadataParam,
+  OtherString,
   PaginationParams,
   RangeQueryParam,
   Metadata,
@@ -23,7 +24,7 @@ export class PlanResource extends StripeResource {
   ): Promise<Response<DeletedPlan>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/plans/${id}`,
+      `/v1/plans/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -36,30 +37,36 @@ export class PlanResource extends StripeResource {
     params?: PlanRetrieveParams,
     options?: RequestOptions
   ): Promise<Response<Plan>> {
-    return this._makeRequest('GET', `/v1/plans/${id}`, params, options, {
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          amount_decimal: {kind: 'nullable', inner: {kind: 'decimal_string'}},
-          tiers: {
-            kind: 'array',
-            element: {
-              kind: 'object',
-              fields: {
-                flat_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
-                },
-                unit_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
+    return this._makeRequest(
+      'GET',
+      `/v1/plans/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            amount_decimal: {kind: 'nullable', inner: {kind: 'decimal_string'}},
+            tiers: {
+              kind: 'array',
+              element: {
+                kind: 'object',
+                fields: {
+                  flat_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
+                  unit_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
                 },
               },
             },
           },
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * Updates the specified plan by setting the values of the parameters passed. Any parameters not provided are left unchanged. By design, you cannot change a plan's ID, amount, currency, or billing cycle.
@@ -69,30 +76,36 @@ export class PlanResource extends StripeResource {
     params?: PlanUpdateParams,
     options?: RequestOptions
   ): Promise<Response<Plan>> {
-    return this._makeRequest('POST', `/v1/plans/${id}`, params, options, {
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          amount_decimal: {kind: 'nullable', inner: {kind: 'decimal_string'}},
-          tiers: {
-            kind: 'array',
-            element: {
-              kind: 'object',
-              fields: {
-                flat_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
-                },
-                unit_amount_decimal: {
-                  kind: 'nullable',
-                  inner: {kind: 'decimal_string'},
+    return this._makeRequest(
+      'POST',
+      `/v1/plans/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            amount_decimal: {kind: 'nullable', inner: {kind: 'decimal_string'}},
+            tiers: {
+              kind: 'array',
+              element: {
+                kind: 'object',
+                fields: {
+                  flat_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
+                  unit_amount_decimal: {
+                    kind: 'nullable',
+                    inner: {kind: 'decimal_string'},
+                  },
                 },
               },
             },
           },
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * Returns a list of your plans.
@@ -310,9 +323,9 @@ export interface DeletedPlan {
   deleted: true;
 }
 export namespace Plan {
-  export type BillingScheme = 'per_unit' | 'tiered';
+  export type BillingScheme = 'per_unit' | 'tiered' | OtherString;
 
-  export type Interval = 'day' | 'month' | 'week' | 'year';
+  export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
 
   export interface Tier {
     /**
@@ -341,7 +354,7 @@ export namespace Plan {
     up_to: number | null;
   }
 
-  export type TiersMode = 'graduated' | 'volume';
+  export type TiersMode = 'graduated' | 'volume' | OtherString;
 
   export interface TransformUsage {
     /**
@@ -355,10 +368,10 @@ export namespace Plan {
     round: TransformUsage.Round;
   }
 
-  export type UsageType = 'licensed' | 'metered';
+  export type UsageType = 'licensed' | 'metered' | OtherString;
 
   export namespace TransformUsage {
-    export type Round = 'down' | 'up';
+    export type Round = 'down' | 'up' | OtherString;
   }
 }
 export interface PlanCreateParams {
@@ -398,7 +411,7 @@ export interface PlanCreateParams {
   expand?: Array<string>;
 
   /**
-   * An identifier randomly generated by Stripe. Used to identify this plan when subscribing a customer. You can optionally override this ID, but the ID must be unique across all plans in your Stripe account. You can, however, use the same plan ID in both live and test modes.
+   * An identifier randomly generated by Stripe. Used to identify this plan when subscribing a customer. You can optionally override this ID, but the ID must be unique across all plans in your Stripe account. You can use the same plan ID in live mode and in your sandboxes.
    */
   id?: string;
 
@@ -450,9 +463,9 @@ export interface PlanCreateParams {
   usage_type?: PlanCreateParams.UsageType;
 }
 export namespace PlanCreateParams {
-  export type Interval = 'day' | 'month' | 'week' | 'year';
+  export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
 
-  export type BillingScheme = 'per_unit' | 'tiered';
+  export type BillingScheme = 'per_unit' | 'tiered' | OtherString;
 
   export interface Product {
     /**
@@ -488,6 +501,11 @@ export namespace PlanCreateParams {
     tax_code?: string;
 
     /**
+     * Tax details for this product, including the [tax code](https://docs.stripe.com/tax/tax-codes) and an optional performance location.
+     */
+    tax_details?: Product.TaxDetails;
+
+    /**
      * A label that represents units of this product. When set, this will be included in customers' receipts, invoices, Checkout, and the customer portal.
      */
     unit_label?: string;
@@ -520,7 +538,7 @@ export namespace PlanCreateParams {
     up_to: 'inf' | number;
   }
 
-  export type TiersMode = 'graduated' | 'volume';
+  export type TiersMode = 'graduated' | 'volume' | OtherString;
 
   export interface TransformUsage {
     /**
@@ -534,10 +552,24 @@ export namespace PlanCreateParams {
     round: TransformUsage.Round;
   }
 
-  export type UsageType = 'licensed' | 'metered';
+  export type UsageType = 'licensed' | 'metered' | OtherString;
+
+  export namespace Product {
+    export interface TaxDetails {
+      /**
+       * A tax location ID. Depending on the [tax code](https://docs.stripe.com/tax/tax-for-tickets/reference/tax-location-performance), this is required, optional, or not supported.
+       */
+      performance_location?: string;
+
+      /**
+       * A [tax code](https://docs.stripe.com/tax/tax-categories) ID.
+       */
+      tax_code?: Emptyable<string>;
+    }
+  }
 
   export namespace TransformUsage {
-    export type Round = 'down' | 'up';
+    export type Round = 'down' | 'up' | OtherString;
   }
 }
 export interface PlanRetrieveParams {

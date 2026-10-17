@@ -5,7 +5,7 @@ import {RequestOptions, Response} from '../lib.js';
 
 export class AccountSessionResource extends StripeResource {
   /**
-   * Creates a AccountSession object that includes a single-use token that the platform can use on their front-end to grant client-side API access.
+   * Creates an AccountSession object that includes a single-use token that the platform can use on their front-end to grant client-side API access.
    */
   create(
     params: AccountSessionCreateParams,
@@ -80,6 +80,8 @@ export namespace AccountSession {
     payment_details: Components.PaymentDetails;
 
     payment_disputes: Components.PaymentDisputes;
+
+    payment_method_settings: Components.PaymentMethodSettings;
 
     payments: Components.Payments;
 
@@ -221,6 +223,15 @@ export namespace AccountSession {
       enabled: boolean;
 
       features: PaymentDisputes.Features;
+    }
+
+    export interface PaymentMethodSettings {
+      /**
+       * Whether the embedded component is enabled.
+       */
+      enabled: boolean;
+
+      features: PaymentMethodSettings.Features;
     }
 
     export interface Payments {
@@ -368,6 +379,11 @@ export namespace AccountSession {
          * Whether sending refunds is enabled. This is `true` by default.
          */
         refund_management: boolean;
+
+        /**
+         * Whether to allow connected accounts to submit disputes using Smart Disputes. Defaults to the value of `dispute_management`.
+         */
+        smart_disputes_management: boolean;
       }
     }
 
@@ -515,6 +531,11 @@ export namespace AccountSession {
          * Whether sending refunds is enabled. This is `true` by default.
          */
         refund_management: boolean;
+
+        /**
+         * Whether to allow connected accounts to submit disputes using Smart Disputes. Defaults to the value of `dispute_management`.
+         */
+        smart_disputes_management: boolean;
       }
     }
 
@@ -534,6 +555,20 @@ export namespace AccountSession {
          * Whether sending refunds is enabled. This is `true` by default.
          */
         refund_management: boolean;
+
+        /**
+         * Whether to allow connected accounts to submit disputes using Smart Disputes. Defaults to the value of `dispute_management`.
+         */
+        smart_disputes_management: boolean;
+      }
+    }
+
+    export namespace PaymentMethodSettings {
+      export interface Features {
+        /**
+         * Whether Stripe user authentication is disabled. This value can only be `true` for accounts where `controller.requirement_collection` is `application` for the account. This is `false` by default.
+         */
+        disable_stripe_user_authentication: boolean;
       }
     }
 
@@ -558,6 +593,11 @@ export namespace AccountSession {
          * Whether sending refunds is enabled. This is `true` by default.
          */
         refund_management: boolean;
+
+        /**
+         * Whether to allow connected accounts to submit disputes using Smart Disputes. Defaults to the value of `dispute_management`.
+         */
+        smart_disputes_management: boolean;
       }
     }
 
@@ -698,6 +738,11 @@ export namespace AccountSessionCreateParams {
      * Configuration for the [payment disputes](https://docs.stripe.com/connect/supported-embedded-components/payment-disputes/) embedded component.
      */
     payment_disputes?: Components.PaymentDisputes;
+
+    /**
+     * Configuration for the [payment method settings](https://docs.stripe.com/connect/supported-embedded-components/payment-method-settings/) embedded component.
+     */
+    payment_method_settings?: Components.PaymentMethodSettings;
 
     /**
      * Configuration for the [payments](https://docs.stripe.com/connect/supported-embedded-components/payments/) embedded component.
@@ -904,6 +949,18 @@ export namespace AccountSessionCreateParams {
       features?: PaymentDisputes.Features;
     }
 
+    export interface PaymentMethodSettings {
+      /**
+       * Whether the embedded component is enabled.
+       */
+      enabled: boolean;
+
+      /**
+       * The list of features enabled in the embedded component.
+       */
+      features?: PaymentMethodSettings.Features;
+    }
+
     export interface Payments {
       /**
        * Whether the embedded component is enabled.
@@ -1070,6 +1127,11 @@ export namespace AccountSessionCreateParams {
          * Whether sending refunds is enabled. This is `true` by default.
          */
         refund_management?: boolean;
+
+        /**
+         * Whether to allow connected accounts to submit disputes using Smart Disputes. Defaults to the value of `dispute_management`.
+         */
+        smart_disputes_management?: boolean;
       }
     }
 
@@ -1217,6 +1279,11 @@ export namespace AccountSessionCreateParams {
          * Whether sending refunds is enabled. This is `true` by default.
          */
         refund_management?: boolean;
+
+        /**
+         * Whether to allow connected accounts to submit disputes using Smart Disputes. Defaults to the value of `dispute_management`.
+         */
+        smart_disputes_management?: boolean;
       }
     }
 
@@ -1236,6 +1303,20 @@ export namespace AccountSessionCreateParams {
          * Whether sending refunds is enabled. This is `true` by default.
          */
         refund_management?: boolean;
+
+        /**
+         * Whether to allow connected accounts to submit disputes using Smart Disputes. Defaults to the value of `dispute_management`.
+         */
+        smart_disputes_management?: boolean;
+      }
+    }
+
+    export namespace PaymentMethodSettings {
+      export interface Features {
+        /**
+         * Whether Stripe user authentication is disabled. This value can only be `true` for accounts where `controller.requirement_collection` is `application` for the account. This is `false` by default.
+         */
+        disable_stripe_user_authentication?: boolean;
       }
     }
 
@@ -1260,6 +1341,11 @@ export namespace AccountSessionCreateParams {
          * Whether sending refunds is enabled. This is `true` by default.
          */
         refund_management?: boolean;
+
+        /**
+         * Whether to allow connected accounts to submit disputes using Smart Disputes. Defaults to the value of `dispute_management`.
+         */
+        smart_disputes_management?: boolean;
       }
     }
 

@@ -2,6 +2,7 @@
 
 import {StripeResource} from '../StripeResource.js';
 import {PaymentMethod} from './PaymentMethods.js';
+import {OtherString} from '../shared.js';
 import {RequestOptions, Response} from '../lib.js';
 
 export class MandateResource extends StripeResource {
@@ -15,7 +16,7 @@ export class MandateResource extends StripeResource {
   ): Promise<Response<Mandate>> {
     return this._makeRequest(
       'GET',
-      `/v1/mandates/${id}`,
+      `/v1/mandates/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -103,6 +104,8 @@ export namespace Mandate {
 
     bacs_debit?: PaymentMethodDetails.BacsDebit;
 
+    blik?: PaymentMethodDetails.Blik;
+
     card?: PaymentMethodDetails.Card;
 
     cashapp?: PaymentMethodDetails.Cashapp;
@@ -153,9 +156,9 @@ export namespace Mandate {
     currency: string;
   }
 
-  export type Status = 'active' | 'inactive' | 'pending';
+  export type Status = 'active' | 'inactive' | 'pending' | OtherString;
 
-  export type Type = 'multi_use' | 'single_use';
+  export type Type = 'multi_use' | 'single_use' | OtherString;
 
   export namespace CustomerAcceptance {
     export interface Offline {}
@@ -172,7 +175,7 @@ export namespace Mandate {
       user_agent: string | null;
     }
 
-    export type Type = 'offline' | 'online';
+    export type Type = 'offline' | 'online' | OtherString;
   }
 
   export namespace PaymentMethodDetails {
@@ -239,7 +242,21 @@ export namespace Mandate {
       url: string;
     }
 
-    export interface Card {}
+    export interface Blik {
+      /**
+       * Date at which the mandate expires.
+       */
+      expires_at: number | null;
+
+      /**
+       * Type of the mandate.
+       */
+      type: 'off_session';
+    }
+
+    export interface Card {
+      india?: Card.India;
+    }
 
     export interface Cashapp {}
 
@@ -382,11 +399,15 @@ export namespace Mandate {
     }
 
     export namespace AcssDebit {
-      export type DefaultFor = 'invoice' | 'subscription';
+      export type DefaultFor = 'invoice' | 'subscription' | OtherString;
 
-      export type PaymentSchedule = 'combined' | 'interval' | 'sporadic';
+      export type PaymentSchedule =
+        | 'combined'
+        | 'interval'
+        | 'sporadic'
+        | OtherString;
 
-      export type TransactionType = 'business' | 'personal';
+      export type TransactionType = 'business' | 'personal' | OtherString;
     }
 
     export namespace BacsDebit {
@@ -394,18 +415,41 @@ export namespace Mandate {
         | 'accepted'
         | 'pending'
         | 'refused'
-        | 'revoked';
+        | 'revoked'
+        | OtherString;
 
       export type RevocationReason =
         | 'account_closed'
         | 'bank_account_restricted'
         | 'bank_ownership_changed'
         | 'could_not_process'
-        | 'debit_not_authorized';
+        | 'debit_not_authorized'
+        | OtherString;
+    }
+
+    export namespace Card {
+      export interface India {
+        /**
+         * The reason why the mandate has an `inactive` status. This field is only populated if the mandate is inactive.
+         */
+        inactive_reason: India.InactiveReason | null;
+      }
+
+      export namespace India {
+        export type InactiveReason =
+          | 'canceled'
+          | 'card_not_supported'
+          | 'currency_not_supported'
+          | 'expired'
+          | 'issuer_not_supported'
+          | 'processing_error'
+          | 'undetermined'
+          | OtherString;
+      }
     }
 
     export namespace Payto {
-      export type AmountType = 'fixed' | 'maximum';
+      export type AmountType = 'fixed' | 'maximum' | OtherString;
 
       export type PaymentSchedule =
         | 'adhoc'
@@ -415,7 +459,8 @@ export namespace Mandate {
         | 'monthly'
         | 'quarterly'
         | 'semi_annual'
-        | 'weekly';
+        | 'weekly'
+        | OtherString;
 
       export type Purpose =
         | 'dependant_support'
@@ -428,24 +473,26 @@ export namespace Mandate {
         | 'retail'
         | 'salary'
         | 'tax'
-        | 'utility';
+        | 'utility'
+        | OtherString;
     }
 
     export namespace Pix {
-      export type AmountIncludesIof = 'always' | 'never';
+      export type AmountIncludesIof = 'always' | 'never' | OtherString;
 
-      export type AmountType = 'fixed' | 'maximum';
+      export type AmountType = 'fixed' | 'maximum' | OtherString;
 
       export type PaymentSchedule =
         | 'halfyearly'
         | 'monthly'
         | 'quarterly'
         | 'weekly'
-        | 'yearly';
+        | 'yearly'
+        | OtherString;
     }
 
     export namespace Upi {
-      export type AmountType = 'fixed' | 'maximum';
+      export type AmountType = 'fixed' | 'maximum' | OtherString;
     }
   }
 }

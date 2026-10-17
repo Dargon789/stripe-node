@@ -17,6 +17,7 @@ import {
   Emptyable,
   MetadataParam,
   AddressParam,
+  OtherString,
   PaginationParams,
   RangeQueryParam,
   Metadata,
@@ -43,9 +44,7 @@ export class ChargeResource extends StripeResource {
     }) as any;
   }
   /**
-   * This method is no longer recommended—use the [Payment Intents API](https://docs.stripe.com/docs/api/payment_intents)
-   * to initiate a new payment instead. Confirmation of the PaymentIntent creates the Charge
-   * object used to request payment.
+   * This method is deprecated and will be removed soon. If your integration uses it, you need to update it to use a different payment flow, such as [the Payment Intents API](https://docs.stripe.com/docs/payments/payment-intents).
    */
   create(
     params?: ChargeCreateParams,
@@ -63,7 +62,7 @@ export class ChargeResource extends StripeResource {
   ): Promise<Response<Charge>> {
     return this._makeRequest(
       'GET',
-      `/v1/charges/${id}`,
+      `/v1/charges/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -78,7 +77,7 @@ export class ChargeResource extends StripeResource {
   ): Promise<Response<Charge>> {
     return this._makeRequest(
       'POST',
-      `/v1/charges/${id}`,
+      `/v1/charges/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -98,11 +97,7 @@ export class ChargeResource extends StripeResource {
     }) as any;
   }
   /**
-   * Capture the payment of an existing, uncaptured charge that was created with the capture option set to false.
-   *
-   * Uncaptured payments expire a set number of days after they are created ([7 by default](https://docs.stripe.com/docs/charges/placing-a-hold)), after which they are marked as refunded and capture attempts will fail.
-   *
-   * Don't use this method to capture a PaymentIntent-initiated charge. Use [Capture a PaymentIntent](https://docs.stripe.com/docs/api/payment_intents/capture).
+   * This method is deprecated and will be removed soon. If your integration uses it, you need to update it to use a different payment flow, such as [the Payment Intents API](https://docs.stripe.com/docs/payments/payment-intents).
    */
   capture(
     id: string,
@@ -111,7 +106,7 @@ export class ChargeResource extends StripeResource {
   ): Promise<Response<Charge>> {
     return this._makeRequest(
       'POST',
-      `/v1/charges/${id}/capture`,
+      `/v1/charges/${encodeURIComponent(id)}/capture`,
       params,
       options
     ) as any;
@@ -542,6 +537,8 @@ export namespace Charge {
 
     paypal?: PaymentMethodDetails.Paypal;
 
+    paypay?: PaymentMethodDetails.Paypay;
+
     payto?: PaymentMethodDetails.Payto;
 
     pix?: PaymentMethodDetails.Pix;
@@ -559,6 +556,8 @@ export namespace Charge {
     sepa_credit_transfer?: PaymentMethodDetails.SepaCreditTransfer;
 
     sepa_debit?: PaymentMethodDetails.SepaDebit;
+
+    sequra?: PaymentMethodDetails.Sequra;
 
     sofort?: PaymentMethodDetails.Sofort;
 
@@ -631,7 +630,7 @@ export namespace Charge {
     tracking_number?: string | null;
   }
 
-  export type Status = 'failed' | 'pending' | 'succeeded';
+  export type Status = 'failed' | 'pending' | 'succeeded' | OtherString;
 
   export interface TransferData {
     /**
@@ -665,7 +664,8 @@ export namespace Charge {
     export type AdviceCode =
       | 'confirm_card_data'
       | 'do_not_try_again'
-      | 'try_again_later';
+      | 'try_again_later'
+      | OtherString;
 
     export interface Rule {
       /**
@@ -948,6 +948,11 @@ export namespace Charge {
 
     export interface Bizum {
       /**
+       * A unique identifier for the buyer as determined by the local payment processor.
+       */
+      buyer_id: string | null;
+
+      /**
        * The Bizum transaction ID associated with this payment.
        */
       transaction_id: string | null;
@@ -1004,6 +1009,11 @@ export namespace Charge {
       description?: string | null;
 
       /**
+       * The Electronic Commerce Indicator (ECI) returned by the card network in the authorization response. Indicates the level of authentication used. Only populated for Visa and Mastercard transactions. This is the network's final ECI and can differ from the request value. An authenticated ECI alone doesn't determine liability shift.
+       */
+      electronic_commerce_indicator: string | null;
+
+      /**
        * Two-digit number representing the card's expiration month.
        */
       exp_month: number;
@@ -1054,7 +1064,7 @@ export namespace Charge {
       /**
        * ID of the mandate used to make this payment or created by it.
        */
-      mandate: string | null;
+      mandate: string | Mandate | null;
 
       /**
        * True if this payment was marked as MOTO and out of scope for SCA.
@@ -1089,6 +1099,11 @@ export namespace Charge {
        * Populated if this transaction used 3D Secure authentication.
        */
       three_d_secure: Card.ThreeDSecure | null;
+
+      /**
+       * Transaction Link ID (TLID) is a unique identifier for a transaction. This is used by some card networks, such as Mastercard, for transaction linking, in addition to Network Transaction IDs. This value will be present if it is returned by the financial network in the authorization response, and null otherwise.
+       */
+      transaction_link_id: string | null;
 
       /**
        * If this Card is part of a card wallet, this contains the details of the card wallet.
@@ -1294,7 +1309,7 @@ export namespace Charge {
       account_holder_type: Fpx.AccountHolderType | null;
 
       /**
-       * The customer's bank. Can be one of `affin_bank`, `agrobank`, `alliance_bank`, `ambank`, `bank_islam`, `bank_muamalat`, `bank_rakyat`, `bsn`, `cimb`, `hong_leong_bank`, `hsbc`, `kfh`, `maybank2u`, `ocbc`, `public_bank`, `rhb`, `standard_chartered`, `uob`, `deutsche_bank`, `maybank2e`, `pb_enterprise`, or `bank_of_china`.
+       * The customer's bank. Can be one of `affin_bank`, `agrobank`, `alliance_bank`, `ambank`, `bank_islam`, `bank_muamalat`, `bnp_paribas`, `bank_rakyat`, `bsn`, `cimb`, `citibank`, `hong_leong_bank`, `hsbc`, `kfh`, `maybank2u`, `ocbc`, `public_bank`, `rhb`, `standard_chartered`, `uob`, `deutsche_bank`, `maybank2e`, `mbsb_bank`, `pb_enterprise`, or `bank_of_china`.
        */
       bank: Fpx.Bank;
 
@@ -1553,6 +1568,11 @@ export namespace Charge {
        * You could use this attribute to get a sense of international fees.
        */
       country: string | null;
+
+      /**
+       * The [funding source group code](https://docs.stripe.com/payments/link/link-payment-methods) applied to this Link payment at confirmation time.
+       */
+      funding_source_group?: string;
     }
 
     export interface MbWay {}
@@ -1716,6 +1736,8 @@ export namespace Charge {
       transaction_id: string | null;
     }
 
+    export interface Paypay {}
+
     export interface Payto {
       /**
        * Bank-State-Branch number of the bank account.
@@ -1745,7 +1767,12 @@ export namespace Charge {
       bank_transaction_id?: string | null;
 
       /**
-       * ID of the multi use Mandate generated by the PaymentIntent
+       * Uniquely identifies this particular Pix account. You can use this attribute to check whether two Pix accounts are the same.
+       */
+      fingerprint?: string | null;
+
+      /**
+       * ID of the multi use Mandate generated by the PaymentIntent or SetupIntent.
        */
       mandate?: string;
     }
@@ -1846,6 +1873,13 @@ export namespace Charge {
       mandate: string | null;
     }
 
+    export interface Sequra {
+      /**
+       * The SeQura transaction ID associated with this payment.
+       */
+      transaction_id: string | null;
+    }
+
     export interface Sofort {
       /**
        * Bank code of bank associated with the bank account.
@@ -1923,7 +1957,7 @@ export namespace Charge {
 
     export interface Twint {
       /**
-       * ID of the multi use Mandate generated by the PaymentIntent
+       * ID of the multi use Mandate generated by the PaymentIntent or SetupIntent.
        */
       mandate?: string;
     }
@@ -2009,7 +2043,7 @@ export namespace Charge {
     export interface Zip {}
 
     export namespace AchDebit {
-      export type AccountHolderType = 'company' | 'individual';
+      export type AccountHolderType = 'company' | 'individual' | OtherString;
     }
 
     export namespace Alma {
@@ -2034,7 +2068,7 @@ export namespace Charge {
       export namespace Funding {
         export interface Card {
           /**
-           * Card brand. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa` or `unknown`.
+           * Card brand. Can be `American Express`, `Cartes Bancaires`, `Diners Club`, `Discover`, `Eftpos Australia`, `Girocard`, `JCB`, `MasterCard`, `UnionPay`, `Visa`, or `Unknown`.
            */
           brand: string | null;
 
@@ -2067,7 +2101,7 @@ export namespace Charge {
     }
 
     export namespace Bancontact {
-      export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+      export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
     }
 
     export namespace Card {
@@ -2135,7 +2169,7 @@ export namespace Charge {
         status: Overcapture.Status;
       }
 
-      export type RegulatedStatus = 'regulated' | 'unregulated';
+      export type RegulatedStatus = 'regulated' | 'unregulated' | OtherString;
 
       export interface ThreeDSecure {
         /**
@@ -2211,11 +2245,11 @@ export namespace Charge {
       }
 
       export namespace ExtendedAuthorization {
-        export type Status = 'disabled' | 'enabled';
+        export type Status = 'disabled' | 'enabled' | OtherString;
       }
 
       export namespace IncrementalAuthorization {
-        export type Status = 'available' | 'unavailable';
+        export type Status = 'available' | 'unavailable' | OtherString;
       }
 
       export namespace Installments {
@@ -2238,37 +2272,47 @@ export namespace Charge {
         }
 
         export namespace Plan {
-          export type Type = 'bonus' | 'fixed_count' | 'revolving';
+          export type Type =
+            | 'bonus'
+            | 'fixed_count'
+            | 'revolving'
+            | OtherString;
         }
       }
 
       export namespace Multicapture {
-        export type Status = 'available' | 'unavailable';
+        export type Status = 'available' | 'unavailable' | OtherString;
       }
 
       export namespace Overcapture {
-        export type Status = 'available' | 'unavailable';
+        export type Status = 'available' | 'unavailable' | OtherString;
       }
 
       export namespace ThreeDSecure {
-        export type AuthenticationFlow = 'challenge' | 'frictionless';
+        export type AuthenticationFlow =
+          | 'challenge'
+          | 'frictionless'
+          | OtherString;
 
         export type ElectronicCommerceIndicator =
           | '01'
           | '02'
           | '05'
           | '06'
-          | '07';
+          | '07'
+          | OtherString;
 
-        export type ExemptionIndicator = 'low_risk' | 'none';
+        export type ExemptionIndicator = 'low_risk' | 'none' | OtherString;
 
         export type Result =
           | 'attempt_acknowledged'
           | 'authenticated'
+          | 'data_share_only'
           | 'exempted'
           | 'failed'
           | 'not_supported'
-          | 'processing_error';
+          | 'processing_error'
+          | OtherString;
 
         export type ResultReason =
           | 'abandoned'
@@ -2277,9 +2321,16 @@ export namespace Charge {
           | 'card_not_enrolled'
           | 'network_not_supported'
           | 'protocol_error'
-          | 'rejected';
+          | 'rejected'
+          | OtherString;
 
-        export type Version = '1.0.2' | '2.1.0' | '2.2.0' | '2.3.0' | '2.3.1';
+        export type Version =
+          | '1.0.2'
+          | '2.1.0'
+          | '2.2.0'
+          | '2.3.0'
+          | '2.3.1'
+          | OtherString;
       }
 
       export namespace Wallet {
@@ -2289,7 +2340,12 @@ export namespace Charge {
 
         export interface GooglePay {}
 
-        export interface Link {}
+        export interface Link {
+          /**
+           * The [funding source group code](https://docs.stripe.com/payments/link/link-payment-methods) applied to this Link payment at confirmation time.
+           */
+          funding_source_group: string | null;
+        }
 
         export interface Masterpass {
           /**
@@ -2322,7 +2378,8 @@ export namespace Charge {
           | 'link'
           | 'masterpass'
           | 'samsung_pay'
-          | 'visa_checkout';
+          | 'visa_checkout'
+          | OtherString;
 
         export interface VisaCheckout {
           /**
@@ -2366,7 +2423,8 @@ export namespace Charge {
         | 'contactless_emv'
         | 'contactless_magstripe_mode'
         | 'magnetic_stripe_fallback'
-        | 'magnetic_stripe_track2';
+        | 'magnetic_stripe_track2'
+        | OtherString;
 
       export interface Receipt {
         /**
@@ -2423,7 +2481,12 @@ export namespace Charge {
       }
 
       export namespace Receipt {
-        export type AccountType = 'checking' | 'credit' | 'prepaid' | 'unknown';
+        export type AccountType =
+          | 'checking'
+          | 'credit'
+          | 'prepaid'
+          | 'unknown'
+          | OtherString;
       }
 
       export namespace Wallet {
@@ -2431,7 +2494,8 @@ export namespace Charge {
           | 'apple_pay'
           | 'google_pay'
           | 'samsung_pay'
-          | 'unknown';
+          | 'unknown'
+          | OtherString;
       }
     }
 
@@ -2441,14 +2505,18 @@ export namespace Charge {
         | 'ethereum'
         | 'polygon'
         | 'solana'
-        | 'tempo';
+        | 'sui'
+        | 'tempo'
+        | OtherString;
 
       export type TokenCurrency =
         | 'phantom_cash'
         | 'usdc'
         | 'usdg'
         | 'usdp'
-        | 'usdt';
+        | 'usdsui'
+        | 'usdt'
+        | OtherString;
     }
 
     export namespace Eps {
@@ -2480,11 +2548,12 @@ export namespace Charge {
         | 'sparda_bank_wien'
         | 'volksbank_gruppe'
         | 'volkskreditbank_ag'
-        | 'vr_bank_braunau';
+        | 'vr_bank_braunau'
+        | OtherString;
     }
 
     export namespace Fpx {
-      export type AccountHolderType = 'company' | 'individual';
+      export type AccountHolderType = 'company' | 'individual' | OtherString;
 
       export type Bank =
         | 'affin_bank'
@@ -2495,20 +2564,24 @@ export namespace Charge {
         | 'bank_muamalat'
         | 'bank_of_china'
         | 'bank_rakyat'
+        | 'bnp_paribas'
         | 'bsn'
         | 'cimb'
+        | 'citibank'
         | 'deutsche_bank'
         | 'hong_leong_bank'
         | 'hsbc'
         | 'kfh'
         | 'maybank2e'
         | 'maybank2u'
+        | 'mbsb_bank'
         | 'ocbc'
         | 'pb_enterprise'
         | 'public_bank'
         | 'rhb'
         | 'standard_chartered'
-        | 'uob';
+        | 'uob'
+        | OtherString;
     }
 
     export namespace Ideal {
@@ -2532,7 +2605,8 @@ export namespace Charge {
         | 'sns_bank'
         | 'triodos_bank'
         | 'van_lanschot'
-        | 'yoursafe';
+        | 'yoursafe'
+        | OtherString;
 
       export type Bic =
         | 'ABNANL2A'
@@ -2555,7 +2629,8 @@ export namespace Charge {
         | 'REVOIE23'
         | 'REVOLT21'
         | 'SNSBNL2A'
-        | 'TRIONL2U';
+        | 'TRIONL2U'
+        | OtherString;
     }
 
     export namespace InteracPresent {
@@ -2564,7 +2639,8 @@ export namespace Charge {
         | 'contactless_emv'
         | 'contactless_magstripe_mode'
         | 'magnetic_stripe_fallback'
-        | 'magnetic_stripe_track2';
+        | 'magnetic_stripe_track2'
+        | OtherString;
 
       export interface Receipt {
         /**
@@ -2614,7 +2690,11 @@ export namespace Charge {
       }
 
       export namespace Receipt {
-        export type AccountType = 'checking' | 'savings' | 'unknown';
+        export type AccountType =
+          | 'checking'
+          | 'savings'
+          | 'unknown'
+          | OtherString;
       }
     }
 
@@ -2645,7 +2725,12 @@ export namespace Charge {
       }
 
       export namespace Store {
-        export type Chain = 'familymart' | 'lawson' | 'ministop' | 'seicomart';
+        export type Chain =
+          | 'familymart'
+          | 'lawson'
+          | 'ministop'
+          | 'seicomart'
+          | OtherString;
       }
     }
 
@@ -2672,7 +2757,8 @@ export namespace Charge {
         | 'shinhyup'
         | 'suhyup'
         | 'tossbank'
-        | 'woori';
+        | 'woori'
+        | OtherString;
     }
 
     export namespace Mobilepay {
@@ -2731,7 +2817,8 @@ export namespace Charge {
         | 'tmobile_usbugi_bankowe'
         | 'toyota_bank'
         | 'velobank'
-        | 'volkswagen_bank';
+        | 'volkswagen_bank'
+        | OtherString;
     }
 
     export namespace Paypal {
@@ -2748,9 +2835,16 @@ export namespace Charge {
       }
 
       export namespace SellerProtection {
-        export type DisputeCategory = 'fraudulent' | 'product_not_received';
+        export type DisputeCategory =
+          | 'fraudulent'
+          | 'product_not_received'
+          | OtherString;
 
-        export type Status = 'eligible' | 'not_eligible' | 'partially_eligible';
+        export type Status =
+          | 'eligible'
+          | 'not_eligible'
+          | 'partially_eligible'
+          | OtherString;
       }
     }
 
@@ -2767,7 +2861,7 @@ export namespace Charge {
       export namespace Funding {
         export interface Card {
           /**
-           * Card brand. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa` or `unknown`.
+           * Card brand. Can be `American Express`, `Cartes Bancaires`, `Diners Club`, `Discover`, `Eftpos Australia`, `Girocard`, `JCB`, `MasterCard`, `UnionPay`, `Visa`, or `Unknown`.
            */
           brand: string | null;
 
@@ -2807,13 +2901,14 @@ export namespace Charge {
         | 'fr'
         | 'it'
         | 'nl'
-        | 'pl';
+        | 'pl'
+        | OtherString;
     }
 
     export namespace UsBankAccount {
-      export type AccountHolderType = 'company' | 'individual';
+      export type AccountHolderType = 'company' | 'individual' | OtherString;
 
-      export type AccountType = 'checking' | 'savings';
+      export type AccountType = 'checking' | 'savings' | OtherString;
     }
   }
 }
@@ -2831,7 +2926,7 @@ export interface ChargeCreateParams {
   application_fee_amount?: number;
 
   /**
-   * Whether to immediately capture the charge. Defaults to `true`. When `false`, the charge issues an authorization (or pre-authorization), and will need to be [captured](https://api.stripe.com#capture_charge) later. Uncaptured charges expire after a set number of days (7 by default). For more information, see the [authorizing charges and settling later](https://docs.stripe.com/charges/placing-a-hold) documentation.
+   * Whether to immediately capture the charge. Defaults to `true`. When `false`, the charge issues an authorization (or pre-authorization), and will need to be [captured](https://docs.stripe.com/api#capture_charge) later. Uncaptured charges expire after a set number of days (7 by default). For more information, see the [authorizing charges and settling later](https://docs.stripe.com/charges/placing-a-hold) documentation.
    */
   capture?: boolean;
 
@@ -3056,7 +3151,7 @@ export namespace ChargeUpdateParams {
   }
 
   export namespace FraudDetails {
-    export type UserReport = 'fraudulent' | 'safe';
+    export type UserReport = 'fraudulent' | 'safe' | OtherString;
   }
 }
 export interface ChargeListParams extends PaginationParams {

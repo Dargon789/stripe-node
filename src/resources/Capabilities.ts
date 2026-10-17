@@ -1,6 +1,7 @@
 // File generated from our OpenAPI spec
 
 import {Account} from './Accounts.js';
+import {OtherString} from '../shared.js';
 import {RequestOptions} from '../lib.js';
 export interface Capability {
   /**
@@ -60,7 +61,7 @@ export namespace Capability {
     disabled_reason: FutureRequirements.DisabledReason | null;
 
     /**
-     * Details about validation and verification failures for `due` requirements that must be resolved.
+     * Fields that are `currently_due` and need to be collected again because validation or verification failed.
      */
     errors: Array<FutureRequirements.Error>;
 
@@ -102,7 +103,7 @@ export namespace Capability {
     disabled_reason: Requirements.DisabledReason | null;
 
     /**
-     * Details about validation and verification failures for `due` requirements that must be resolved.
+     * Fields that are `currently_due` and need to be collected again because validation or verification failed.
      */
     errors: Array<Requirements.Error>;
 
@@ -122,7 +123,12 @@ export namespace Capability {
     pending_verification: Array<string>;
   }
 
-  export type Status = 'active' | 'inactive' | 'pending' | 'unrequested';
+  export type Status =
+    | 'active'
+    | 'inactive'
+    | 'pending'
+    | 'unrequested'
+    | OtherString;
 
   export namespace FutureRequirements {
     export interface Alternative {
@@ -147,7 +153,8 @@ export namespace Capability {
       | 'rejected.inactivity'
       | 'rejected.other'
       | 'rejected.unsupported_business'
-      | 'requirements.fields_needed';
+      | 'requirements.fields_needed'
+      | OtherString;
 
     export interface Error {
       /**
@@ -171,8 +178,10 @@ export namespace Capability {
         | 'external_request'
         | 'information_missing'
         | 'invalid_address_city_state_postal_code'
+        | 'invalid_address_cmra_address'
         | 'invalid_address_highway_contract_box'
         | 'invalid_address_private_mailbox'
+        | 'invalid_address_registered_agent_address'
         | 'invalid_business_profile_name'
         | 'invalid_business_profile_name_denylisted'
         | 'invalid_company_name_denylisted'
@@ -291,7 +300,8 @@ export namespace Capability {
       | 'rejected.inactivity'
       | 'rejected.other'
       | 'rejected.unsupported_business'
-      | 'requirements.fields_needed';
+      | 'requirements.fields_needed'
+      | OtherString;
 
     export interface Error {
       /**
@@ -315,8 +325,10 @@ export namespace Capability {
         | 'external_request'
         | 'information_missing'
         | 'invalid_address_city_state_postal_code'
+        | 'invalid_address_cmra_address'
         | 'invalid_address_highway_contract_box'
         | 'invalid_address_private_mailbox'
+        | 'invalid_address_registered_agent_address'
         | 'invalid_business_profile_name'
         | 'invalid_business_profile_name_denylisted'
         | 'invalid_company_name_denylisted'

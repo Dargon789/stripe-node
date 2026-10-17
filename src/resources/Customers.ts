@@ -16,6 +16,7 @@ import {
   Emptyable,
   AddressParam,
   MetadataParam,
+  OtherString,
   PaginationParams,
   RangeQueryParam,
   Address,
@@ -40,7 +41,7 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<DeletedCustomer>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/customers/${id}`,
+      `/v1/customers/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -55,7 +56,7 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<Customer | DeletedCustomer>> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${id}`,
+      `/v1/customers/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -70,101 +71,111 @@ export class CustomerResource extends StripeResource {
     params?: CustomerUpdateParams,
     options?: RequestOptions
   ): Promise<Response<Customer>> {
-    return this._makeRequest('POST', `/v1/customers/${id}`, params, options, {
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          subscriptions: {
-            kind: 'object',
-            fields: {
-              data: {
-                kind: 'array',
-                element: {
-                  kind: 'object',
-                  fields: {
-                    items: {
-                      kind: 'object',
-                      fields: {
-                        data: {
-                          kind: 'array',
-                          element: {
-                            kind: 'object',
-                            fields: {
-                              plan: {
-                                kind: 'object',
-                                fields: {
-                                  amount_decimal: {
-                                    kind: 'nullable',
-                                    inner: {kind: 'decimal_string'},
-                                  },
-                                  tiers: {
-                                    kind: 'array',
-                                    element: {
-                                      kind: 'object',
-                                      fields: {
-                                        flat_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
-                                        },
-                                        unit_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
+    return this._makeRequest(
+      'POST',
+      `/v1/customers/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            subscriptions: {
+              kind: 'object',
+              fields: {
+                data: {
+                  kind: 'array',
+                  element: {
+                    kind: 'object',
+                    fields: {
+                      items: {
+                        kind: 'object',
+                        fields: {
+                          data: {
+                            kind: 'array',
+                            element: {
+                              kind: 'object',
+                              fields: {
+                                plan: {
+                                  kind: 'object',
+                                  fields: {
+                                    amount_decimal: {
+                                      kind: 'nullable',
+                                      inner: {kind: 'decimal_string'},
+                                    },
+                                    tiers: {
+                                      kind: 'array',
+                                      element: {
+                                        kind: 'object',
+                                        fields: {
+                                          flat_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
+                                          unit_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
                                         },
                                       },
                                     },
                                   },
                                 },
-                              },
-                              price: {
-                                kind: 'object',
-                                fields: {
-                                  currency_options: {
-                                    kind: 'array',
-                                    element: {
-                                      kind: 'object',
-                                      fields: {
-                                        tiers: {
-                                          kind: 'array',
-                                          element: {
-                                            kind: 'object',
-                                            fields: {
-                                              flat_amount_decimal: {
-                                                kind: 'nullable',
-                                                inner: {kind: 'decimal_string'},
-                                              },
-                                              unit_amount_decimal: {
-                                                kind: 'nullable',
-                                                inner: {kind: 'decimal_string'},
+                                price: {
+                                  kind: 'object',
+                                  fields: {
+                                    currency_options: {
+                                      kind: 'array',
+                                      element: {
+                                        kind: 'object',
+                                        fields: {
+                                          tiers: {
+                                            kind: 'array',
+                                            element: {
+                                              kind: 'object',
+                                              fields: {
+                                                flat_amount_decimal: {
+                                                  kind: 'nullable',
+                                                  inner: {
+                                                    kind: 'decimal_string',
+                                                  },
+                                                },
+                                                unit_amount_decimal: {
+                                                  kind: 'nullable',
+                                                  inner: {
+                                                    kind: 'decimal_string',
+                                                  },
+                                                },
                                               },
                                             },
                                           },
-                                        },
-                                        unit_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
-                                        },
-                                      },
-                                    },
-                                  },
-                                  tiers: {
-                                    kind: 'array',
-                                    element: {
-                                      kind: 'object',
-                                      fields: {
-                                        flat_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
-                                        },
-                                        unit_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
+                                          unit_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
                                         },
                                       },
                                     },
-                                  },
-                                  unit_amount_decimal: {
-                                    kind: 'nullable',
-                                    inner: {kind: 'decimal_string'},
+                                    tiers: {
+                                      kind: 'array',
+                                      element: {
+                                        kind: 'object',
+                                        fields: {
+                                          flat_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
+                                          unit_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
+                                        },
+                                      },
+                                    },
+                                    unit_amount_decimal: {
+                                      kind: 'nullable',
+                                      inner: {kind: 'decimal_string'},
+                                    },
                                   },
                                 },
                               },
@@ -179,8 +190,8 @@ export class CustomerResource extends StripeResource {
             },
           },
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * Removes the currently applied discount on a customer.
@@ -192,7 +203,7 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<DeletedDiscount>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/customers/${id}/discount`,
+      `/v1/customers/${encodeURIComponent(id)}/discount`,
       params,
       options
     ) as any;
@@ -593,7 +604,7 @@ export class CustomerResource extends StripeResource {
   ): ApiListPromise<CustomerBalanceTransaction> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${id}/balance_transactions`,
+      `/v1/customers/${encodeURIComponent(id)}/balance_transactions`,
       params,
       options,
       {
@@ -611,7 +622,7 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CustomerBalanceTransaction>> {
     return this._makeRequest(
       'POST',
-      `/v1/customers/${id}/balance_transactions`,
+      `/v1/customers/${encodeURIComponent(id)}/balance_transactions`,
       params,
       options
     ) as any;
@@ -627,7 +638,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CustomerBalanceTransaction>> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${customerId}/balance_transactions/${id}`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/balance_transactions/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -643,7 +656,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CustomerBalanceTransaction>> {
     return this._makeRequest(
       'POST',
-      `/v1/customers/${customerId}/balance_transactions/${id}`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/balance_transactions/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -658,7 +673,7 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CashBalance>> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${id}/cash_balance`,
+      `/v1/customers/${encodeURIComponent(id)}/cash_balance`,
       params,
       options
     ) as any;
@@ -673,7 +688,7 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CashBalance>> {
     return this._makeRequest(
       'POST',
-      `/v1/customers/${id}/cash_balance`,
+      `/v1/customers/${encodeURIComponent(id)}/cash_balance`,
       params,
       options
     ) as any;
@@ -688,7 +703,7 @@ export class CustomerResource extends StripeResource {
   ): ApiListPromise<CustomerCashBalanceTransaction> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${id}/cash_balance_transactions`,
+      `/v1/customers/${encodeURIComponent(id)}/cash_balance_transactions`,
       params,
       options,
       {
@@ -707,7 +722,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CustomerCashBalanceTransaction>> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${customerId}/cash_balance_transactions/${id}`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/cash_balance_transactions/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -724,7 +741,7 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<FundingInstructions>> {
     return this._makeRequest(
       'POST',
-      `/v1/customers/${id}/funding_instructions`,
+      `/v1/customers/${encodeURIComponent(id)}/funding_instructions`,
       params,
       options
     ) as any;
@@ -739,7 +756,7 @@ export class CustomerResource extends StripeResource {
   ): ApiListPromise<PaymentMethod> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${id}/payment_methods`,
+      `/v1/customers/${encodeURIComponent(id)}/payment_methods`,
       params,
       options,
       {
@@ -758,7 +775,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<PaymentMethod>> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${customerId}/payment_methods/${id}`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/payment_methods/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -773,7 +792,7 @@ export class CustomerResource extends StripeResource {
   ): ApiListPromise<CustomerSource> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${id}/sources`,
+      `/v1/customers/${encodeURIComponent(id)}/sources`,
       params,
       options,
       {
@@ -795,7 +814,7 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CustomerSource>> {
     return this._makeRequest(
       'POST',
-      `/v1/customers/${id}/sources`,
+      `/v1/customers/${encodeURIComponent(id)}/sources`,
       params,
       options
     ) as any;
@@ -811,7 +830,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CustomerSource>> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${customerId}/sources/${id}`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/sources/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -827,7 +848,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CustomerSource>> {
     return this._makeRequest(
       'POST',
-      `/v1/customers/${customerId}/sources/${id}`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/sources/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -843,7 +866,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<CustomerSource | DeletedCustomerSource>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/customers/${customerId}/sources/${id}`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/sources/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -859,7 +884,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<BankAccount>> {
     return this._makeRequest(
       'POST',
-      `/v1/customers/${customerId}/sources/${id}/verify`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/sources/${encodeURIComponent(id)}/verify`,
       params,
       options
     ) as any;
@@ -875,7 +902,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<DeletedTaxId>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/customers/${customerId}/tax_ids/${id}`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/tax_ids/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -891,7 +920,9 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<TaxId>> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${customerId}/tax_ids/${id}`,
+      `/v1/customers/${encodeURIComponent(
+        customerId
+      )}/tax_ids/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -906,7 +937,7 @@ export class CustomerResource extends StripeResource {
   ): ApiListPromise<TaxId> {
     return this._makeRequest(
       'GET',
-      `/v1/customers/${id}/tax_ids`,
+      `/v1/customers/${encodeURIComponent(id)}/tax_ids`,
       params,
       options,
       {
@@ -924,7 +955,7 @@ export class CustomerResource extends StripeResource {
   ): Promise<Response<TaxId>> {
     return this._makeRequest(
       'POST',
-      `/v1/customers/${id}/tax_ids`,
+      `/v1/customers/${encodeURIComponent(id)}/tax_ids`,
       params,
       options
     ) as any;
@@ -942,7 +973,7 @@ export interface Customer {
   object: 'customer';
 
   /**
-   * The customer's address.
+   * The customer's billing address.
    */
   address?: Address | null;
 
@@ -1178,7 +1209,7 @@ export namespace Customer {
     provider: Tax.Provider;
   }
 
-  export type TaxExempt = 'exempt' | 'none' | 'reverse';
+  export type TaxExempt = 'exempt' | 'none' | 'reverse' | OtherString;
 
   export namespace InvoiceSettings {
     export interface CustomField {
@@ -1211,7 +1242,8 @@ export namespace Customer {
       | 'failed'
       | 'not_collecting'
       | 'supported'
-      | 'unrecognized_location';
+      | 'unrecognized_location'
+      | OtherString;
 
     export interface Location {
       /**
@@ -1230,14 +1262,20 @@ export namespace Customer {
       state: string | null;
     }
 
-    export type Provider = 'anrok' | 'avalara' | 'sphere' | 'stripe';
+    export type Provider =
+      | 'anrok'
+      | 'avalara'
+      | 'sphere'
+      | 'stripe'
+      | OtherString;
 
     export namespace Location {
       export type Source =
         | 'billing_address'
         | 'ip_address'
         | 'payment_method'
-        | 'shipping_destination';
+        | 'shipping_destination'
+        | OtherString;
     }
   }
 }
@@ -1283,7 +1321,7 @@ export interface CustomerCreateParams {
   individual_name?: Emptyable<string>;
 
   /**
-   * The prefix for the customer used to generate unique invoice numbers. Must be 3–12 uppercase letters or numbers.
+   * The prefix for the customer used to generate unique invoice numbers. Must be 1–12 uppercase letters or numbers.
    */
   invoice_prefix?: string;
 
@@ -1408,11 +1446,11 @@ export namespace CustomerCreateParams {
     validate_location?: Tax.ValidateLocation;
   }
 
-  export type TaxExempt = 'exempt' | 'none' | 'reverse';
+  export type TaxExempt = 'exempt' | 'none' | 'reverse' | OtherString;
 
   export interface TaxIdDatum {
     /**
-     * Type of the tax ID, one of `ad_nrt`, `ae_trn`, `al_tin`, `am_tin`, `ao_tin`, `ar_cuit`, `au_abn`, `au_arn`, `aw_tin`, `az_tin`, `ba_tin`, `bb_tin`, `bd_bin`, `bf_ifu`, `bg_uic`, `bh_vat`, `bj_ifu`, `bo_tin`, `br_cnpj`, `br_cpf`, `bs_tin`, `by_tin`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `cd_nif`, `ch_uid`, `ch_vat`, `cl_tin`, `cm_niu`, `cn_tin`, `co_nit`, `cr_tin`, `cv_nif`, `de_stn`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `et_tin`, `eu_oss_vat`, `eu_vat`, `fo_vat`, `gb_vat`, `ge_vat`, `gi_tin`, `gn_nif`, `hk_br`, `hr_oib`, `hu_tin`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `it_cf`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kg_tin`, `kh_tin`, `kr_brn`, `kz_bin`, `la_tin`, `li_uid`, `li_vat`, `lk_vat`, `ma_vat`, `md_vat`, `me_pib`, `mk_vat`, `mr_nif`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `ng_tin`, `no_vat`, `no_voec`, `np_pan`, `nz_gst`, `om_vat`, `pe_ruc`, `ph_tin`, `pl_nip`, `py_ruc`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sn_ninea`, `sr_fin`, `sv_nit`, `th_vat`, `tj_tin`, `tr_tin`, `tw_vat`, `tz_vat`, `ua_vat`, `ug_tin`, `us_ein`, `uy_ruc`, `uz_tin`, `uz_vat`, `ve_rif`, `vn_tin`, `za_vat`, `zm_tin`, or `zw_tin`
+     * Type of the tax ID, one of `ad_nrt`, `ae_trn`, `al_tin`, `am_tin`, `ao_tin`, `ar_cuit`, `au_abn`, `au_arn`, `aw_tin`, `az_tin`, `ba_tin`, `bb_tin`, `bd_bin`, `bf_ifu`, `bg_uic`, `bh_vat`, `bj_ifu`, `bo_tin`, `br_cnpj`, `br_cpf`, `bs_tin`, `by_tin`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `cd_nif`, `ch_uid`, `ch_vat`, `cl_tin`, `cm_niu`, `cn_tin`, `co_nit`, `cr_tin`, `cv_nif`, `de_stn`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `et_tin`, `eu_oss_vat`, `eu_vat`, `fo_vat`, `gb_vat`, `ge_vat`, `gi_tin`, `gn_nif`, `hk_br`, `hr_oib`, `hu_tin`, `ic_nif`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `it_cf`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kg_tin`, `kh_tin`, `kr_brn`, `kz_bin`, `la_tin`, `li_uid`, `li_vat`, `lk_vat`, `ma_vat`, `md_vat`, `me_pib`, `mk_vat`, `mr_nif`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `ng_tin`, `no_vat`, `no_voec`, `np_pan`, `nz_gst`, `om_vat`, `pe_ruc`, `ph_tin`, `pl_nip`, `py_ruc`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sn_ninea`, `sr_fin`, `sv_nit`, `th_vat`, `tj_tin`, `tr_tin`, `tw_vat`, `tz_vat`, `ua_vat`, `ug_tin`, `us_ein`, `uy_ruc`, `uz_tin`, `uz_vat`, `ve_rif`, `vn_tin`, `za_vat`, `zm_tin`, or `zw_tin`
      */
     type: TaxIdDatum.Type;
 
@@ -1434,7 +1472,8 @@ export namespace CustomerCreateParams {
       export type ReconciliationMode =
         | 'automatic'
         | 'manual'
-        | 'merchant_default';
+        | 'merchant_default'
+        | OtherString;
     }
   }
 
@@ -1464,12 +1503,15 @@ export namespace CustomerCreateParams {
     }
 
     export namespace RenderingOptions {
-      export type AmountTaxDisplay = 'exclude_tax' | 'include_inclusive_tax';
+      export type AmountTaxDisplay =
+        | 'exclude_tax'
+        | 'include_inclusive_tax'
+        | OtherString;
     }
   }
 
   export namespace Tax {
-    export type ValidateLocation = 'deferred' | 'immediately';
+    export type ValidateLocation = 'deferred' | 'immediately' | OtherString;
   }
 
   export namespace TaxIdDatum {
@@ -1527,6 +1569,7 @@ export namespace CustomerCreateParams {
       | 'hk_br'
       | 'hr_oib'
       | 'hu_tin'
+      | 'ic_nif'
       | 'id_npwp'
       | 'il_vat'
       | 'in_gst'
@@ -1589,7 +1632,8 @@ export namespace CustomerCreateParams {
       | 'vn_tin'
       | 'za_vat'
       | 'zm_tin'
-      | 'zw_tin';
+      | 'zw_tin'
+      | OtherString;
   }
 }
 export interface CustomerRetrieveParams {
@@ -1649,7 +1693,7 @@ export interface CustomerUpdateParams {
   individual_name?: Emptyable<string>;
 
   /**
-   * The prefix for the customer used to generate unique invoice numbers. Must be 3–12 uppercase letters or numbers.
+   * The prefix for the customer used to generate unique invoice numbers. Must be 1–12 uppercase letters or numbers.
    */
   invoice_prefix?: string;
 
@@ -1762,7 +1806,7 @@ export namespace CustomerUpdateParams {
     validate_location?: Tax.ValidateLocation;
   }
 
-  export type TaxExempt = 'exempt' | 'none' | 'reverse';
+  export type TaxExempt = 'exempt' | 'none' | 'reverse' | OtherString;
 
   export namespace CashBalance {
     export interface Settings {
@@ -1776,7 +1820,8 @@ export namespace CustomerUpdateParams {
       export type ReconciliationMode =
         | 'automatic'
         | 'manual'
-        | 'merchant_default';
+        | 'merchant_default'
+        | OtherString;
     }
   }
 
@@ -1806,12 +1851,19 @@ export namespace CustomerUpdateParams {
     }
 
     export namespace RenderingOptions {
-      export type AmountTaxDisplay = 'exclude_tax' | 'include_inclusive_tax';
+      export type AmountTaxDisplay =
+        | 'exclude_tax'
+        | 'include_inclusive_tax'
+        | OtherString;
     }
   }
 
   export namespace Tax {
-    export type ValidateLocation = 'auto' | 'deferred' | 'immediately';
+    export type ValidateLocation =
+      | 'auto'
+      | 'deferred'
+      | 'immediately'
+      | OtherString;
   }
 }
 export interface CustomerListParams extends PaginationParams {
@@ -1911,14 +1963,20 @@ export namespace CustomerCreateFundingInstructionsParams {
       country: string;
     }
 
-    export type RequestedAddressType = 'iban' | 'sort_code' | 'spei' | 'zengin';
+    export type RequestedAddressType =
+      | 'iban'
+      | 'sort_code'
+      | 'spei'
+      | 'zengin'
+      | OtherString;
 
     export type Type =
       | 'eu_bank_transfer'
       | 'gb_bank_transfer'
       | 'jp_bank_transfer'
       | 'mx_bank_transfer'
-      | 'us_bank_transfer';
+      | 'us_bank_transfer'
+      | OtherString;
   }
 }
 export interface CustomerCreateSourceParams {
@@ -1941,7 +1999,7 @@ export interface CustomerCreateSourceParams {
 }
 export interface CustomerCreateTaxIdParams {
   /**
-   * Type of the tax ID, one of `ad_nrt`, `ae_trn`, `al_tin`, `am_tin`, `ao_tin`, `ar_cuit`, `au_abn`, `au_arn`, `aw_tin`, `az_tin`, `ba_tin`, `bb_tin`, `bd_bin`, `bf_ifu`, `bg_uic`, `bh_vat`, `bj_ifu`, `bo_tin`, `br_cnpj`, `br_cpf`, `bs_tin`, `by_tin`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `cd_nif`, `ch_uid`, `ch_vat`, `cl_tin`, `cm_niu`, `cn_tin`, `co_nit`, `cr_tin`, `cv_nif`, `de_stn`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `et_tin`, `eu_oss_vat`, `eu_vat`, `fo_vat`, `gb_vat`, `ge_vat`, `gi_tin`, `gn_nif`, `hk_br`, `hr_oib`, `hu_tin`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `it_cf`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kg_tin`, `kh_tin`, `kr_brn`, `kz_bin`, `la_tin`, `li_uid`, `li_vat`, `lk_vat`, `ma_vat`, `md_vat`, `me_pib`, `mk_vat`, `mr_nif`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `ng_tin`, `no_vat`, `no_voec`, `np_pan`, `nz_gst`, `om_vat`, `pe_ruc`, `ph_tin`, `pl_nip`, `py_ruc`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sn_ninea`, `sr_fin`, `sv_nit`, `th_vat`, `tj_tin`, `tr_tin`, `tw_vat`, `tz_vat`, `ua_vat`, `ug_tin`, `us_ein`, `uy_ruc`, `uz_tin`, `uz_vat`, `ve_rif`, `vn_tin`, `za_vat`, `zm_tin`, or `zw_tin`
+   * Type of the tax ID, one of `ad_nrt`, `ae_trn`, `al_tin`, `am_tin`, `ao_tin`, `ar_cuit`, `au_abn`, `au_arn`, `aw_tin`, `az_tin`, `ba_tin`, `bb_tin`, `bd_bin`, `bf_ifu`, `bg_uic`, `bh_vat`, `bj_ifu`, `bo_tin`, `br_cnpj`, `br_cpf`, `bs_tin`, `by_tin`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `cd_nif`, `ch_uid`, `ch_vat`, `cl_tin`, `cm_niu`, `cn_tin`, `co_nit`, `cr_tin`, `cv_nif`, `de_stn`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `et_tin`, `eu_oss_vat`, `eu_vat`, `fo_vat`, `gb_vat`, `ge_vat`, `gi_tin`, `gn_nif`, `hk_br`, `hr_oib`, `hu_tin`, `ic_nif`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `it_cf`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kg_tin`, `kh_tin`, `kr_brn`, `kz_bin`, `la_tin`, `li_uid`, `li_vat`, `lk_vat`, `ma_vat`, `md_vat`, `me_pib`, `mk_vat`, `mr_nif`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `ng_tin`, `no_vat`, `no_voec`, `np_pan`, `nz_gst`, `om_vat`, `pe_ruc`, `ph_tin`, `pl_nip`, `py_ruc`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sn_ninea`, `sr_fin`, `sv_nit`, `th_vat`, `tj_tin`, `tr_tin`, `tw_vat`, `tz_vat`, `ua_vat`, `ug_tin`, `us_ein`, `uy_ruc`, `uz_tin`, `uz_vat`, `ve_rif`, `vn_tin`, `za_vat`, `zm_tin`, or `zw_tin`
    */
   type: CustomerCreateTaxIdParams.Type;
 
@@ -2010,6 +2068,7 @@ export namespace CustomerCreateTaxIdParams {
     | 'hk_br'
     | 'hr_oib'
     | 'hu_tin'
+    | 'ic_nif'
     | 'id_npwp'
     | 'il_vat'
     | 'in_gst'
@@ -2072,7 +2131,8 @@ export namespace CustomerCreateTaxIdParams {
     | 'vn_tin'
     | 'za_vat'
     | 'zm_tin'
-    | 'zw_tin';
+    | 'zw_tin'
+    | OtherString;
 }
 export interface CustomerDeleteDiscountParams {}
 export interface CustomerDeleteSourceParams {
@@ -2123,7 +2183,11 @@ export interface CustomerListPaymentMethodsParams extends PaginationParams {
   type?: CustomerListPaymentMethodsParams.Type;
 }
 export namespace CustomerListPaymentMethodsParams {
-  export type AllowRedisplay = 'always' | 'limited' | 'unspecified';
+  export type AllowRedisplay =
+    | 'always'
+    | 'limited'
+    | 'unspecified'
+    | OtherString;
 
   export type Type =
     | 'acss_debit'
@@ -2165,6 +2229,7 @@ export namespace CustomerListPaymentMethodsParams {
     | 'payco'
     | 'paynow'
     | 'paypal'
+    | 'paypay'
     | 'payto'
     | 'pix'
     | 'promptpay'
@@ -2173,6 +2238,7 @@ export namespace CustomerListPaymentMethodsParams {
     | 'satispay'
     | 'scalapay'
     | 'sepa_debit'
+    | 'sequra'
     | 'sofort'
     | 'sunbit'
     | 'swish'
@@ -2180,7 +2246,8 @@ export namespace CustomerListPaymentMethodsParams {
     | 'upi'
     | 'us_bank_account'
     | 'wechat_pay'
-    | 'zip';
+    | 'zip'
+    | OtherString;
 }
 export interface CustomerListSourcesParams extends PaginationParams {
   /**
@@ -2295,7 +2362,8 @@ export namespace CustomerUpdateCashBalanceParams {
     export type ReconciliationMode =
       | 'automatic'
       | 'manual'
-      | 'merchant_default';
+      | 'merchant_default'
+      | OtherString;
   }
 }
 export interface CustomerUpdateSourceParams {
@@ -2367,7 +2435,7 @@ export interface CustomerUpdateSourceParams {
   owner?: CustomerUpdateSourceParams.Owner;
 }
 export namespace CustomerUpdateSourceParams {
-  export type AccountHolderType = 'company' | 'individual';
+  export type AccountHolderType = 'company' | 'individual' | OtherString;
 
   export interface Owner {
     /**

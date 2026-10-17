@@ -2,7 +2,7 @@
 
 import {Account} from './Accounts.js';
 import {Customer, DeletedCustomer} from './Customers.js';
-import {Metadata} from '../shared.js';
+import {Metadata, OtherString} from '../shared.js';
 import {RequestOptions} from '../lib.js';
 export interface BankAccount {
   /**
@@ -129,7 +129,7 @@ export interface DeletedBankAccount {
   deleted: true;
 }
 export namespace BankAccount {
-  export type AvailablePayoutMethod = 'instant' | 'standard';
+  export type AvailablePayoutMethod = 'instant' | 'standard' | OtherString;
 
   export interface FutureRequirements {
     /**
@@ -138,7 +138,7 @@ export namespace BankAccount {
     currently_due: Array<string> | null;
 
     /**
-     * Details about validation and verification failures for `due` requirements that must be resolved.
+     * Fields that are `currently_due` and need to be collected again because validation or verification failed.
      */
     errors: Array<FutureRequirements.Error> | null;
 
@@ -160,7 +160,7 @@ export namespace BankAccount {
     currently_due: Array<string> | null;
 
     /**
-     * Details about validation and verification failures for `due` requirements that must be resolved.
+     * Fields that are `currently_due` and need to be collected again because validation or verification failed.
      */
     errors: Array<Requirements.Error> | null;
 
@@ -198,8 +198,10 @@ export namespace BankAccount {
         | 'external_request'
         | 'information_missing'
         | 'invalid_address_city_state_postal_code'
+        | 'invalid_address_cmra_address'
         | 'invalid_address_highway_contract_box'
         | 'invalid_address_private_mailbox'
+        | 'invalid_address_registered_agent_address'
         | 'invalid_business_profile_name'
         | 'invalid_business_profile_name_denylisted'
         | 'invalid_company_name_denylisted'
@@ -318,8 +320,10 @@ export namespace BankAccount {
         | 'external_request'
         | 'information_missing'
         | 'invalid_address_city_state_postal_code'
+        | 'invalid_address_cmra_address'
         | 'invalid_address_highway_contract_box'
         | 'invalid_address_private_mailbox'
+        | 'invalid_address_registered_agent_address'
         | 'invalid_business_profile_name'
         | 'invalid_business_profile_name_denylisted'
         | 'invalid_company_name_denylisted'

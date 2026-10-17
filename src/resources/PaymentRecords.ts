@@ -4,15 +4,28 @@ import {StripeResource} from '../StripeResource.js';
 import {PaymentMethod} from './PaymentMethods.js';
 import {Mandate} from './Mandates.js';
 import {
+  PaginationParams,
   Emptyable,
   MetadataParam,
   AddressParam,
+  OtherString,
   Metadata,
   Address,
 } from '../shared.js';
-import {RequestOptions, Response} from '../lib.js';
+import {RequestOptions, ApiListPromise, Response} from '../lib.js';
 
 export class PaymentRecordResource extends StripeResource {
+  /**
+   * List all the Payment Records for a given merchant.
+   */
+  list(
+    params?: PaymentRecordListParams,
+    options?: RequestOptions
+  ): ApiListPromise<PaymentRecord> {
+    return this._makeRequest('GET', '/v1/payment_records', params, options, {
+      methodType: 'list',
+    }) as any;
+  }
   /**
    * Retrieves a Payment Record with the given ID
    */
@@ -23,7 +36,7 @@ export class PaymentRecordResource extends StripeResource {
   ): Promise<Response<PaymentRecord>> {
     return this._makeRequest(
       'GET',
-      `/v1/payment_records/${id}`,
+      `/v1/payment_records/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -39,7 +52,7 @@ export class PaymentRecordResource extends StripeResource {
   ): Promise<Response<PaymentRecord>> {
     return this._makeRequest(
       'POST',
-      `/v1/payment_records/${id}/report_payment_attempt`,
+      `/v1/payment_records/${encodeURIComponent(id)}/report_payment_attempt`,
       params,
       options
     ) as any;
@@ -55,7 +68,9 @@ export class PaymentRecordResource extends StripeResource {
   ): Promise<Response<PaymentRecord>> {
     return this._makeRequest(
       'POST',
-      `/v1/payment_records/${id}/report_payment_attempt_canceled`,
+      `/v1/payment_records/${encodeURIComponent(
+        id
+      )}/report_payment_attempt_canceled`,
       params,
       options
     ) as any;
@@ -71,7 +86,9 @@ export class PaymentRecordResource extends StripeResource {
   ): Promise<Response<PaymentRecord>> {
     return this._makeRequest(
       'POST',
-      `/v1/payment_records/${id}/report_payment_attempt_failed`,
+      `/v1/payment_records/${encodeURIComponent(
+        id
+      )}/report_payment_attempt_failed`,
       params,
       options
     ) as any;
@@ -87,7 +104,9 @@ export class PaymentRecordResource extends StripeResource {
   ): Promise<Response<PaymentRecord>> {
     return this._makeRequest(
       'POST',
-      `/v1/payment_records/${id}/report_payment_attempt_guaranteed`,
+      `/v1/payment_records/${encodeURIComponent(
+        id
+      )}/report_payment_attempt_guaranteed`,
       params,
       options
     ) as any;
@@ -102,7 +121,9 @@ export class PaymentRecordResource extends StripeResource {
   ): Promise<Response<PaymentRecord>> {
     return this._makeRequest(
       'POST',
-      `/v1/payment_records/${id}/report_payment_attempt_informational`,
+      `/v1/payment_records/${encodeURIComponent(
+        id
+      )}/report_payment_attempt_informational`,
       params,
       options
     ) as any;
@@ -118,7 +139,7 @@ export class PaymentRecordResource extends StripeResource {
   ): Promise<Response<PaymentRecord>> {
     return this._makeRequest(
       'POST',
-      `/v1/payment_records/${id}/report_refund`,
+      `/v1/payment_records/${encodeURIComponent(id)}/report_refund`,
       params,
       options
     ) as any;
@@ -353,7 +374,7 @@ export namespace PaymentRecord {
     phone: string | null;
   }
 
-  export type CustomerPresence = 'off_session' | 'on_session';
+  export type CustomerPresence = 'off_session' | 'on_session' | OtherString;
 
   export interface PaymentMethodDetails {
     ach_credit_transfer?: PaymentMethodDetails.AchCreditTransfer;
@@ -437,6 +458,8 @@ export namespace PaymentRecord {
 
     mobilepay?: PaymentMethodDetails.Mobilepay;
 
+    momo?: PaymentMethodDetails.Momo;
+
     multibanco?: PaymentMethodDetails.Multibanco;
 
     naver_pay?: PaymentMethodDetails.NaverPay;
@@ -460,6 +483,8 @@ export namespace PaymentRecord {
 
     paypal?: PaymentMethodDetails.Paypal;
 
+    paypay?: PaymentMethodDetails.Paypay;
+
     payto?: PaymentMethodDetails.Payto;
 
     pix?: PaymentMethodDetails.Pix;
@@ -477,6 +502,8 @@ export namespace PaymentRecord {
     sepa_credit_transfer?: PaymentMethodDetails.SepaCreditTransfer;
 
     sepa_debit?: PaymentMethodDetails.SepaDebit;
+
+    sequra?: PaymentMethodDetails.Sequra;
 
     sofort?: PaymentMethodDetails.Sofort;
 
@@ -520,7 +547,7 @@ export namespace PaymentRecord {
     type: 'custom';
   }
 
-  export type ReportedBy = 'self' | 'stripe';
+  export type ReportedBy = 'self' | 'stripe' | OtherString;
 
   export interface ShippingDetails {
     /**
@@ -822,6 +849,11 @@ export namespace PaymentRecord {
 
     export interface Bizum {
       /**
+       * A unique identifier for the buyer as determined by the local payment processor.
+       */
+      buyer_id: string | null;
+
+      /**
        * The Bizum transaction ID associated with this payment.
        */
       transaction_id: string | null;
@@ -870,7 +902,7 @@ export namespace PaymentRecord {
       /**
        * A high-level description of the type of cards issued in this range.
        */
-      description: string | null;
+      description?: string | null;
 
       /**
        * Two-digit number representing the card's expiration month.
@@ -897,7 +929,7 @@ export namespace PaymentRecord {
       /**
        * Issuer identification number of the card.
        */
-      iin: string | null;
+      iin?: string | null;
 
       /**
        * Installment details for this payment.
@@ -907,7 +939,7 @@ export namespace PaymentRecord {
       /**
        * The name of the card's issuing bank.
        */
-      issuer: string | null;
+      issuer?: string | null;
 
       /**
        * The last four digits of the card.
@@ -943,11 +975,6 @@ export namespace PaymentRecord {
        * This is used by the financial networks to identify a transaction. Visa calls this the Transaction ID, Mastercard calls this the Trace ID, and American Express calls this the Acquirer Reference Data. This value will be present if it is returned by the financial network in the authorization response, and null otherwise.
        */
       network_transaction_id: string | null;
-
-      /**
-       * The transaction type that was passed for an off-session, Merchant-Initiated transaction, one of `recurring` or `unscheduled`.
-       */
-      stored_credential_usage: Card.StoredCredentialUsage | null;
 
       /**
        * Populated if this transaction used 3D Secure authentication.
@@ -1168,7 +1195,7 @@ export namespace PaymentRecord {
       account_holder_type: Fpx.AccountHolderType | null;
 
       /**
-       * The customer's bank. Can be one of `affin_bank`, `agrobank`, `alliance_bank`, `ambank`, `bank_islam`, `bank_muamalat`, `bank_rakyat`, `bsn`, `cimb`, `hong_leong_bank`, `hsbc`, `kfh`, `maybank2u`, `ocbc`, `public_bank`, `rhb`, `standard_chartered`, `uob`, `deutsche_bank`, `maybank2e`, `pb_enterprise`, or `bank_of_china`.
+       * The customer's bank. Can be one of `affin_bank`, `agrobank`, `alliance_bank`, `ambank`, `bank_islam`, `bank_muamalat`, `bnp_paribas`, `bank_rakyat`, `bsn`, `cimb`, `citibank`, `hong_leong_bank`, `hsbc`, `kfh`, `maybank2u`, `ocbc`, `public_bank`, `rhb`, `standard_chartered`, `uob`, `deutsche_bank`, `maybank2e`, `mbsb_bank`, `pb_enterprise`, or `bank_of_china`.
        */
       bank: Fpx.Bank;
 
@@ -1421,6 +1448,11 @@ export namespace PaymentRecord {
        * Two-letter ISO code representing the funding source country beneath the Link payment. You could use this attribute to get a sense of international fees.
        */
       country: string | null;
+
+      /**
+       * The [funding source group code](https://docs.stripe.com/payments/link/link-payment-methods) applied to this Link payment at confirmation time.
+       */
+      funding_source_group?: string;
     }
 
     export interface MbWay {}
@@ -1430,6 +1462,18 @@ export namespace PaymentRecord {
        * Internal card details
        */
       card: Mobilepay.Card | null;
+    }
+
+    export interface Momo {
+      /**
+       * Uniquely identifies this particular MoMo account. You can use this attribute to check whether two MoMo accounts are the same.
+       */
+      fingerprint: string | null;
+
+      /**
+       * ID of the multi-use Mandate created by, or used to make, this MoMo payment.
+       */
+      mandate?: string;
     }
 
     export interface Multibanco {
@@ -1582,6 +1626,8 @@ export namespace PaymentRecord {
       transaction_id: string | null;
     }
 
+    export interface Paypay {}
+
     export interface Payto {
       /**
        * Bank-State-Branch number of the bank account.
@@ -1611,7 +1657,7 @@ export namespace PaymentRecord {
       bank_transaction_id?: string | null;
 
       /**
-       * ID of the multi use Mandate generated by the PaymentIntent
+       * ID of the multi use Mandate generated by the PaymentIntent or SetupIntent.
        */
       mandate?: string;
     }
@@ -1712,6 +1758,13 @@ export namespace PaymentRecord {
       mandate: string | null;
     }
 
+    export interface Sequra {
+      /**
+       * The SeQura transaction ID associated with this payment.
+       */
+      transaction_id: string | null;
+    }
+
     export interface Sofort {
       /**
        * Bank code of bank associated with the bank account.
@@ -1787,7 +1840,7 @@ export namespace PaymentRecord {
 
     export interface Twint {
       /**
-       * ID of the multi use Mandate generated by the PaymentIntent
+       * ID of the multi use Mandate generated by the PaymentIntent or SetupIntent.
        */
       mandate?: string;
     }
@@ -1873,7 +1926,7 @@ export namespace PaymentRecord {
     export interface Zip {}
 
     export namespace AchDebit {
-      export type AccountHolderType = 'company' | 'individual';
+      export type AccountHolderType = 'company' | 'individual' | OtherString;
     }
 
     export namespace Alma {
@@ -1892,13 +1945,13 @@ export namespace PaymentRecord {
         /**
          * funding type of the underlying payment method.
          */
-        type: 'card' | null;
+        type: Funding.Type | null;
       }
 
       export namespace Funding {
         export interface Card {
           /**
-           * Card brand. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa` or `unknown`.
+           * Card brand. Can be `American Express`, `Cartes Bancaires`, `Diners Club`, `Discover`, `Eftpos Australia`, `Girocard`, `JCB`, `MasterCard`, `UnionPay`, `Visa`, or `Unknown`.
            */
           brand: string | null;
 
@@ -1927,11 +1980,13 @@ export namespace PaymentRecord {
            */
           last4: string | null;
         }
+
+        export type Type = 'card' | OtherString;
       }
     }
 
     export namespace Bancontact {
-      export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+      export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
     }
 
     export namespace Card {
@@ -1947,7 +2002,8 @@ export namespace PaymentRecord {
         | 'mastercard'
         | 'unionpay'
         | 'unknown'
-        | 'visa';
+        | 'visa'
+        | OtherString;
 
       export interface Checks {
         /**
@@ -1966,7 +2022,12 @@ export namespace PaymentRecord {
         cvc_check: Checks.CvcCheck | null;
       }
 
-      export type Funding = 'credit' | 'debit' | 'prepaid' | 'unknown';
+      export type Funding =
+        | 'credit'
+        | 'debit'
+        | 'prepaid'
+        | 'unknown'
+        | OtherString;
 
       export interface Installments {
         /**
@@ -1987,7 +2048,8 @@ export namespace PaymentRecord {
         | 'mastercard'
         | 'unionpay'
         | 'unknown'
-        | 'visa';
+        | 'visa'
+        | OtherString;
 
       export interface NetworkToken {
         /**
@@ -1996,18 +2058,11 @@ export namespace PaymentRecord {
         used: boolean;
       }
 
-      export type StoredCredentialUsage = 'recurring' | 'unscheduled';
-
       export interface ThreeDSecure {
         /**
          * For authenticated transactions: Indicates how the issuing bank authenticated the customer.
          */
         authentication_flow: ThreeDSecure.AuthenticationFlow | null;
-
-        /**
-         * The 3D Secure cryptogram, also known as the "authentication value" (AAV, CAVV or AEVV).
-         */
-        cryptogram: string | null;
 
         /**
          * The Electronic Commerce Indicator (ECI). A protocol-level field indicating what degree of authentication was performed.
@@ -2050,8 +2105,10 @@ export namespace PaymentRecord {
 
         google_pay?: Wallet.GooglePay;
 
+        link?: Wallet.Link;
+
         /**
-         * The type of the card wallet, one of `apple_pay` or `google_pay`. An additional hash is included on the Wallet subhash with a name matching this value. It contains additional information specific to the card wallet type.
+         * The type of the card wallet, one of `apple_pay`, `google_pay`, or `link`. An additional hash is included on the Wallet subhash with a name matching this value. It contains additional information specific to the card wallet type.
          */
         type: string;
       }
@@ -2061,15 +2118,22 @@ export namespace PaymentRecord {
           | 'fail'
           | 'pass'
           | 'unavailable'
-          | 'unchecked';
+          | 'unchecked'
+          | OtherString;
 
         export type AddressPostalCodeCheck =
           | 'fail'
           | 'pass'
           | 'unavailable'
-          | 'unchecked';
+          | 'unchecked'
+          | OtherString;
 
-        export type CvcCheck = 'fail' | 'pass' | 'unavailable' | 'unchecked';
+        export type CvcCheck =
+          | 'fail'
+          | 'pass'
+          | 'unavailable'
+          | 'unchecked'
+          | OtherString;
       }
 
       export namespace Installments {
@@ -2091,12 +2155,19 @@ export namespace PaymentRecord {
         }
 
         export namespace Plan {
-          export type Type = 'bonus' | 'fixed_count' | 'revolving';
+          export type Type =
+            | 'bonus'
+            | 'fixed_count'
+            | 'revolving'
+            | OtherString;
         }
       }
 
       export namespace ThreeDSecure {
-        export type AuthenticationFlow = 'challenge' | 'frictionless';
+        export type AuthenticationFlow =
+          | 'challenge'
+          | 'frictionless'
+          | OtherString;
 
         export type ElectronicCommerceIndicator =
           | '01'
@@ -2105,17 +2176,20 @@ export namespace PaymentRecord {
           | '04'
           | '05'
           | '06'
-          | '07';
+          | '07'
+          | OtherString;
 
-        export type ExemptionIndicator = 'low_risk' | 'none';
+        export type ExemptionIndicator = 'low_risk' | 'none' | OtherString;
 
         export type Result =
           | 'attempt_acknowledged'
           | 'authenticated'
+          | 'data_share_only'
           | 'exempted'
           | 'failed'
           | 'not_supported'
-          | 'processing_error';
+          | 'processing_error'
+          | OtherString;
 
         export type ResultReason =
           | 'abandoned'
@@ -2124,9 +2198,16 @@ export namespace PaymentRecord {
           | 'card_not_enrolled'
           | 'network_not_supported'
           | 'protocol_error'
-          | 'rejected';
+          | 'rejected'
+          | OtherString;
 
-        export type Version = '1.0.2' | '2.1.0' | '2.2.0';
+        export type Version =
+          | '1.0.2'
+          | '2.1.0'
+          | '2.2.0'
+          | '2.3.0'
+          | '2.3.1'
+          | OtherString;
       }
 
       export namespace Wallet {
@@ -2138,6 +2219,8 @@ export namespace PaymentRecord {
         }
 
         export interface GooglePay {}
+
+        export interface Link {}
       }
     }
 
@@ -2159,7 +2242,8 @@ export namespace PaymentRecord {
         | 'contactless_emv'
         | 'contactless_magstripe_mode'
         | 'magnetic_stripe_fallback'
-        | 'magnetic_stripe_track2';
+        | 'magnetic_stripe_track2'
+        | OtherString;
 
       export interface Receipt {
         /**
@@ -2216,7 +2300,12 @@ export namespace PaymentRecord {
       }
 
       export namespace Receipt {
-        export type AccountType = 'checking' | 'credit' | 'prepaid' | 'unknown';
+        export type AccountType =
+          | 'checking'
+          | 'credit'
+          | 'prepaid'
+          | 'unknown'
+          | OtherString;
       }
 
       export namespace Wallet {
@@ -2224,7 +2313,8 @@ export namespace PaymentRecord {
           | 'apple_pay'
           | 'google_pay'
           | 'samsung_pay'
-          | 'unknown';
+          | 'unknown'
+          | OtherString;
       }
     }
 
@@ -2234,14 +2324,18 @@ export namespace PaymentRecord {
         | 'ethereum'
         | 'polygon'
         | 'solana'
-        | 'tempo';
+        | 'sui'
+        | 'tempo'
+        | OtherString;
 
       export type TokenCurrency =
         | 'phantom_cash'
         | 'usdc'
         | 'usdg'
         | 'usdp'
-        | 'usdt';
+        | 'usdsui'
+        | 'usdt'
+        | OtherString;
     }
 
     export namespace Eps {
@@ -2273,11 +2367,12 @@ export namespace PaymentRecord {
         | 'sparda_bank_wien'
         | 'volksbank_gruppe'
         | 'volkskreditbank_ag'
-        | 'vr_bank_braunau';
+        | 'vr_bank_braunau'
+        | OtherString;
     }
 
     export namespace Fpx {
-      export type AccountHolderType = 'company' | 'individual';
+      export type AccountHolderType = 'company' | 'individual' | OtherString;
 
       export type Bank =
         | 'affin_bank'
@@ -2288,20 +2383,24 @@ export namespace PaymentRecord {
         | 'bank_muamalat'
         | 'bank_of_china'
         | 'bank_rakyat'
+        | 'bnp_paribas'
         | 'bsn'
         | 'cimb'
+        | 'citibank'
         | 'deutsche_bank'
         | 'hong_leong_bank'
         | 'hsbc'
         | 'kfh'
         | 'maybank2e'
         | 'maybank2u'
+        | 'mbsb_bank'
         | 'ocbc'
         | 'pb_enterprise'
         | 'public_bank'
         | 'rhb'
         | 'standard_chartered'
-        | 'uob';
+        | 'uob'
+        | OtherString;
     }
 
     export namespace Ideal {
@@ -2325,7 +2424,8 @@ export namespace PaymentRecord {
         | 'sns_bank'
         | 'triodos_bank'
         | 'van_lanschot'
-        | 'yoursafe';
+        | 'yoursafe'
+        | OtherString;
 
       export type Bic =
         | 'ABNANL2A'
@@ -2348,7 +2448,8 @@ export namespace PaymentRecord {
         | 'REVOIE23'
         | 'REVOLT21'
         | 'SNSBNL2A'
-        | 'TRIONL2U';
+        | 'TRIONL2U'
+        | OtherString;
     }
 
     export namespace InteracPresent {
@@ -2357,7 +2458,8 @@ export namespace PaymentRecord {
         | 'contactless_emv'
         | 'contactless_magstripe_mode'
         | 'magnetic_stripe_fallback'
-        | 'magnetic_stripe_track2';
+        | 'magnetic_stripe_track2'
+        | OtherString;
 
       export interface Receipt {
         /**
@@ -2407,7 +2509,11 @@ export namespace PaymentRecord {
       }
 
       export namespace Receipt {
-        export type AccountType = 'checking' | 'savings' | 'unknown';
+        export type AccountType =
+          | 'checking'
+          | 'savings'
+          | 'unknown'
+          | OtherString;
       }
     }
 
@@ -2438,7 +2544,12 @@ export namespace PaymentRecord {
       }
 
       export namespace Store {
-        export type Chain = 'familymart' | 'lawson' | 'ministop' | 'seicomart';
+        export type Chain =
+          | 'familymart'
+          | 'lawson'
+          | 'ministop'
+          | 'seicomart'
+          | OtherString;
       }
     }
 
@@ -2465,7 +2576,8 @@ export namespace PaymentRecord {
         | 'shinhyup'
         | 'suhyup'
         | 'tossbank'
-        | 'woori';
+        | 'woori'
+        | OtherString;
     }
 
     export namespace Mobilepay {
@@ -2524,7 +2636,8 @@ export namespace PaymentRecord {
         | 'tmobile_usbugi_bankowe'
         | 'toyota_bank'
         | 'velobank'
-        | 'volkswagen_bank';
+        | 'volkswagen_bank'
+        | OtherString;
     }
 
     export namespace Paypal {
@@ -2541,9 +2654,16 @@ export namespace PaymentRecord {
       }
 
       export namespace SellerProtection {
-        export type DisputeCategory = 'fraudulent' | 'product_not_received';
+        export type DisputeCategory =
+          | 'fraudulent'
+          | 'product_not_received'
+          | OtherString;
 
-        export type Status = 'eligible' | 'not_eligible' | 'partially_eligible';
+        export type Status =
+          | 'eligible'
+          | 'not_eligible'
+          | 'partially_eligible'
+          | OtherString;
       }
     }
 
@@ -2554,7 +2674,7 @@ export namespace PaymentRecord {
         /**
          * Funding type of the underlying payment method.
          */
-        type: 'card' | null;
+        type: Funding.Type | null;
       }
 
       export namespace Funding {
@@ -2589,6 +2709,8 @@ export namespace PaymentRecord {
            */
           last4: string | null;
         }
+
+        export type Type = 'card' | OtherString;
       }
     }
 
@@ -2600,13 +2722,14 @@ export namespace PaymentRecord {
         | 'fr'
         | 'it'
         | 'nl'
-        | 'pl';
+        | 'pl'
+        | OtherString;
     }
 
     export namespace UsBankAccount {
-      export type AccountHolderType = 'company' | 'individual';
+      export type AccountHolderType = 'company' | 'individual' | OtherString;
 
-      export type AccountType = 'checking' | 'savings';
+      export type AccountType = 'checking' | 'savings' | OtherString;
     }
   }
 
@@ -2620,6 +2743,22 @@ export namespace PaymentRecord {
   }
 }
 export interface PaymentRecordRetrieveParams {
+  /**
+   * Specifies which fields in the response should be expanded.
+   */
+  expand?: Array<string>;
+}
+export interface PaymentRecordListParams extends PaginationParams {
+  /**
+   * Only return Payment Records that were created after this unix timestamp.
+   */
+  created_after?: number;
+
+  /**
+   * Only return Payment Records that were created before this unix timestamp.
+   */
+  created_before?: number;
+
   /**
    * Specifies which fields in the response should be expanded.
    */
@@ -2640,6 +2779,11 @@ export interface PaymentRecordReportPaymentParams {
    * Information about the Payment Method debited for this payment.
    */
   payment_method_details: PaymentRecordReportPaymentParams.PaymentMethodDetails;
+
+  /**
+   * Information about the payment attempt cancelation.
+   */
+  canceled?: PaymentRecordReportPaymentParams.Canceled;
 
   /**
    * Customer information for this payment.
@@ -2726,6 +2870,13 @@ export namespace PaymentRecordReportPaymentParams {
     type?: 'custom';
   }
 
+  export interface Canceled {
+    /**
+     * When the reported payment was canceled. Measured in seconds since the Unix epoch.
+     */
+    canceled_at: number;
+  }
+
   export interface CustomerDetails {
     /**
      * The customer who made the payment.
@@ -2733,7 +2884,7 @@ export namespace PaymentRecordReportPaymentParams {
     customer?: string;
 
     /**
-     * The customer's phone number.
+     * The customer's email address.
      */
     email?: string;
 
@@ -2748,7 +2899,7 @@ export namespace PaymentRecordReportPaymentParams {
     phone?: string;
   }
 
-  export type CustomerPresence = 'off_session' | 'on_session';
+  export type CustomerPresence = 'off_session' | 'on_session' | OtherString;
 
   export interface Failed {
     /**
@@ -2764,7 +2915,7 @@ export namespace PaymentRecordReportPaymentParams {
     guaranteed_at: number;
   }
 
-  export type Outcome = 'failed' | 'guaranteed';
+  export type Outcome = 'canceled' | 'failed' | 'guaranteed' | OtherString;
 
   export interface ProcessorDetails {
     /**
@@ -2847,6 +2998,11 @@ export interface PaymentRecordReportPaymentAttemptParams {
   initiated_at: number;
 
   /**
+   * Information about the payment attempt cancelation.
+   */
+  canceled?: PaymentRecordReportPaymentAttemptParams.Canceled;
+
+  /**
    * An arbitrary string attached to the object. Often useful for displaying to users.
    */
   description?: string;
@@ -2887,6 +3043,13 @@ export interface PaymentRecordReportPaymentAttemptParams {
   shipping_details?: PaymentRecordReportPaymentAttemptParams.ShippingDetails;
 }
 export namespace PaymentRecordReportPaymentAttemptParams {
+  export interface Canceled {
+    /**
+     * When the reported payment was canceled. Measured in seconds since the Unix epoch.
+     */
+    canceled_at: number;
+  }
+
   export interface Failed {
     /**
      * When the reported payment failed. Measured in seconds since the Unix epoch.
@@ -2901,7 +3064,7 @@ export namespace PaymentRecordReportPaymentAttemptParams {
     guaranteed_at: number;
   }
 
-  export type Outcome = 'failed' | 'guaranteed';
+  export type Outcome = 'canceled' | 'failed' | 'guaranteed' | OtherString;
 
   export interface PaymentMethodDetails {
     /**
@@ -3062,7 +3225,7 @@ export namespace PaymentRecordReportPaymentAttemptInformationalParams {
     customer?: string;
 
     /**
-     * The customer's phone number.
+     * The customer's email address.
      */
     email?: string;
 
@@ -3106,11 +3269,6 @@ export interface PaymentRecordReportRefundParams {
   processor_details: PaymentRecordReportRefundParams.ProcessorDetails;
 
   /**
-   * Information about the payment attempt refund.
-   */
-  refunded: PaymentRecordReportRefundParams.Refunded;
-
-  /**
    * A positive integer in the [smallest currency unit](https://docs.stripe.com/currencies#zero-decimal) representing how much of this payment to refund. Can refund only up to the remaining, unrefunded amount of the payment.
    */
   amount?: PaymentRecordReportRefundParams.Amount;
@@ -3129,6 +3287,11 @@ export interface PaymentRecordReportRefundParams {
    * Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
    */
   metadata?: Emptyable<MetadataParam>;
+
+  /**
+   * Information about the payment attempt refund.
+   */
+  refunded?: PaymentRecordReportRefundParams.Refunded;
 }
 export namespace PaymentRecordReportRefundParams {
   export interface ProcessorDetails {
@@ -3143,13 +3306,6 @@ export namespace PaymentRecordReportRefundParams {
     type: 'custom';
   }
 
-  export interface Refunded {
-    /**
-     * When the reported refund completed. Measured in seconds since the Unix epoch.
-     */
-    refunded_at: number;
-  }
-
   export interface Amount {
     /**
      * Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies).
@@ -3160,6 +3316,13 @@ export namespace PaymentRecordReportRefundParams {
      * A positive integer representing the amount in the currency's [minor unit](https://docs.stripe.com/currencies#zero-decimal). For example, `100` can represent 1 USD or 100 JPY.
      */
     value: number;
+  }
+
+  export interface Refunded {
+    /**
+     * When the reported refund completed. Measured in seconds since the Unix epoch.
+     */
+    refunded_at: number;
   }
 
   export namespace ProcessorDetails {

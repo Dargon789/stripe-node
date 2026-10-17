@@ -2,7 +2,7 @@
 
 import {StripeResource} from '../../../StripeResource.js';
 import {V2Amount} from './../V2Amounts.js';
-import {JapanAddressParam, MetadataParam, Decimal} from '../../../shared.js';
+import {Address, OtherString, MetadataParam, Decimal} from '../../../shared.js';
 import {RequestOptions, Response} from '../../../lib.js';
 
 export class AccountTokenResource extends StripeResource {
@@ -57,7 +57,7 @@ export class AccountTokenResource extends StripeResource {
   ): Promise<Response<AccountToken>> {
     return this._makeRequest(
       'GET',
-      `/v2/core/account_tokens/${id}`,
+      `/v2/core/account_tokens/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -171,9 +171,14 @@ export namespace V2 {
 
         export interface BusinessDetails {
           /**
+           * Additional addresses associated with the business.
+           */
+          additional_addresses?: Array<BusinessDetails.AdditionalAddress>;
+
+          /**
            * The business registration address of the business entity.
            */
-          address?: JapanAddressParam;
+          address?: BusinessDetails.Address;
 
           /**
            * The business gross annual revenue for its preceding fiscal year.
@@ -235,7 +240,8 @@ export namespace V2 {
           | 'company'
           | 'government_entity'
           | 'individual'
-          | 'non_profit';
+          | 'non_profit'
+          | OtherString;
 
         export interface Individual {
           /**
@@ -251,7 +257,7 @@ export namespace V2 {
           /**
            * The individual's residential address.
            */
-          address?: JapanAddressParam;
+          address?: Individual.Address;
 
           /**
            * The individual's date of birth.
@@ -392,6 +398,85 @@ export namespace V2 {
         }
 
         export namespace BusinessDetails {
+          export interface AdditionalAddress {
+            /**
+             * City, district, suburb, town, or village.
+             */
+            city?: string;
+
+            /**
+             * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+             */
+            country?: string;
+
+            /**
+             * Address line 1 (e.g., street, PO Box, or company name).
+             */
+            line1?: string;
+
+            /**
+             * Address line 2 (e.g., apartment, suite, unit, or building).
+             */
+            line2?: string;
+
+            /**
+             * ZIP or postal code.
+             */
+            postal_code?: string;
+
+            /**
+             * Purpose of additional address.
+             */
+            purpose: AdditionalAddress.Purpose;
+
+            /**
+             * State, county, province, or region.
+             */
+            state?: string;
+
+            /**
+             * Town or district.
+             */
+            town?: string;
+          }
+
+          export interface Address {
+            /**
+             * City, district, suburb, town, or village.
+             */
+            city?: string;
+
+            /**
+             * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+             */
+            country?: string;
+
+            /**
+             * Address line 1 (e.g., street, PO Box, or company name).
+             */
+            line1?: string;
+
+            /**
+             * Address line 2 (e.g., apartment, suite, unit, or building).
+             */
+            line2?: string;
+
+            /**
+             * ZIP or postal code.
+             */
+            postal_code?: string;
+
+            /**
+             * State, county, province, or region.
+             */
+            state?: string;
+
+            /**
+             * Town or district.
+             */
+            town?: string;
+          }
+
           export interface AnnualRevenue {
             /**
              * A non-negative integer representing the amount in the smallest currency unit.
@@ -501,12 +586,12 @@ export namespace V2 {
             /**
              * Kana Address.
              */
-            kana?: JapanAddressParam;
+            kana?: ScriptAddresses.Kana;
 
             /**
              * Kanji Address.
              */
-            kanji?: JapanAddressParam;
+            kanji?: ScriptAddresses.Kanji;
           }
 
           export interface ScriptNames {
@@ -548,7 +633,14 @@ export namespace V2 {
             | 'trust'
             | 'unincorporated_association'
             | 'unincorporated_non_profit'
-            | 'unincorporated_partnership';
+            | 'unincorporated_partnership'
+            | OtherString;
+
+          export namespace AdditionalAddress {
+            export type Purpose =
+              | 'administrative'
+              | 'principal_place_of_business';
+          }
 
           export namespace Documents {
             export interface BankAccountOwnershipVerification {
@@ -560,7 +652,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: BankAccountOwnershipVerification.Type;
             }
 
             export interface CompanyLicense {
@@ -572,7 +664,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: CompanyLicense.Type;
             }
 
             export interface CompanyMemorandumOfAssociation {
@@ -584,7 +676,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: CompanyMemorandumOfAssociation.Type;
             }
 
             export interface CompanyMinisterialDecree {
@@ -596,7 +688,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: CompanyMinisterialDecree.Type;
             }
 
             export interface CompanyRegistrationVerification {
@@ -608,7 +700,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: CompanyRegistrationVerification.Type;
             }
 
             export interface CompanyTaxIdVerification {
@@ -620,7 +712,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: CompanyTaxIdVerification.Type;
             }
 
             export interface PrimaryVerification {
@@ -632,7 +724,7 @@ export namespace V2 {
               /**
                * The format of the verification document. Currently supports `front_back` only.
                */
-              type: 'front_back';
+              type: PrimaryVerification.Type;
             }
 
             export interface ProofOfAddress {
@@ -644,7 +736,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: ProofOfAddress.Type;
             }
 
             export interface ProofOfRegistration {
@@ -661,7 +753,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: ProofOfRegistration.Type;
             }
 
             export interface ProofOfUltimateBeneficialOwnership {
@@ -678,7 +770,31 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: ProofOfUltimateBeneficialOwnership.Type;
+            }
+
+            export namespace BankAccountOwnershipVerification {
+              export type Type = 'files' | OtherString;
+            }
+
+            export namespace CompanyLicense {
+              export type Type = 'files' | OtherString;
+            }
+
+            export namespace CompanyMemorandumOfAssociation {
+              export type Type = 'files' | OtherString;
+            }
+
+            export namespace CompanyMinisterialDecree {
+              export type Type = 'files' | OtherString;
+            }
+
+            export namespace CompanyRegistrationVerification {
+              export type Type = 'files' | OtherString;
+            }
+
+            export namespace CompanyTaxIdVerification {
+              export type Type = 'files' | OtherString;
             }
 
             export namespace PrimaryVerification {
@@ -693,6 +809,12 @@ export namespace V2 {
                  */
                 front?: string;
               }
+
+              export type Type = 'front_back' | OtherString;
+            }
+
+            export namespace ProofOfAddress {
+              export type Type = 'files' | OtherString;
             }
 
             export namespace ProofOfRegistration {
@@ -702,6 +824,8 @@ export namespace V2 {
                  */
                 person: string;
               }
+
+              export type Type = 'files' | OtherString;
             }
 
             export namespace ProofOfUltimateBeneficialOwnership {
@@ -711,6 +835,8 @@ export namespace V2 {
                  */
                 person: string;
               }
+
+              export type Type = 'files' | OtherString;
             }
           }
 
@@ -830,7 +956,84 @@ export namespace V2 {
               | 'th_crn'
               | 'th_prn'
               | 'th_tin'
-              | 'us_ein';
+              | 'us_ein'
+              | OtherString;
+          }
+
+          export namespace ScriptAddresses {
+            export interface Kana {
+              /**
+               * City, district, suburb, town, or village.
+               */
+              city?: string;
+
+              /**
+               * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+               */
+              country?: string;
+
+              /**
+               * Address line 1 (e.g., street, PO Box, or company name).
+               */
+              line1?: string;
+
+              /**
+               * Address line 2 (e.g., apartment, suite, unit, or building).
+               */
+              line2?: string;
+
+              /**
+               * ZIP or postal code.
+               */
+              postal_code?: string;
+
+              /**
+               * State, county, province, or region.
+               */
+              state?: string;
+
+              /**
+               * Town or district.
+               */
+              town?: string;
+            }
+
+            export interface Kanji {
+              /**
+               * City, district, suburb, town, or village.
+               */
+              city?: string;
+
+              /**
+               * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+               */
+              country?: string;
+
+              /**
+               * Address line 1 (e.g., street, PO Box, or company name).
+               */
+              line1?: string;
+
+              /**
+               * Address line 2 (e.g., apartment, suite, unit, or building).
+               */
+              line2?: string;
+
+              /**
+               * ZIP or postal code.
+               */
+              postal_code?: string;
+
+              /**
+               * State, county, province, or region.
+               */
+              state?: string;
+
+              /**
+               * Town or district.
+               */
+              town?: string;
+            }
           }
 
           export namespace ScriptNames {
@@ -915,6 +1118,43 @@ export namespace V2 {
             surname?: string;
           }
 
+          export interface Address {
+            /**
+             * City, district, suburb, town, or village.
+             */
+            city?: string;
+
+            /**
+             * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+             */
+            country?: string;
+
+            /**
+             * Address line 1 (e.g., street, PO Box, or company name).
+             */
+            line1?: string;
+
+            /**
+             * Address line 2 (e.g., apartment, suite, unit, or building).
+             */
+            line2?: string;
+
+            /**
+             * ZIP or postal code.
+             */
+            postal_code?: string;
+
+            /**
+             * State, county, province, or region.
+             */
+            state?: string;
+
+            /**
+             * Town or district.
+             */
+            town?: string;
+          }
+
           export interface DateOfBirth {
             /**
              * The day of the birth.
@@ -971,9 +1211,9 @@ export namespace V2 {
             value: string;
           }
 
-          export type LegalGender = 'female' | 'male';
+          export type LegalGender = 'female' | 'male' | OtherString;
 
-          export type PoliticalExposure = 'existing' | 'none';
+          export type PoliticalExposure = 'existing' | 'none' | OtherString;
 
           export interface Relationship {
             /**
@@ -1006,12 +1246,12 @@ export namespace V2 {
             /**
              * Kana Address.
              */
-            kana?: JapanAddressParam;
+            kana?: ScriptAddresses.Kana;
 
             /**
              * Kanji Address.
              */
-            kanji?: JapanAddressParam;
+            kanji?: ScriptAddresses.Kanji;
           }
 
           export interface ScriptNames {
@@ -1040,7 +1280,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: CompanyAuthorization.Type;
             }
 
             export interface Passport {
@@ -1052,7 +1292,7 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: Passport.Type;
             }
 
             export interface PrimaryVerification {
@@ -1064,7 +1304,7 @@ export namespace V2 {
               /**
                * The format of the verification document. Currently supports `front_back` only.
                */
-              type: 'front_back';
+              type: PrimaryVerification.Type;
             }
 
             export interface SecondaryVerification {
@@ -1076,7 +1316,7 @@ export namespace V2 {
               /**
                * The format of the verification document. Currently supports `front_back` only.
                */
-              type: 'front_back';
+              type: SecondaryVerification.Type;
             }
 
             export interface Visa {
@@ -1088,7 +1328,15 @@ export namespace V2 {
               /**
                * The format of the document. Currently supports `files` only.
                */
-              type: 'files';
+              type: Visa.Type;
+            }
+
+            export namespace CompanyAuthorization {
+              export type Type = 'files' | OtherString;
+            }
+
+            export namespace Passport {
+              export type Type = 'files' | OtherString;
             }
 
             export namespace PrimaryVerification {
@@ -1103,6 +1351,8 @@ export namespace V2 {
                  */
                 front?: string;
               }
+
+              export type Type = 'front_back' | OtherString;
             }
 
             export namespace SecondaryVerification {
@@ -1117,6 +1367,12 @@ export namespace V2 {
                  */
                 front?: string;
               }
+
+              export type Type = 'front_back' | OtherString;
+            }
+
+            export namespace Visa {
+              export type Type = 'files' | OtherString;
             }
           }
 
@@ -1198,7 +1454,84 @@ export namespace V2 {
               | 'us_ssn'
               | 'us_ssn_last_4'
               | 'uy_dni'
-              | 'za_id';
+              | 'za_id'
+              | OtherString;
+          }
+
+          export namespace ScriptAddresses {
+            export interface Kana {
+              /**
+               * City, district, suburb, town, or village.
+               */
+              city?: string;
+
+              /**
+               * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+               */
+              country?: string;
+
+              /**
+               * Address line 1 (e.g., street, PO Box, or company name).
+               */
+              line1?: string;
+
+              /**
+               * Address line 2 (e.g., apartment, suite, unit, or building).
+               */
+              line2?: string;
+
+              /**
+               * ZIP or postal code.
+               */
+              postal_code?: string;
+
+              /**
+               * State, county, province, or region.
+               */
+              state?: string;
+
+              /**
+               * Town or district.
+               */
+              town?: string;
+            }
+
+            export interface Kanji {
+              /**
+               * City, district, suburb, town, or village.
+               */
+              city?: string;
+
+              /**
+               * Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
+               */
+              country?: string;
+
+              /**
+               * Address line 1 (e.g., street, PO Box, or company name).
+               */
+              line1?: string;
+
+              /**
+               * Address line 2 (e.g., apartment, suite, unit, or building).
+               */
+              line2?: string;
+
+              /**
+               * ZIP or postal code.
+               */
+              postal_code?: string;
+
+              /**
+               * State, county, province, or region.
+               */
+              state?: string;
+
+              /**
+               * Town or district.
+               */
+              town?: string;
+            }
           }
 
           export namespace ScriptNames {

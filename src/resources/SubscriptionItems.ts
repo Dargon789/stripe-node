@@ -8,6 +8,7 @@ import {TaxRate} from './TaxRates.js';
 import {
   Emptyable,
   MetadataParam,
+  OtherString,
   Decimal,
   PaginationParams,
   Metadata,
@@ -25,7 +26,7 @@ export class SubscriptionItemResource extends StripeResource {
   ): Promise<Response<DeletedSubscriptionItem>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/subscription_items/${id}`,
+      `/v1/subscription_items/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -40,7 +41,7 @@ export class SubscriptionItemResource extends StripeResource {
   ): Promise<Response<SubscriptionItem>> {
     return this._makeRequest(
       'GET',
-      `/v1/subscription_items/${id}`,
+      `/v1/subscription_items/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -140,7 +141,7 @@ export class SubscriptionItemResource extends StripeResource {
   ): Promise<Response<SubscriptionItem>> {
     return this._makeRequest(
       'POST',
-      `/v1/subscription_items/${id}`,
+      `/v1/subscription_items/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -487,6 +488,11 @@ export interface SubscriptionItem {
   current_period_start: number;
 
   /**
+   * The current trial that is applied to this subscription item.
+   */
+  current_trial: SubscriptionItem.CurrentTrial | null;
+
+  /**
    * Always true for a deleted object
    */
   deleted?: void;
@@ -502,10 +508,10 @@ export interface SubscriptionItem {
   metadata: Metadata;
 
   /**
-   * You can now model subscriptions more flexibly using the [Prices API](https://api.stripe.com#prices). It replaces the Plans API and is backwards compatible to simplify your migration.
+   * You can now model subscriptions more flexibly using the [Prices API](https://docs.stripe.com/api#prices). It replaces the Plans API and is backwards compatible to simplify your migration.
    *
    * Plans define the base price, currency, and billing cycle for recurring purchases of products.
-   * [Products](https://api.stripe.com#products) help you track inventory or provisioning, and plans help you track pricing. Different physical goods or levels of service should be represented by products, and pricing options should be represented by plans. This approach lets you change prices without having to change your provisioning scheme.
+   * [Products](https://docs.stripe.com/api#products) help you track inventory or provisioning, and plans help you track pricing. Different physical goods or levels of service should be represented by products, and pricing options should be represented by plans. This approach lets you change prices without having to change your provisioning scheme.
    *
    * For example, you might have a single "gold" product that has plans for $10/month, $100/year, €9/month, and €90/year.
    *
@@ -515,7 +521,7 @@ export interface SubscriptionItem {
 
   /**
    * Prices define the unit cost, currency, and (optional) billing cycle for both recurring and one-time purchases of products.
-   * [Products](https://api.stripe.com#products) help you track inventory or provisioning, and prices help you track payment terms. Different physical goods or levels of service should be represented by products, and pricing options should be represented by prices. This approach lets you change prices without having to change your provisioning scheme.
+   * [Products](https://docs.stripe.com/api#products) help you track inventory or provisioning, and prices help you track payment terms. Different physical goods or levels of service should be represented by products, and pricing options should be represented by prices. This approach lets you change prices without having to change your provisioning scheme.
    *
    * For example, you might have a single "gold" product that has prices for $10/month, $100/year, and €9 once.
    *
@@ -561,6 +567,14 @@ export namespace SubscriptionItem {
      */
     usage_gte: number | null;
   }
+
+  export interface CurrentTrial {
+    end_date: number;
+
+    start_date: number;
+
+    trial_offer: string;
+  }
 }
 export interface SubscriptionItemCreateParams {
   /**
@@ -574,6 +588,11 @@ export interface SubscriptionItemCreateParams {
   billing_thresholds?: Emptyable<
     SubscriptionItemCreateParams.BillingThresholds
   >;
+
+  /**
+   * The trial offer to apply to this subscription item.
+   */
+  current_trial?: SubscriptionItemCreateParams.CurrentTrial;
 
   /**
    * The coupons to redeem into discounts for the subscription item.
@@ -638,6 +657,13 @@ export namespace SubscriptionItemCreateParams {
     usage_gte: number;
   }
 
+  export interface CurrentTrial {
+    /**
+     * The ID of the trial offer to apply to the subscription item.
+     */
+    trial_offer: string;
+  }
+
   export interface Discount {
     /**
      * ID of the coupon to create a new discount for.
@@ -659,7 +685,8 @@ export namespace SubscriptionItemCreateParams {
     | 'allow_incomplete'
     | 'default_incomplete'
     | 'error_if_incomplete'
-    | 'pending_if_incomplete';
+    | 'pending_if_incomplete'
+    | OtherString;
 
   export interface PriceData {
     /**
@@ -696,7 +723,8 @@ export namespace SubscriptionItemCreateParams {
   export type ProrationBehavior =
     | 'always_invoice'
     | 'create_prorations'
-    | 'none';
+    | 'none'
+    | OtherString;
 
   export namespace PriceData {
     export interface Recurring {
@@ -711,10 +739,14 @@ export namespace SubscriptionItemCreateParams {
       interval_count?: number;
     }
 
-    export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'unspecified'
+      | OtherString;
 
     export namespace Recurring {
-      export type Interval = 'day' | 'month' | 'week' | 'year';
+      export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
     }
   }
 }
@@ -731,6 +763,11 @@ export interface SubscriptionItemUpdateParams {
   billing_thresholds?: Emptyable<
     SubscriptionItemUpdateParams.BillingThresholds
   >;
+
+  /**
+   * The trial offer to apply to this subscription item.
+   */
+  current_trial?: SubscriptionItemUpdateParams.CurrentTrial;
 
   /**
    * The coupons to redeem into discounts for the subscription item.
@@ -763,12 +800,12 @@ export interface SubscriptionItemUpdateParams {
   plan?: string;
 
   /**
-   * The ID of the price object. One of `price` or `price_data` is required. When changing a subscription item's price, `quantity` is set to 1 unless a `quantity` parameter is provided.
+   * The ID of the price object. You can use either `price` or `price_data`, but not both, to set or change this item's price. If you're updating an existing item without changing its price, omit both. When changing a subscription item's price, `quantity` is set to 1 unless a `quantity` parameter is provided.
    */
   price?: string;
 
   /**
-   * Data used to generate a new [Price](https://docs.stripe.com/api/prices) object inline. One of `price` or `price_data` is required.
+   * Data used to generate a new [Price](https://docs.stripe.com/api/prices) object inline. You can use either `price` or `price_data`, but not both, to set or change this item's price. If you're updating an existing item without changing its price, omit both.
    */
   price_data?: SubscriptionItemUpdateParams.PriceData;
 
@@ -800,6 +837,13 @@ export namespace SubscriptionItemUpdateParams {
     usage_gte: number;
   }
 
+  export interface CurrentTrial {
+    /**
+     * The ID of the trial offer to apply to the subscription item.
+     */
+    trial_offer: string;
+  }
+
   export interface Discount {
     /**
      * ID of the coupon to create a new discount for.
@@ -821,7 +865,8 @@ export namespace SubscriptionItemUpdateParams {
     | 'allow_incomplete'
     | 'default_incomplete'
     | 'error_if_incomplete'
-    | 'pending_if_incomplete';
+    | 'pending_if_incomplete'
+    | OtherString;
 
   export interface PriceData {
     /**
@@ -858,7 +903,8 @@ export namespace SubscriptionItemUpdateParams {
   export type ProrationBehavior =
     | 'always_invoice'
     | 'create_prorations'
-    | 'none';
+    | 'none'
+    | OtherString;
 
   export namespace PriceData {
     export interface Recurring {
@@ -873,10 +919,14 @@ export namespace SubscriptionItemUpdateParams {
       interval_count?: number;
     }
 
-    export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'unspecified'
+      | OtherString;
 
     export namespace Recurring {
-      export type Interval = 'day' | 'month' | 'week' | 'year';
+      export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
     }
   }
 }
@@ -917,10 +967,12 @@ export namespace SubscriptionItemDeleteParams {
     | 'allow_incomplete'
     | 'default_incomplete'
     | 'error_if_incomplete'
-    | 'pending_if_incomplete';
+    | 'pending_if_incomplete'
+    | OtherString;
 
   export type ProrationBehavior =
     | 'always_invoice'
     | 'create_prorations'
-    | 'none';
+    | 'none'
+    | OtherString;
 }

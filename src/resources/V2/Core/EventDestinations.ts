@@ -2,7 +2,7 @@
 
 import {StripeResource} from '../../../StripeResource.js';
 import {Event} from './Events.js';
-import {MetadataParam, Metadata} from '../../../shared.js';
+import {MetadataParam, OtherString, Metadata} from '../../../shared.js';
 import {RequestOptions, V2ListPromise, Response} from '../../../lib.js';
 import {DeletedObject} from './../../V2/DeletedObject.js';
 
@@ -48,7 +48,7 @@ export class EventDestinationResource extends StripeResource {
   ): Promise<Response<DeletedObject>> {
     return this._makeRequest(
       'DELETE',
-      `/v2/core/event_destinations/${id}`,
+      `/v2/core/event_destinations/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -63,7 +63,7 @@ export class EventDestinationResource extends StripeResource {
   ): Promise<Response<EventDestination>> {
     return this._makeRequest(
       'GET',
-      `/v2/core/event_destinations/${id}`,
+      `/v2/core/event_destinations/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -78,7 +78,7 @@ export class EventDestinationResource extends StripeResource {
   ): Promise<Response<EventDestination>> {
     return this._makeRequest(
       'POST',
-      `/v2/core/event_destinations/${id}`,
+      `/v2/core/event_destinations/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -93,7 +93,7 @@ export class EventDestinationResource extends StripeResource {
   ): Promise<Response<EventDestination>> {
     return this._makeRequest(
       'POST',
-      `/v2/core/event_destinations/${id}/disable`,
+      `/v2/core/event_destinations/${encodeURIComponent(id)}/disable`,
       params,
       options
     ) as any;
@@ -108,7 +108,7 @@ export class EventDestinationResource extends StripeResource {
   ): Promise<Response<EventDestination>> {
     return this._makeRequest(
       'POST',
-      `/v2/core/event_destinations/${id}/enable`,
+      `/v2/core/event_destinations/${encodeURIComponent(id)}/enable`,
       params,
       options
     ) as any;
@@ -123,7 +123,7 @@ export class EventDestinationResource extends StripeResource {
   ): Promise<Response<Event>> {
     return this._makeRequest(
       'POST',
-      `/v2/core/event_destinations/${id}/ping`,
+      `/v2/core/event_destinations/${encodeURIComponent(id)}/ping`,
       params,
       options
     ) as any;
@@ -141,34 +141,34 @@ export interface EventDestination {
   object: 'v2.core.event_destination';
 
   /**
-   * Amazon EventBridge configuration.
+   * Configuration for delivering events through an Amazon EventBridge partner event source.
    */
-  amazon_eventbridge?: V2.Core.EventDestination.AmazonEventbridge;
+  amazon_eventbridge?: EventDestination.AmazonEventbridge;
 
   /**
-   * Azure Event Grid configuration.
+   * Configuration for delivering events through an Azure Event Grid partner topic.
    */
-  azure_event_grid?: V2.Core.EventDestination.AzureEventGrid;
+  azure_event_grid?: EventDestination.AzureEventGrid;
 
   /**
-   * Time at which the object was created.
+   * The time when the destination was created.
    */
   created: string;
 
   /**
-   * An optional description of what the event destination is used for.
+   * An optional user-defined description of the destination's purpose.
    */
   description: string;
 
   /**
-   * The list of events to enable for this endpoint.
+   * The list of event types enabled for delivery to this destination.
    */
   enabled_events: Array<string>;
 
   /**
-   * Payload type of events being subscribed to.
+   * Whether to deliver as snapshot or thin events.
    */
-  event_payload: V2.Core.EventDestination.EventPayload;
+  event_payload: EventDestination.EventPayload;
 
   /**
    * Specifies which accounts' events route to this destination.
@@ -185,151 +185,150 @@ export interface EventDestination {
   livemode: boolean;
 
   /**
-   * Metadata.
+   * User-defined key/value data for the destination; it has no effect on event matching or delivery.
    */
   metadata?: Metadata;
 
   /**
-   * Event destination name.
+   * A user-defined label for identifying the destination in Stripe.
    */
   name: string;
 
   /**
-   * If using the snapshot event payload, the API version events are rendered as.
+   * For snapshot events only, the Stripe API version used to render event objects. Thin events are not pinned to an API version.
    */
   snapshot_api_version?: string;
 
   /**
-   * Status. It can be set to either enabled or disabled.
+   * Whether Stripe currently attempts delivery. Stripe attempts delivery to enabled destinations when their provider configuration is active; disabled destinations do not receive delivery attempts.
    */
-  status: V2.Core.EventDestination.Status;
+  status: EventDestination.Status;
 
   /**
-   * Additional information about event destination status.
+   * Additional lifecycle context for the destination status, when available.
    */
-  status_details?: V2.Core.EventDestination.StatusDetails;
+  status_details?: EventDestination.StatusDetails;
 
   /**
-   * Event destination type.
+   * The delivery transport. Chosen when the destination is created and cannot be changed by update.
    */
-  type: V2.Core.EventDestination.Type;
+  type: EventDestination.Type;
 
   /**
-   * Time at which the object was last updated.
+   * The time when the destination object was last updated.
    */
   updated: string;
 
   /**
-   * Webhook endpoint configuration.
+   * Configuration for delivering events to a webhook endpoint. Live mode requires HTTPS; sandbox mode also supports HTTP.
    */
-  webhook_endpoint?: V2.Core.EventDestination.WebhookEndpoint;
+  webhook_endpoint?: EventDestination.WebhookEndpoint;
 }
-export namespace V2 {
-  export namespace Core {
-    export namespace EventDestination {
-      export interface AmazonEventbridge {
-        /**
-         * The AWS account ID.
-         */
-        aws_account_id: string;
+export namespace EventDestination {
+  export interface AmazonEventbridge {
+    /**
+     * The AWS account ID that owns the event bus receiving events.
+     */
+    aws_account_id: string;
 
-        /**
-         * The ARN of the AWS event source.
-         */
-        aws_event_source_arn: string;
+    /**
+     * The ARN of the Stripe-created partner event source in your AWS account.
+     */
+    aws_event_source_arn: string;
 
-        /**
-         * The state of the AWS event source.
-         */
-        aws_event_source_status: AmazonEventbridge.AwsEventSourceStatus;
-      }
+    /**
+     * The AWS-reported lifecycle state of the partner event source.
+     */
+    aws_event_source_status: AmazonEventbridge.AwsEventSourceStatus;
+  }
 
-      export interface AzureEventGrid {
-        /**
-         * The name of the Azure partner topic.
-         */
-        azure_partner_topic_name: string;
+  export interface AzureEventGrid {
+    /**
+     * The name of the Stripe-created partner topic that receives events.
+     */
+    azure_partner_topic_name: string;
 
-        /**
-         * The status of the Azure partner topic.
-         */
-        azure_partner_topic_status: AzureEventGrid.AzurePartnerTopicStatus;
+    /**
+     * The Azure-reported lifecycle state of the partner topic.
+     */
+    azure_partner_topic_status: AzureEventGrid.AzurePartnerTopicStatus;
 
-        /**
-         * The Azure region.
-         */
-        azure_region: string;
+    /**
+     * The Azure region where the partner topic is located.
+     */
+    azure_region: string;
 
-        /**
-         * The name of the Azure resource group.
-         */
-        azure_resource_group_name: string;
+    /**
+     * The Azure resource group containing the partner topic.
+     */
+    azure_resource_group_name: string;
 
-        /**
-         * The Azure subscription ID.
-         */
-        azure_subscription_id: string;
-      }
+    /**
+     * The Azure subscription containing the resource group and partner topic.
+     */
+    azure_subscription_id: string;
+  }
 
-      export type EventPayload = 'snapshot' | 'thin';
+  export type EventPayload = 'snapshot' | 'thin';
 
-      export type Status = 'disabled' | 'enabled';
+  export type Status = 'disabled' | 'enabled';
 
-      export interface StatusDetails {
-        /**
-         * Details about why the event destination has been disabled.
-         */
-        disabled?: StatusDetails.Disabled;
-      }
+  export interface StatusDetails {
+    /**
+     * Present when the destination was disabled; identifies the cause, time, and provider-side object involved when available.
+     */
+    disabled?: StatusDetails.Disabled;
+  }
 
-      export type Type =
-        | 'amazon_eventbridge'
-        | 'azure_event_grid'
-        | 'webhook_endpoint';
+  export type Type =
+    | 'amazon_eventbridge'
+    | 'azure_event_grid'
+    | 'webhook_endpoint'
+    | OtherString;
 
-      export interface WebhookEndpoint {
-        /**
-         * The signing secret of the webhook endpoint, only includable on creation.
-         */
-        signing_secret?: string;
+  export interface WebhookEndpoint {
+    /**
+     * The secret used to verify Stripe signatures on delivered events. Returned only in the create response when explicitly included; public API clients cannot retrieve it later.
+     */
+    signing_secret?: string;
 
-        /**
-         * The URL of the webhook endpoint, includable.
-         */
-        url?: string;
-      }
+    /**
+     * The URL where Stripe sends matching events. Live mode requires HTTPS; sandbox mode also supports HTTP. Returned only when explicitly included.
+     */
+    url?: string;
+  }
 
-      export namespace AmazonEventbridge {
-        export type AwsEventSourceStatus =
-          | 'active'
-          | 'deleted'
-          | 'pending'
-          | 'unknown';
-      }
+  export namespace AmazonEventbridge {
+    export type AwsEventSourceStatus =
+      | 'active'
+      | 'deleted'
+      | 'pending'
+      | 'unknown';
+  }
 
-      export namespace AzureEventGrid {
-        export type AzurePartnerTopicStatus =
-          | 'activated'
-          | 'deleted'
-          | 'never_activated'
-          | 'unknown';
-      }
+  export namespace AzureEventGrid {
+    export type AzurePartnerTopicStatus =
+      | 'activated'
+      | 'deleted'
+      | 'never_activated'
+      | 'unknown'
+      | OtherString;
+  }
 
-      export namespace StatusDetails {
-        export interface Disabled {
-          /**
-           * Reason event destination has been disabled.
-           */
-          reason: Disabled.Reason;
-        }
+  export namespace StatusDetails {
+    export interface Disabled {
+      /**
+       * Reason event destination has been disabled.
+       */
+      reason: Disabled.Reason;
+    }
 
-        export namespace Disabled {
-          export type Reason =
-            | 'no_aws_event_source_exists'
-            | 'no_azure_partner_topic_exists'
-            | 'user';
-        }
-      }
+    export namespace Disabled {
+      export type Reason =
+        | 'no_aws_event_source_exists'
+        | 'no_azure_partner_topic_exists'
+        | 'user'
+        | OtherString;
     }
   }
 }
@@ -337,66 +336,66 @@ export namespace V2 {
   export namespace Core {
     export interface EventDestinationCreateParams {
       /**
-       * The list of events to enable for this endpoint.
+       * The list of event types enabled for delivery to this destination.
        */
       enabled_events: Array<string>;
 
       /**
-       * Payload type of events being subscribed to.
+       * Whether to deliver as snapshot or thin events.
        */
       event_payload: EventDestinationCreateParams.EventPayload;
 
       /**
-       * Event destination name.
+       * A user-defined label for identifying the destination.
        */
       name: string;
 
       /**
-       * Event destination type.
+       * The delivery transport. Chosen when the destination is created and cannot be changed by update.
        */
       type: EventDestinationCreateParams.Type;
 
       /**
-       * Amazon EventBridge configuration.
+       * AWS account and region where Stripe creates the EventBridge partner event source.
        */
       amazon_eventbridge?: EventDestinationCreateParams.AmazonEventbridge;
 
       /**
-       * Azure Event Grid configuration.
+       * Azure subscription, resource group, and region where Stripe creates the partner topic.
        */
       azure_event_grid?: EventDestinationCreateParams.AzureEventGrid;
 
       /**
-       * An optional description of what the event destination is used for.
+       * An optional user-defined description of the destination's purpose.
        */
       description?: string;
 
       /**
-       * Specifies which accounts' events route to this destination.
+       * The account or organization scopes that can supply events. Use this with `enabled_events` to define the subscription.
        * `@self`: Receive events from the account that owns the event destination.
-       * `@accounts`: Receive events emitted from other accounts you manage which includes your v1 and v2 accounts.
+       * `@accounts`: Receive events emitted from other accounts you manage, including your v1 and v2 accounts.
        * `@organization_members`: Receive events from accounts directly linked to the organization.
        * `@organization_members/@accounts`: Receive events from all accounts connected to any platform accounts in the organization.
        */
       events_from?: Array<string>;
 
       /**
-       * Additional fields to include in the response.
+       * Include normally redacted webhook fields in the create response. Public API clients must include `webhook_endpoint.signing_secret` to receive the signing secret.
        */
       include?: Array<EventDestinationCreateParams.Include>;
 
       /**
-       * Metadata.
+       * User-defined key/value data for the destination.
        */
       metadata?: MetadataParam;
 
       /**
-       * If using the snapshot event payload, the API version events are rendered as.
+       * For snapshot events only, the Stripe API version used to render event objects; do not provide this for thin events.
        */
       snapshot_api_version?: string;
 
       /**
-       * Webhook endpoint configuration.
+       * Delivery target for the webhook endpoint. Live mode requires HTTPS; sandbox mode also supports HTTP.
        */
       webhook_endpoint?: EventDestinationCreateParams.WebhookEndpoint;
     }
@@ -407,44 +406,46 @@ export namespace V2 {
       export type Type =
         | 'amazon_eventbridge'
         | 'azure_event_grid'
-        | 'webhook_endpoint';
+        | 'webhook_endpoint'
+        | OtherString;
 
       export interface AmazonEventbridge {
         /**
-         * The AWS account ID.
+         * Your AWS account where Stripe creates the partner event source.
          */
         aws_account_id: string;
 
         /**
-         * The region of the AWS event source.
+         * The AWS region where Stripe creates the partner event source.
          */
         aws_region: string;
       }
 
       export interface AzureEventGrid {
         /**
-         * The Azure region.
+         * The Azure region where Stripe creates the partner topic.
          */
         azure_region: string;
 
         /**
-         * The name of the Azure resource group.
+         * The Azure resource group where Stripe creates the partner topic.
          */
         azure_resource_group_name: string;
 
         /**
-         * The Azure subscription ID.
+         * The Azure subscription where Stripe creates the partner topic.
          */
         azure_subscription_id: string;
       }
 
       export type Include =
         | 'webhook_endpoint.signing_secret'
-        | 'webhook_endpoint.url';
+        | 'webhook_endpoint.url'
+        | OtherString;
 
       export interface WebhookEndpoint {
         /**
-         * The URL of the webhook endpoint.
+         * The URL where Stripe sends matching events. Live mode requires HTTPS; sandbox mode also supports HTTP.
          */
         url: string;
       }
@@ -457,7 +458,11 @@ export namespace V2 {
       /**
        * Additional fields to include in the response.
        */
-      include?: Array<'webhook_endpoint.url'>;
+      include?: Array<EventDestinationRetrieveParams.Include>;
+    }
+
+    export namespace EventDestinationRetrieveParams {
+      export type Include = 'webhook_endpoint.url' | OtherString;
     }
   }
 }
@@ -465,19 +470,19 @@ export namespace V2 {
   export namespace Core {
     export interface EventDestinationUpdateParams {
       /**
-       * An optional description of what the event destination is used for.
+       * An optional user-defined description of the destination's purpose; it does not control routing.
        */
       description?: string;
 
       /**
-       * The list of events to enable for this endpoint.
+       * The list of event types enabled for delivery to this destination. Event scopes are configured when the destination is created.
        */
       enabled_events?: Array<string>;
 
       /**
-       * Additional fields to include in the response. Currently supports `webhook_endpoint.url`.
+       * Include the normally redacted `webhook_endpoint.url` in the response.
        */
-      include?: Array<'webhook_endpoint.url'>;
+      include?: Array<EventDestinationUpdateParams.Include>;
 
       /**
        * Metadata.
@@ -485,20 +490,22 @@ export namespace V2 {
       metadata?: MetadataParam;
 
       /**
-       * Event destination name.
+       * A user-defined label for identifying the destination; it does not control routing.
        */
       name?: string;
 
       /**
-       * Webhook endpoint configuration.
+       * New delivery target for the webhook endpoint. Live mode requires HTTPS; sandbox mode also supports HTTP.
        */
       webhook_endpoint?: EventDestinationUpdateParams.WebhookEndpoint;
     }
 
     export namespace EventDestinationUpdateParams {
+      export type Include = 'webhook_endpoint.url' | OtherString;
+
       export interface WebhookEndpoint {
         /**
-         * The URL of the webhook endpoint.
+         * The URL where Stripe sends matching events. Live mode requires HTTPS; sandbox mode also supports HTTP.
          */
         url: string;
       }
@@ -509,14 +516,18 @@ export namespace V2 {
   export namespace Core {
     export interface EventDestinationListParams {
       /**
-       * Additional fields to include in the response. Currently supports `webhook_endpoint.url`.
+       * Include the normally redacted `webhook_endpoint.url` in each returned destination.
        */
-      include?: Array<'webhook_endpoint.url'>;
+      include?: Array<EventDestinationListParams.Include>;
 
       /**
        * The page size.
        */
       limit?: number;
+    }
+
+    export namespace EventDestinationListParams {
+      export type Include = 'webhook_endpoint.url' | OtherString;
     }
   }
 }

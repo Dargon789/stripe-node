@@ -1,7 +1,7 @@
 // File generated from our OpenAPI spec
 
 import {StripeResource} from '../StripeResource.js';
-import {PaginationParams, Metadata} from '../shared.js';
+import {PaginationParams, OtherString, Metadata} from '../shared.js';
 import {RequestOptions, ApiListPromise, Response} from '../lib.js';
 
 export class InvoiceRenderingTemplateResource extends StripeResource {
@@ -32,7 +32,7 @@ export class InvoiceRenderingTemplateResource extends StripeResource {
   ): Promise<Response<InvoiceRenderingTemplate>> {
     return this._makeRequest(
       'GET',
-      `/v1/invoice_rendering_templates/${id}`,
+      `/v1/invoice_rendering_templates/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -47,7 +47,7 @@ export class InvoiceRenderingTemplateResource extends StripeResource {
   ): Promise<Response<InvoiceRenderingTemplate>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoice_rendering_templates/${id}/archive`,
+      `/v1/invoice_rendering_templates/${encodeURIComponent(id)}/archive`,
       params,
       options
     ) as any;
@@ -62,7 +62,7 @@ export class InvoiceRenderingTemplateResource extends StripeResource {
   ): Promise<Response<InvoiceRenderingTemplate>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoice_rendering_templates/${id}/unarchive`,
+      `/v1/invoice_rendering_templates/${encodeURIComponent(id)}/unarchive`,
       params,
       options
     ) as any;
@@ -110,7 +110,7 @@ export interface InvoiceRenderingTemplate {
   version: number;
 }
 export namespace InvoiceRenderingTemplate {
-  export type Status = 'active' | 'archived';
+  export type Status = 'active' | 'archived' | OtherString;
 }
 export interface InvoiceRenderingTemplateRetrieveParams {
   /**
@@ -129,7 +129,7 @@ export interface InvoiceRenderingTemplateListParams extends PaginationParams {
   status?: InvoiceRenderingTemplateListParams.Status;
 }
 export namespace InvoiceRenderingTemplateListParams {
-  export type Status = 'active' | 'archived';
+  export type Status = 'active' | 'archived' | OtherString;
 }
 export interface InvoiceRenderingTemplateArchiveParams {
   /**

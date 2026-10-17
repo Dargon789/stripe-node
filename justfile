@@ -21,8 +21,12 @@ test *args: install build
 
 # try to compile the example TS file to make sure exports work
 types-test: build
-    if [ ! -d testProjects/types/node_modules ]; then (cd testProjects/types && npm install); fi
-    tsc --build testProjects/types
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for dir in types types-cjs types-cjs-node16; do
+        if [ ! -d "testProjects/$dir/node_modules" ]; then (cd "testProjects/$dir" && npm install); fi
+        tsc --build "testProjects/$dir"
+    done
 
 # run full integration tests by installing a bunch of packages and starting servers (slow)
 integrations-test: build
@@ -66,7 +70,7 @@ prettier *args: install
     prettier "{src,examples,scripts,test,types}/**/*.{ts,js}" {{ args }}
 
 # ⭐ format all files
-format: (prettier "--write --loglevel silent")
+format: (prettier "--write --loglevel error")
 
 # verify formatting of files (without changes)
 format-check: (prettier "--check")
@@ -82,3 +86,10 @@ update-version version:
 # remove build artifacts
 clean:
     rm -rf ./node_modules/.cache ./esm ./cjs
+
+# ⭐ print the API version this SDK pins and the lowest runtime it supports
+print-version-info:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "pinned-api-version: $(rg -N --color never -m1 -o '[0-9]{4}-[0-9]{2}-[0-9]{2}[.\w-]*' src/apiVersion.ts)"
+    echo "minimum-runtime-version: $(rg -N --color never -o '"node": ">=([^"]+)"' --replace '$1' package.json)"

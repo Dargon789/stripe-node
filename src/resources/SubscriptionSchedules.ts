@@ -1,7 +1,7 @@
 // File generated from our OpenAPI spec
 
 import {StripeResource} from '../StripeResource.js';
-import {Discount} from './Discounts.js';
+import {Discount as _Discount} from './Discounts.js';
 import {Application, DeletedApplication} from './Applications.js';
 import {Customer, DeletedCustomer} from './Customers.js';
 import {Subscription} from './Subscriptions.js';
@@ -17,6 +17,7 @@ import * as TestHelpers from './TestHelpers/index.js';
 import {
   Emptyable,
   MetadataParam,
+  OtherString,
   Decimal,
   PaginationParams,
   RangeQueryParam,
@@ -109,7 +110,7 @@ export class SubscriptionScheduleResource extends StripeResource {
   ): Promise<Response<SubscriptionSchedule>> {
     return this._makeRequest(
       'GET',
-      `/v1/subscription_schedules/${id}`,
+      `/v1/subscription_schedules/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -124,7 +125,7 @@ export class SubscriptionScheduleResource extends StripeResource {
   ): Promise<Response<SubscriptionSchedule>> {
     return this._makeRequest(
       'POST',
-      `/v1/subscription_schedules/${id}`,
+      `/v1/subscription_schedules/${encodeURIComponent(id)}`,
       params,
       options,
       {
@@ -182,7 +183,7 @@ export class SubscriptionScheduleResource extends StripeResource {
   ): Promise<Response<SubscriptionSchedule>> {
     return this._makeRequest(
       'POST',
-      `/v1/subscription_schedules/${id}/cancel`,
+      `/v1/subscription_schedules/${encodeURIComponent(id)}/cancel`,
       params,
       options
     ) as any;
@@ -197,7 +198,7 @@ export class SubscriptionScheduleResource extends StripeResource {
   ): Promise<Response<SubscriptionSchedule>> {
     return this._makeRequest(
       'POST',
-      `/v1/subscription_schedules/${id}/release`,
+      `/v1/subscription_schedules/${encodeURIComponent(id)}/release`,
       params,
       options
     ) as any;
@@ -270,6 +271,11 @@ export interface SubscriptionSchedule {
    * Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format.
    */
   metadata: Metadata | null;
+
+  /**
+   * The pause schedules for this subscription schedule.
+   */
+  pause_schedules?: Array<SubscriptionSchedule.PauseSchedule>;
 
   /**
    * Configuration for the subscription schedule's phases.
@@ -377,7 +383,26 @@ export namespace SubscriptionSchedule {
     transfer_data: DefaultSettings.TransferData | null;
   }
 
-  export type EndBehavior = 'cancel' | 'none' | 'release' | 'renew';
+  export type EndBehavior =
+    | 'cancel'
+    | 'none'
+    | 'release'
+    | 'renew'
+    | OtherString;
+
+  export interface PauseSchedule {
+    /**
+     * A unique identifier for this pause schedule.
+     */
+    key: string;
+
+    pause: PauseSchedule.Pause;
+
+    /**
+     * Details about when and how the subscription resumes.
+     */
+    resume: PauseSchedule.Resume | null;
+  }
 
   export interface Phase {
     /**
@@ -473,6 +498,11 @@ export namespace SubscriptionSchedule {
     transfer_data: Phase.TransferData | null;
 
     /**
+     * If set to true the entire phase is counted as a trial and the customer will not be charged for any fees.
+     */
+    trial?: boolean;
+
+    /**
      * When the trial ends within the phase.
      */
     trial_end: number | null;
@@ -483,7 +513,8 @@ export namespace SubscriptionSchedule {
     | 'canceled'
     | 'completed'
     | 'not_started'
-    | 'released';
+    | 'released'
+    | OtherString;
 
   export namespace BillingMode {
     export interface Flexible {
@@ -493,10 +524,10 @@ export namespace SubscriptionSchedule {
       proration_discounts?: Flexible.ProrationDiscounts;
     }
 
-    export type Type = 'classic' | 'flexible';
+    export type Type = 'classic' | 'flexible' | OtherString;
 
     export namespace Flexible {
-      export type ProrationDiscounts = 'included' | 'itemized';
+      export type ProrationDiscounts = 'included' | 'itemized' | OtherString;
     }
   }
 
@@ -518,7 +549,7 @@ export namespace SubscriptionSchedule {
       liability: AutomaticTax.Liability | null;
     }
 
-    export type BillingCycleAnchor = 'automatic' | 'phase_start';
+    export type BillingCycleAnchor = 'automatic' | 'phase_start' | OtherString;
 
     export interface BillingThresholds {
       /**
@@ -532,7 +563,10 @@ export namespace SubscriptionSchedule {
       reset_billing_cycle_anchor: boolean | null;
     }
 
-    export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+    export type CollectionMethod =
+      | 'charge_automatically'
+      | 'send_invoice'
+      | OtherString;
 
     export interface InvoiceSettings {
       /**
@@ -541,9 +575,24 @@ export namespace SubscriptionSchedule {
       account_tax_ids: Array<string | TaxId | DeletedTaxId> | null;
 
       /**
+       * A list of up to 4 custom fields to be displayed on the invoice.
+       */
+      custom_fields: Array<InvoiceSettings.CustomField> | null;
+
+      /**
        * Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `billing=charge_automatically`.
        */
       days_until_due: number | null;
+
+      /**
+       * An arbitrary string attached to the object. Often useful for displaying to users.
+       */
+      description: string | null;
+
+      /**
+       * Footer to be displayed on the invoice.
+       */
+      footer: string | null;
 
       issuer: InvoiceSettings.Issuer;
     }
@@ -574,11 +623,23 @@ export namespace SubscriptionSchedule {
       }
 
       export namespace Liability {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
     export namespace InvoiceSettings {
+      export interface CustomField {
+        /**
+         * The name of the custom field.
+         */
+        name: string;
+
+        /**
+         * The value of the custom field.
+         */
+        value: string;
+      }
+
       export interface Issuer {
         /**
          * The connected account being referenced when `type` is `account`.
@@ -592,7 +653,186 @@ export namespace SubscriptionSchedule {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
+      }
+    }
+  }
+
+  export namespace PauseSchedule {
+    export interface Pause {
+      /**
+       * Time at which the subscription pauses.
+       */
+      pause_at: number;
+
+      /**
+       * Settings controlling billing behavior during the pause.
+       */
+      settings: Pause.Settings | null;
+
+      status: Pause.Status;
+    }
+
+    export interface Resume {
+      /**
+       * Time at which the subscription resumes.
+       */
+      resume_at: number;
+
+      settings: Resume.Settings;
+
+      status: Resume.Status;
+    }
+
+    export namespace Pause {
+      export interface Settings {
+        bill_for: Settings.BillFor;
+
+        /**
+         * Determines how to handle debits and credits when pausing.
+         */
+        invoicing_behavior: Settings.InvoicingBehavior;
+
+        /**
+         * The type of pause settings.
+         */
+        type: Settings.Type;
+      }
+
+      export interface Status {
+        error?: Status.Error;
+
+        /**
+         * The lifecycle state of the pause operation.
+         */
+        type: Status.Type;
+      }
+
+      export namespace Settings {
+        export interface BillFor {
+          outstanding_usage_through: BillFor.OutstandingUsageThrough;
+
+          unused_time_from: BillFor.UnusedTimeFrom;
+        }
+
+        export type InvoicingBehavior =
+          | 'invoice'
+          | 'pending_invoice_item'
+          | OtherString;
+
+        export type Type = 'subscription' | OtherString;
+
+        export namespace BillFor {
+          export interface OutstandingUsageThrough {
+            /**
+             * The type of outstanding usage billing behavior.
+             */
+            type: OutstandingUsageThrough.Type;
+          }
+
+          export interface UnusedTimeFrom {
+            /**
+             * The type of unused time credit behavior.
+             */
+            type: UnusedTimeFrom.Type;
+          }
+
+          export namespace OutstandingUsageThrough {
+            export type Type = 'none' | 'pause_at' | OtherString;
+          }
+
+          export namespace UnusedTimeFrom {
+            export type Type =
+              | 'item_current_period_start'
+              | 'none'
+              | 'pause_at'
+              | OtherString;
+          }
+        }
+      }
+
+      export namespace Status {
+        export interface Error {
+          /**
+           * A machine-readable error code.
+           */
+          code?: string;
+
+          /**
+           * A description of the error.
+           */
+          message: string;
+        }
+
+        export type Type = 'error' | 'scheduled' | 'succeeded' | OtherString;
+      }
+    }
+
+    export namespace Resume {
+      export interface Settings {
+        /**
+         * The billing cycle anchor that applies when the subscription is resumed.
+         */
+        billing_cycle_anchor: Settings.BillingCycleAnchor;
+
+        /**
+         * Controls whether Stripe attempts payment on the resumption invoice and how that affects the subscription's status.
+         */
+        payment_behavior: Settings.PaymentBehavior;
+
+        /**
+         * Determines how to handle prorations resulting from the billing_cycle_anchor change on resume.
+         */
+        proration_behavior: Settings.ProrationBehavior;
+      }
+
+      export interface Status {
+        error?: Status.Error;
+
+        /**
+         * The lifecycle state of the resume operation.
+         */
+        type: Status.Type;
+      }
+
+      export namespace Settings {
+        export type BillingCycleAnchor =
+          | 'resume_at'
+          | 'unchanged'
+          | OtherString;
+
+        export type PaymentBehavior =
+          | 'resume_on_payment_attempt'
+          | 'resume_on_payment_success'
+          | OtherString;
+
+        export type ProrationBehavior =
+          | 'always_invoice'
+          | 'create_prorations'
+          | 'none'
+          | OtherString;
+      }
+
+      export namespace Status {
+        export interface Error {
+          /**
+           * A machine-readable error code.
+           */
+          code?: string;
+
+          /**
+           * A description of the error.
+           */
+          message: string;
+        }
+
+        export type Type =
+          | 'error'
+          | 'pending'
+          | 'requires_action'
+          | 'scheduled'
+          | 'succeeded'
+          | OtherString;
       }
     }
   }
@@ -649,7 +889,7 @@ export namespace SubscriptionSchedule {
       liability: AutomaticTax.Liability | null;
     }
 
-    export type BillingCycleAnchor = 'automatic' | 'phase_start';
+    export type BillingCycleAnchor = 'automatic' | 'phase_start' | OtherString;
 
     export interface BillingThresholds {
       /**
@@ -663,7 +903,10 @@ export namespace SubscriptionSchedule {
       reset_billing_cycle_anchor: boolean | null;
     }
 
-    export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+    export type CollectionMethod =
+      | 'charge_automatically'
+      | 'send_invoice'
+      | OtherString;
 
     export interface Discount {
       /**
@@ -674,7 +917,7 @@ export namespace SubscriptionSchedule {
       /**
        * ID of an existing discount on the object (or one of its ancestors) to reuse.
        */
-      discount: string | Discount | null;
+      discount: string | _Discount | null;
 
       /**
        * ID of the promotion code to create a new discount for.
@@ -689,9 +932,24 @@ export namespace SubscriptionSchedule {
       account_tax_ids: Array<string | TaxId | DeletedTaxId> | null;
 
       /**
+       * A list of up to 4 custom fields to be displayed on the invoice.
+       */
+      custom_fields: Array<InvoiceSettings.CustomField> | null;
+
+      /**
        * Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `billing=charge_automatically`.
        */
       days_until_due: number | null;
+
+      /**
+       * An arbitrary string attached to the object. Often useful for displaying to users.
+       */
+      description: string | null;
+
+      /**
+       * Footer to be displayed on the invoice.
+       */
+      footer: string | null;
 
       /**
        * The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
@@ -739,7 +997,8 @@ export namespace SubscriptionSchedule {
     export type ProrationBehavior =
       | 'always_invoice'
       | 'create_prorations'
-      | 'none';
+      | 'none'
+      | OtherString;
 
     export interface TransferData {
       /**
@@ -763,7 +1022,7 @@ export namespace SubscriptionSchedule {
         /**
          * ID of an existing discount on the object (or one of its ancestors) to reuse.
          */
-        discount: string | Discount | null;
+        discount: string | _Discount | null;
 
         /**
          * ID of the promotion code to create a new discount for.
@@ -803,14 +1062,19 @@ export namespace SubscriptionSchedule {
         }
 
         export namespace End {
-          export type Type = 'min_item_period_end' | 'phase_end' | 'timestamp';
+          export type Type =
+            | 'min_item_period_end'
+            | 'phase_end'
+            | 'timestamp'
+            | OtherString;
         }
 
         export namespace Start {
           export type Type =
             | 'max_item_period_start'
             | 'phase_start'
-            | 'timestamp';
+            | 'timestamp'
+            | OtherString;
         }
       }
     }
@@ -829,11 +1093,23 @@ export namespace SubscriptionSchedule {
       }
 
       export namespace Liability {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
     export namespace InvoiceSettings {
+      export interface CustomField {
+        /**
+         * The name of the custom field.
+         */
+        name: string;
+
+        /**
+         * The value of the custom field.
+         */
+        value: string;
+      }
+
       export interface Issuer {
         /**
          * The connected account being referenced when `type` is `account`.
@@ -847,7 +1123,7 @@ export namespace SubscriptionSchedule {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
@@ -868,7 +1144,7 @@ export namespace SubscriptionSchedule {
         /**
          * ID of an existing discount on the object (or one of its ancestors) to reuse.
          */
-        discount: string | Discount | null;
+        discount: string | _Discount | null;
 
         /**
          * ID of the promotion code to create a new discount for.
@@ -920,12 +1196,17 @@ export interface SubscriptionScheduleCreateParams {
   metadata?: Emptyable<MetadataParam>;
 
   /**
+   * Configures the subscription's pause behavior and, optionally, its resume behavior. Only one entry is supported.
+   */
+  pause_schedules?: Array<SubscriptionScheduleCreateParams.PauseSchedule>;
+
+  /**
    * List representing phases of the subscription schedule. Each phase can be customized to have different durations, plans, and coupons. If there are multiple phases, the `end_date` of one phase will always equal the `start_date` of the next phase.
    */
   phases?: Array<SubscriptionScheduleCreateParams.Phase>;
 
   /**
-   * When the subscription schedule starts. We recommend using `now` so that it starts the subscription immediately. You can also use a Unix timestamp to backdate the subscription so that it starts on a past date, or set a future date for the subscription to start on.
+   * When the subscription schedule starts. We recommend using `now` so that it starts the subscription immediately, and to avoid unexpected behavior due to request delays or clock skew resulting in a slightly backdated or postdated start. You can also use a Unix timestamp to backdate the subscription so that it starts on a past date, or set a future date for the subscription to start on.
    */
   start_date?: number | 'now';
 }
@@ -994,7 +1275,29 @@ export namespace SubscriptionScheduleCreateParams {
     transfer_data?: Emptyable<DefaultSettings.TransferData>;
   }
 
-  export type EndBehavior = 'cancel' | 'none' | 'release' | 'renew';
+  export type EndBehavior =
+    | 'cancel'
+    | 'none'
+    | 'release'
+    | 'renew'
+    | OtherString;
+
+  export interface PauseSchedule {
+    /**
+     * A unique identifier for this pause schedule entry.
+     */
+    key?: string;
+
+    /**
+     * Configuration for when and how the subscription pauses.
+     */
+    pause?: PauseSchedule.Pause;
+
+    /**
+     * Configuration for when and how the subscription resumes.
+     */
+    resume?: PauseSchedule.Resume;
+  }
 
   export interface Phase {
     /**
@@ -1111,10 +1414,10 @@ export namespace SubscriptionScheduleCreateParams {
       proration_discounts?: Flexible.ProrationDiscounts;
     }
 
-    export type Type = 'classic' | 'flexible';
+    export type Type = 'classic' | 'flexible' | OtherString;
 
     export namespace Flexible {
-      export type ProrationDiscounts = 'included' | 'itemized';
+      export type ProrationDiscounts = 'included' | 'itemized' | OtherString;
     }
   }
 
@@ -1131,7 +1434,7 @@ export namespace SubscriptionScheduleCreateParams {
       liability?: AutomaticTax.Liability;
     }
 
-    export type BillingCycleAnchor = 'automatic' | 'phase_start';
+    export type BillingCycleAnchor = 'automatic' | 'phase_start' | OtherString;
 
     export interface BillingThresholds {
       /**
@@ -1145,7 +1448,10 @@ export namespace SubscriptionScheduleCreateParams {
       reset_billing_cycle_anchor?: boolean;
     }
 
-    export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+    export type CollectionMethod =
+      | 'charge_automatically'
+      | 'send_invoice'
+      | OtherString;
 
     export interface InvoiceSettings {
       /**
@@ -1153,10 +1459,16 @@ export namespace SubscriptionScheduleCreateParams {
        */
       account_tax_ids?: Emptyable<Array<string>>;
 
+      custom_fields?: Emptyable<Array<InvoiceSettings.CustomField>>;
+
       /**
        * Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `collection_method=charge_automatically`.
        */
       days_until_due?: number;
+
+      description?: Emptyable<string>;
+
+      footer?: Emptyable<string>;
 
       /**
        * The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
@@ -1190,11 +1502,23 @@ export namespace SubscriptionScheduleCreateParams {
       }
 
       export namespace Liability {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
     export namespace InvoiceSettings {
+      export interface CustomField {
+        /**
+         * The name of the custom field. This may be up to 40 characters.
+         */
+        name: string;
+
+        /**
+         * The value of the custom field. This may be up to 140 characters.
+         */
+        value: string;
+      }
+
       export interface Issuer {
         /**
          * The connected account being referenced when `type` is `account`.
@@ -1208,7 +1532,196 @@ export namespace SubscriptionScheduleCreateParams {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
+      }
+    }
+  }
+
+  export namespace PauseSchedule {
+    export interface Pause {
+      /**
+       * When to pause the subscription.
+       */
+      pause_at: Pause.PauseAt;
+
+      /**
+       * Settings controlling billing behavior during the pause.
+       */
+      settings?: Pause.Settings;
+    }
+
+    export interface Resume {
+      /**
+       * When to resume the subscription.
+       */
+      resume_at: Resume.ResumeAt;
+
+      /**
+       * Settings controlling how the subscription resumes.
+       */
+      settings?: Resume.Settings;
+    }
+
+    export namespace Pause {
+      export interface PauseAt {
+        /**
+         * The Unix timestamp at which to pause the subscription. Required when `type` is `timestamp`.
+         */
+        timestamp?: number;
+
+        /**
+         * When to pause the subscription. Use `now` to pause immediately or `timestamp` to pause at a specific time.
+         */
+        type: PauseAt.Type;
+      }
+
+      export interface Settings {
+        /**
+         * Controls what to bill for when pausing the subscription.
+         */
+        bill_for?: Settings.BillFor;
+
+        /**
+         * Determines whether to generate an invoice for outstanding amounts when pausing. When adding a pause schedule, defaults to `pending_invoice_item`. On updates, the existing value is preserved if not provided.
+         */
+        invoicing_behavior?: Settings.InvoicingBehavior;
+
+        /**
+         * The pause type. Currently only `subscription` is supported.
+         */
+        type?: Settings.Type;
+      }
+
+      export namespace PauseAt {
+        export type Type = 'now' | 'timestamp' | OtherString;
+      }
+
+      export namespace Settings {
+        export interface BillFor {
+          /**
+           * Controls whether to collect metered usage accrued up to the pause date.
+           */
+          outstanding_usage_through?: BillFor.OutstandingUsageThrough;
+
+          /**
+           * Controls how unused time on subscription items is credited when pausing.
+           */
+          unused_time_from?: BillFor.UnusedTimeFrom;
+        }
+
+        export type InvoicingBehavior =
+          | 'invoice'
+          | 'pending_invoice_item'
+          | OtherString;
+
+        export type Type = 'subscription' | OtherString;
+
+        export namespace BillFor {
+          export interface OutstandingUsageThrough {
+            /**
+             * Determines whether to collect metered usage accrued up to the pause date. When adding a pause schedule, defaults to `pause_at`. On updates, the existing value is preserved if not provided.
+             */
+            type?: OutstandingUsageThrough.Type;
+          }
+
+          export interface UnusedTimeFrom {
+            /**
+             * Determines which point in the billing period unused time is credited from. When adding a pause schedule, defaults to `pause_at`. On updates, the existing value is preserved if not provided.
+             */
+            type?: UnusedTimeFrom.Type;
+          }
+
+          export namespace OutstandingUsageThrough {
+            export type Type = 'none' | 'pause_at' | OtherString;
+          }
+
+          export namespace UnusedTimeFrom {
+            export type Type =
+              | 'item_current_period_start'
+              | 'none'
+              | 'pause_at'
+              | OtherString;
+          }
+        }
+      }
+    }
+
+    export namespace Resume {
+      export interface ResumeAt {
+        /**
+         * The duration after which to resume the subscription. Required when `type` is `duration`.
+         */
+        duration?: ResumeAt.Duration;
+
+        /**
+         * The Unix timestamp at which to resume the subscription. Required when `type` is `timestamp`.
+         */
+        timestamp?: number;
+
+        /**
+         * When to resume the subscription. Use `now` to resume immediately, `duration` to resume after a set duration, or `timestamp` to resume at a specific time.
+         */
+        type: ResumeAt.Type;
+      }
+
+      export interface Settings {
+        /**
+         * Controls the billing cycle anchor when the subscription resumes. When adding a pause schedule, defaults to `resume_at`. On updates, the existing value is preserved if not provided.
+         */
+        billing_cycle_anchor?: Settings.BillingCycleAnchor;
+
+        /**
+         * Controls whether Stripe attempts payment on the resumption invoice and how payment affects the subscription's status. When adding a pause schedule, defaults to `resume_on_payment_success`. On updates, the existing value is preserved if not provided.
+         */
+        payment_behavior?: Settings.PaymentBehavior;
+
+        /**
+         * Determines how to handle prorations when the subscription resumes. When adding a pause schedule, defaults to `create_prorations`. On updates, the existing value is preserved if not provided.
+         */
+        proration_behavior?: Settings.ProrationBehavior;
+      }
+
+      export namespace ResumeAt {
+        export interface Duration {
+          /**
+           * The time unit for the resume duration. One of `day`, `week`, `month`, or `year`.
+           */
+          interval: Duration.Interval;
+
+          /**
+           * The number of intervals after which the subscription resumes.
+           */
+          interval_count?: number;
+        }
+
+        export type Type = 'duration' | 'now' | 'timestamp' | OtherString;
+
+        export namespace Duration {
+          export type Interval =
+            | 'day'
+            | 'month'
+            | 'week'
+            | 'year'
+            | OtherString;
+        }
+      }
+
+      export namespace Settings {
+        export type BillingCycleAnchor =
+          | 'resume_at'
+          | 'unchanged'
+          | OtherString;
+
+        export type PaymentBehavior =
+          | 'resume_on_payment_attempt'
+          | 'resume_on_payment_success'
+          | OtherString;
+
+        export type ProrationBehavior =
+          | 'always_invoice'
+          | 'create_prorations'
+          | 'none'
+          | OtherString;
       }
     }
   }
@@ -1268,7 +1781,7 @@ export namespace SubscriptionScheduleCreateParams {
       liability?: AutomaticTax.Liability;
     }
 
-    export type BillingCycleAnchor = 'automatic' | 'phase_start';
+    export type BillingCycleAnchor = 'automatic' | 'phase_start' | OtherString;
 
     export interface BillingThresholds {
       /**
@@ -1282,7 +1795,10 @@ export namespace SubscriptionScheduleCreateParams {
       reset_billing_cycle_anchor?: boolean;
     }
 
-    export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+    export type CollectionMethod =
+      | 'charge_automatically'
+      | 'send_invoice'
+      | OtherString;
 
     export interface Discount {
       /**
@@ -1320,9 +1836,24 @@ export namespace SubscriptionScheduleCreateParams {
       account_tax_ids?: Emptyable<Array<string>>;
 
       /**
-       * Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `billing=charge_automatically`.
+       * A list of up to 4 custom fields to be displayed on the invoice.
+       */
+      custom_fields?: Emptyable<Array<InvoiceSettings.CustomField>>;
+
+      /**
+       * Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `collection_method=charge_automatically`.
        */
       days_until_due?: number;
+
+      /**
+       * An arbitrary string attached to the object. Often useful for displaying to users.
+       */
+      description?: Emptyable<string>;
+
+      /**
+       * Footer to be displayed on the invoice.
+       */
+      footer?: Emptyable<string>;
 
       /**
        * The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
@@ -1375,7 +1906,8 @@ export namespace SubscriptionScheduleCreateParams {
     export type ProrationBehavior =
       | 'always_invoice'
       | 'create_prorations'
-      | 'none';
+      | 'none'
+      | OtherString;
 
     export interface TransferData {
       /**
@@ -1472,19 +2004,28 @@ export namespace SubscriptionScheduleCreateParams {
         }
 
         export namespace End {
-          export type Type = 'min_item_period_end' | 'phase_end' | 'timestamp';
+          export type Type =
+            | 'min_item_period_end'
+            | 'phase_end'
+            | 'timestamp'
+            | OtherString;
         }
 
         export namespace Start {
           export type Type =
             | 'max_item_period_start'
             | 'phase_start'
-            | 'timestamp';
+            | 'timestamp'
+            | OtherString;
         }
       }
 
       export namespace PriceData {
-        export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+        export type TaxBehavior =
+          | 'exclusive'
+          | 'inclusive'
+          | 'unspecified'
+          | OtherString;
       }
     }
 
@@ -1502,15 +2043,27 @@ export namespace SubscriptionScheduleCreateParams {
       }
 
       export namespace Liability {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
     export namespace Duration {
-      export type Interval = 'day' | 'month' | 'week' | 'year';
+      export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
     }
 
     export namespace InvoiceSettings {
+      export interface CustomField {
+        /**
+         * The name of the custom field. This may be up to 40 characters.
+         */
+        name: string;
+
+        /**
+         * The value of the custom field. This may be up to 140 characters.
+         */
+        value: string;
+      }
+
       export interface Issuer {
         /**
          * The connected account being referenced when `type` is `account`.
@@ -1524,7 +2077,7 @@ export namespace SubscriptionScheduleCreateParams {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
@@ -1598,10 +2151,19 @@ export namespace SubscriptionScheduleCreateParams {
           interval_count?: number;
         }
 
-        export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+        export type TaxBehavior =
+          | 'exclusive'
+          | 'inclusive'
+          | 'unspecified'
+          | OtherString;
 
         export namespace Recurring {
-          export type Interval = 'day' | 'month' | 'week' | 'year';
+          export type Interval =
+            | 'day'
+            | 'month'
+            | 'week'
+            | 'year'
+            | OtherString;
         }
       }
     }
@@ -1633,6 +2195,13 @@ export interface SubscriptionScheduleUpdateParams {
    * Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
    */
   metadata?: Emptyable<MetadataParam>;
+
+  /**
+   * Configures the subscription's pause behavior and, optionally, its resume behavior. Only one entry is supported. Include a key to update an existing entry. Omit to leave an existing pause schedule unchanged, or pass "" to clear it.
+   */
+  pause_schedules?: Emptyable<
+    Array<SubscriptionScheduleUpdateParams.PauseSchedule>
+  >;
 
   /**
    * List representing phases of the subscription schedule. Each phase can be customized to have different durations, plans, and coupons. If there are multiple phases, the `end_date` of one phase will always equal the `start_date` of the next phase. Note that past phases can be omitted.
@@ -1697,7 +2266,29 @@ export namespace SubscriptionScheduleUpdateParams {
     transfer_data?: Emptyable<DefaultSettings.TransferData>;
   }
 
-  export type EndBehavior = 'cancel' | 'none' | 'release' | 'renew';
+  export type EndBehavior =
+    | 'cancel'
+    | 'none'
+    | 'release'
+    | 'renew'
+    | OtherString;
+
+  export interface PauseSchedule {
+    /**
+     * A unique identifier for this pause schedule entry.
+     */
+    key?: string;
+
+    /**
+     * Configuration for when and how the subscription pauses.
+     */
+    pause?: PauseSchedule.Pause;
+
+    /**
+     * Configuration for when and how the subscription resumes.
+     */
+    resume?: Emptyable<PauseSchedule.Resume>;
+  }
 
   export interface Phase {
     /**
@@ -1791,7 +2382,7 @@ export namespace SubscriptionScheduleUpdateParams {
     proration_behavior?: Phase.ProrationBehavior;
 
     /**
-     * The date at which this phase of the subscription schedule starts or `now`. Must be set on the first phase.
+     * The date at which this phase of the subscription schedule starts or `now`. Must be set on the first phase. Prefer to specify `now` over an explicit timestamp when appropriate to avoid unexpected behavior due to request delays or clock skew resulting in the phase being slightly backdated or postdated.
      */
     start_date?: number | 'now';
 
@@ -1806,7 +2397,7 @@ export namespace SubscriptionScheduleUpdateParams {
     trial?: boolean;
 
     /**
-     * Sets the phase to trialing from the start date to this date. Must be before the phase end date, can not be combined with `trial`
+     * Sets the phase to trialing from the start date to this date. Must be within the phase. When combined with `trial=true`, it must match the phase end date.
      */
     trial_end?: number | 'now';
   }
@@ -1814,7 +2405,8 @@ export namespace SubscriptionScheduleUpdateParams {
   export type ProrationBehavior =
     | 'always_invoice'
     | 'create_prorations'
-    | 'none';
+    | 'none'
+    | OtherString;
 
   export namespace DefaultSettings {
     export interface AutomaticTax {
@@ -1829,7 +2421,7 @@ export namespace SubscriptionScheduleUpdateParams {
       liability?: AutomaticTax.Liability;
     }
 
-    export type BillingCycleAnchor = 'automatic' | 'phase_start';
+    export type BillingCycleAnchor = 'automatic' | 'phase_start' | OtherString;
 
     export interface BillingThresholds {
       /**
@@ -1843,7 +2435,10 @@ export namespace SubscriptionScheduleUpdateParams {
       reset_billing_cycle_anchor?: boolean;
     }
 
-    export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+    export type CollectionMethod =
+      | 'charge_automatically'
+      | 'send_invoice'
+      | OtherString;
 
     export interface InvoiceSettings {
       /**
@@ -1851,10 +2446,16 @@ export namespace SubscriptionScheduleUpdateParams {
        */
       account_tax_ids?: Emptyable<Array<string>>;
 
+      custom_fields?: Emptyable<Array<InvoiceSettings.CustomField>>;
+
       /**
        * Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `collection_method=charge_automatically`.
        */
       days_until_due?: number;
+
+      description?: Emptyable<string>;
+
+      footer?: Emptyable<string>;
 
       /**
        * The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
@@ -1888,11 +2489,23 @@ export namespace SubscriptionScheduleUpdateParams {
       }
 
       export namespace Liability {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
     export namespace InvoiceSettings {
+      export interface CustomField {
+        /**
+         * The name of the custom field. This may be up to 40 characters.
+         */
+        name: string;
+
+        /**
+         * The value of the custom field. This may be up to 140 characters.
+         */
+        value: string;
+      }
+
       export interface Issuer {
         /**
          * The connected account being referenced when `type` is `account`.
@@ -1906,7 +2519,196 @@ export namespace SubscriptionScheduleUpdateParams {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
+      }
+    }
+  }
+
+  export namespace PauseSchedule {
+    export interface Pause {
+      /**
+       * When to pause the subscription.
+       */
+      pause_at?: Pause.PauseAt;
+
+      /**
+       * Settings controlling billing behavior during the pause.
+       */
+      settings?: Pause.Settings;
+    }
+
+    export interface Resume {
+      /**
+       * When to resume the subscription.
+       */
+      resume_at?: Resume.ResumeAt;
+
+      /**
+       * Settings controlling how the subscription resumes.
+       */
+      settings?: Resume.Settings;
+    }
+
+    export namespace Pause {
+      export interface PauseAt {
+        /**
+         * The Unix timestamp at which to pause the subscription. Required when `type` is `timestamp`.
+         */
+        timestamp?: number;
+
+        /**
+         * When to pause the subscription. Use `now` to pause immediately or `timestamp` to pause at a specific time.
+         */
+        type: PauseAt.Type;
+      }
+
+      export interface Settings {
+        /**
+         * Controls what to bill for when pausing the subscription.
+         */
+        bill_for?: Settings.BillFor;
+
+        /**
+         * Determines whether to generate an invoice for outstanding amounts when pausing. When adding a pause schedule, defaults to `pending_invoice_item`. On updates, the existing value is preserved if not provided.
+         */
+        invoicing_behavior?: Settings.InvoicingBehavior;
+
+        /**
+         * The pause type. Currently only `subscription` is supported.
+         */
+        type?: Settings.Type;
+      }
+
+      export namespace PauseAt {
+        export type Type = 'now' | 'timestamp' | OtherString;
+      }
+
+      export namespace Settings {
+        export interface BillFor {
+          /**
+           * Controls whether to collect metered usage accrued up to the pause date.
+           */
+          outstanding_usage_through?: BillFor.OutstandingUsageThrough;
+
+          /**
+           * Controls how unused time on subscription items is credited when pausing.
+           */
+          unused_time_from?: BillFor.UnusedTimeFrom;
+        }
+
+        export type InvoicingBehavior =
+          | 'invoice'
+          | 'pending_invoice_item'
+          | OtherString;
+
+        export type Type = 'subscription' | OtherString;
+
+        export namespace BillFor {
+          export interface OutstandingUsageThrough {
+            /**
+             * Determines whether to collect metered usage accrued up to the pause date. When adding a pause schedule, defaults to `pause_at`. On updates, the existing value is preserved if not provided.
+             */
+            type?: OutstandingUsageThrough.Type;
+          }
+
+          export interface UnusedTimeFrom {
+            /**
+             * Determines which point in the billing period unused time is credited from. When adding a pause schedule, defaults to `pause_at`. On updates, the existing value is preserved if not provided.
+             */
+            type?: UnusedTimeFrom.Type;
+          }
+
+          export namespace OutstandingUsageThrough {
+            export type Type = 'none' | 'pause_at' | OtherString;
+          }
+
+          export namespace UnusedTimeFrom {
+            export type Type =
+              | 'item_current_period_start'
+              | 'none'
+              | 'pause_at'
+              | OtherString;
+          }
+        }
+      }
+    }
+
+    export namespace Resume {
+      export interface ResumeAt {
+        /**
+         * The duration after which to resume the subscription. Required when `type` is `duration`.
+         */
+        duration?: ResumeAt.Duration;
+
+        /**
+         * The Unix timestamp at which to resume the subscription. Required when `type` is `timestamp`.
+         */
+        timestamp?: number;
+
+        /**
+         * When to resume the subscription. Use `now` to resume immediately, `duration` to resume after a set duration, or `timestamp` to resume at a specific time.
+         */
+        type: ResumeAt.Type;
+      }
+
+      export interface Settings {
+        /**
+         * Controls the billing cycle anchor when the subscription resumes. When adding a pause schedule, defaults to `resume_at`. On updates, the existing value is preserved if not provided.
+         */
+        billing_cycle_anchor?: Settings.BillingCycleAnchor;
+
+        /**
+         * Controls whether Stripe attempts payment on the resumption invoice and how payment affects the subscription's status. When adding a pause schedule, defaults to `resume_on_payment_success`. On updates, the existing value is preserved if not provided.
+         */
+        payment_behavior?: Settings.PaymentBehavior;
+
+        /**
+         * Determines how to handle prorations when the subscription resumes. When adding a pause schedule, defaults to `create_prorations`. On updates, the existing value is preserved if not provided.
+         */
+        proration_behavior?: Settings.ProrationBehavior;
+      }
+
+      export namespace ResumeAt {
+        export interface Duration {
+          /**
+           * The time unit for the resume duration. One of `day`, `week`, `month`, or `year`.
+           */
+          interval: Duration.Interval;
+
+          /**
+           * The number of intervals after which the subscription resumes.
+           */
+          interval_count?: number;
+        }
+
+        export type Type = 'duration' | 'now' | 'timestamp' | OtherString;
+
+        export namespace Duration {
+          export type Interval =
+            | 'day'
+            | 'month'
+            | 'week'
+            | 'year'
+            | OtherString;
+        }
+      }
+
+      export namespace Settings {
+        export type BillingCycleAnchor =
+          | 'resume_at'
+          | 'unchanged'
+          | OtherString;
+
+        export type PaymentBehavior =
+          | 'resume_on_payment_attempt'
+          | 'resume_on_payment_success'
+          | OtherString;
+
+        export type ProrationBehavior =
+          | 'always_invoice'
+          | 'create_prorations'
+          | 'none'
+          | OtherString;
       }
     }
   }
@@ -1966,7 +2768,7 @@ export namespace SubscriptionScheduleUpdateParams {
       liability?: AutomaticTax.Liability;
     }
 
-    export type BillingCycleAnchor = 'automatic' | 'phase_start';
+    export type BillingCycleAnchor = 'automatic' | 'phase_start' | OtherString;
 
     export interface BillingThresholds {
       /**
@@ -1980,7 +2782,10 @@ export namespace SubscriptionScheduleUpdateParams {
       reset_billing_cycle_anchor?: boolean;
     }
 
-    export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+    export type CollectionMethod =
+      | 'charge_automatically'
+      | 'send_invoice'
+      | OtherString;
 
     export interface Discount {
       /**
@@ -2018,9 +2823,24 @@ export namespace SubscriptionScheduleUpdateParams {
       account_tax_ids?: Emptyable<Array<string>>;
 
       /**
-       * Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `billing=charge_automatically`.
+       * A list of up to 4 custom fields to be displayed on the invoice.
+       */
+      custom_fields?: Emptyable<Array<InvoiceSettings.CustomField>>;
+
+      /**
+       * Number of days within which a customer must pay invoices generated by this subscription schedule. This value will be `null` for subscription schedules where `collection_method=charge_automatically`.
        */
       days_until_due?: number;
+
+      /**
+       * An arbitrary string attached to the object. Often useful for displaying to users.
+       */
+      description?: Emptyable<string>;
+
+      /**
+       * Footer to be displayed on the invoice.
+       */
+      footer?: Emptyable<string>;
 
       /**
        * The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
@@ -2073,7 +2893,8 @@ export namespace SubscriptionScheduleUpdateParams {
     export type ProrationBehavior =
       | 'always_invoice'
       | 'create_prorations'
-      | 'none';
+      | 'none'
+      | OtherString;
 
     export interface TransferData {
       /**
@@ -2170,19 +2991,28 @@ export namespace SubscriptionScheduleUpdateParams {
         }
 
         export namespace End {
-          export type Type = 'min_item_period_end' | 'phase_end' | 'timestamp';
+          export type Type =
+            | 'min_item_period_end'
+            | 'phase_end'
+            | 'timestamp'
+            | OtherString;
         }
 
         export namespace Start {
           export type Type =
             | 'max_item_period_start'
             | 'phase_start'
-            | 'timestamp';
+            | 'timestamp'
+            | OtherString;
         }
       }
 
       export namespace PriceData {
-        export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+        export type TaxBehavior =
+          | 'exclusive'
+          | 'inclusive'
+          | 'unspecified'
+          | OtherString;
       }
     }
 
@@ -2200,15 +3030,27 @@ export namespace SubscriptionScheduleUpdateParams {
       }
 
       export namespace Liability {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
     export namespace Duration {
-      export type Interval = 'day' | 'month' | 'week' | 'year';
+      export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
     }
 
     export namespace InvoiceSettings {
+      export interface CustomField {
+        /**
+         * The name of the custom field. This may be up to 40 characters.
+         */
+        name: string;
+
+        /**
+         * The value of the custom field. This may be up to 140 characters.
+         */
+        value: string;
+      }
+
       export interface Issuer {
         /**
          * The connected account being referenced when `type` is `account`.
@@ -2222,7 +3064,7 @@ export namespace SubscriptionScheduleUpdateParams {
       }
 
       export namespace Issuer {
-        export type Type = 'account' | 'self';
+        export type Type = 'account' | 'self' | OtherString;
       }
     }
 
@@ -2296,10 +3138,19 @@ export namespace SubscriptionScheduleUpdateParams {
           interval_count?: number;
         }
 
-        export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+        export type TaxBehavior =
+          | 'exclusive'
+          | 'inclusive'
+          | 'unspecified'
+          | OtherString;
 
         export namespace Recurring {
-          export type Interval = 'day' | 'month' | 'week' | 'year';
+          export type Interval =
+            | 'day'
+            | 'month'
+            | 'week'
+            | 'year'
+            | OtherString;
         }
       }
     }
@@ -2322,7 +3173,7 @@ export interface SubscriptionScheduleListParams extends PaginationParams {
   created?: RangeQueryParam | number;
 
   /**
-   * Only return subscription schedules for the given customer.
+   * Only return subscription schedules for the given customer. The response will not include subscription schedules for customers with a test clock attached if this parameter is not set.
    */
   customer?: string;
 

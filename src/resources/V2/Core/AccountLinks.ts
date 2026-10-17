@@ -1,6 +1,7 @@
 // File generated from our OpenAPI spec
 
 import {StripeResource} from '../../../StripeResource.js';
+import {OtherString} from '../../../shared.js';
 import {RequestOptions, Response} from '../../../lib.js';
 
 export class AccountLinkResource extends StripeResource {
@@ -52,120 +53,102 @@ export interface AccountLink {
   url: string;
 
   /**
-   * Hash containing usage options.
+   * Describes the Stripe-hosted flow for this Account Link, including its type and flow-specific configuration.
    */
-  use_case: V2.Core.AccountLink.UseCase;
+  use_case: AccountLink.UseCase;
 }
-export namespace V2 {
-  export namespace Core {
-    export namespace AccountLink {
-      export interface UseCase {
+export namespace AccountLink {
+  export interface UseCase {
+    /**
+     * Hash containing configuration options for an Account Link object that onboards a new account.
+     */
+    account_onboarding?: UseCase.AccountOnboarding;
+
+    /**
+     * Hash containing configuration options for an Account Link that updates an existing account.
+     */
+    account_update?: UseCase.AccountUpdate;
+
+    /**
+     * Open Enum. The type of Account Link the user is requesting.
+     */
+    type: UseCase.Type;
+  }
+
+  export namespace UseCase {
+    export interface AccountOnboarding {
+      /**
+       * Specifies the requirements that Stripe collects from v2/core/accounts in the Onboarding flow.
+       */
+      collection_options?: AccountOnboarding.CollectionOptions;
+
+      /**
+       * The URL the user will be redirected to if the AccountLink is expired, has been used, or is otherwise invalid. The URL you specify should attempt to generate a new AccountLink with the same parameters used to create the original AccountLink, then redirect the user to the new AccountLink's URL so they can continue the flow. If a new AccountLink cannot be generated or the redirect fails you should display a useful error to the user. Please make sure to implement authentication before redirecting the user in case this URL is leaked to a third party.
+       */
+      refresh_url: string;
+
+      /**
+       * The URL that the user will be redirected to upon completing the linked flow.
+       */
+      return_url?: string;
+    }
+
+    export interface AccountUpdate {
+      /**
+       * Specifies the requirements that Stripe collects from v2/core/accounts in the Onboarding flow.
+       */
+      collection_options?: AccountUpdate.CollectionOptions;
+
+      /**
+       * The URL the user will be redirected to if the Account Link is expired, has been used, or is otherwise invalid. The URL you specify should attempt to generate a new Account Link with the same parameters used to create the original Account Link, then redirect the user to the new Account Link URL so they can continue the flow. Make sure to authenticate the user before redirecting to the new Account Link, in case the URL leaks to a third party. If a new Account Link can't be generated, or if the redirect fails, you should display a useful error to the user.
+       */
+      refresh_url: string;
+
+      /**
+       * The URL that the user will be redirected to upon completing the linked flow.
+       */
+      return_url?: string;
+    }
+
+    export type Type = 'account_onboarding' | 'account_update' | OtherString;
+
+    export namespace AccountOnboarding {
+      export interface CollectionOptions {
         /**
-         * Hash containing configuration options for an Account Link object that onboards a new account.
+         * Specifies whether the platform collects only currently_due requirements (`currently_due`) or both currently_due and eventually_due requirements (`eventually_due`). If you don't specify collection_options, the default value is currently_due.
          */
-        account_onboarding?: UseCase.AccountOnboarding;
+        fields?: CollectionOptions.Fields;
 
         /**
-         * Hash containing configuration options for an Account Link that updates an existing account.
+         * Specifies whether the platform collects future_requirements in addition to requirements in Connect Onboarding. The default value is `omit`.
          */
-        account_update?: UseCase.AccountUpdate;
-
-        /**
-         * Open Enum. The type of Account Link the user is requesting.
-         */
-        type: UseCase.Type;
+        future_requirements?: CollectionOptions.FutureRequirements;
       }
 
-      export namespace UseCase {
-        export interface AccountOnboarding {
-          /**
-           * Specifies the requirements that Stripe collects from v2/core/accounts in the Onboarding flow.
-           */
-          collection_options?: AccountOnboarding.CollectionOptions;
+      export namespace CollectionOptions {
+        export type Fields = 'currently_due' | 'eventually_due' | OtherString;
 
-          /**
-           * Open Enum. A v2/core/account can be configured to enable certain functionality. The configuration param targets the v2/core/account_link to collect information for the specified v2/core/account configuration/s.
-           */
-          configurations: Array<AccountOnboarding.Configuration>;
+        export type FutureRequirements = 'include' | 'omit' | OtherString;
+      }
+    }
 
-          /**
-           * The URL the user will be redirected to if the AccountLink is expired, has been used, or is otherwise invalid. The URL you specify should attempt to generate a new AccountLink with the same parameters used to create the original AccountLink, then redirect the user to the new AccountLink's URL so they can continue the flow. If a new AccountLink cannot be generated or the redirect fails you should display a useful error to the user. Please make sure to implement authentication before redirecting the user in case this URL is leaked to a third party.
-           */
-          refresh_url: string;
+    export namespace AccountUpdate {
+      export interface CollectionOptions {
+        /**
+         * Specifies whether the platform collects only currently_due requirements (`currently_due`) or both currently_due and eventually_due requirements (`eventually_due`). The default value is `currently_due`.
+         */
+        fields?: CollectionOptions.Fields;
 
-          /**
-           * The URL that the user will be redirected to upon completing the linked flow.
-           */
-          return_url?: string;
-        }
+        /**
+         * Specifies whether the platform collects future_requirements in addition to requirements in Connect Onboarding. The default value is `omit`.
+         */
+        future_requirements?: CollectionOptions.FutureRequirements;
+      }
 
-        export interface AccountUpdate {
-          /**
-           * Specifies the requirements that Stripe collects from v2/core/accounts in the Onboarding flow.
-           */
-          collection_options?: AccountUpdate.CollectionOptions;
+      export namespace CollectionOptions {
+        export type Fields = 'currently_due' | 'eventually_due' | OtherString;
 
-          /**
-           * Open Enum. A v2/account can be configured to enable certain functionality. The configuration param targets the v2/account_link to collect information for the specified v2/account configuration/s.
-           */
-          configurations: Array<AccountUpdate.Configuration>;
-
-          /**
-           * The URL the user will be redirected to if the Account Link is expired, has been used, or is otherwise invalid. The URL you specify should attempt to generate a new Account Link with the same parameters used to create the original Account Link, then redirect the user to the new Account Link URL so they can continue the flow. Make sure to authenticate the user before redirecting to the new Account Link, in case the URL leaks to a third party. If a new Account Link can't be generated, or if the redirect fails, you should display a useful error to the user.
-           */
-          refresh_url: string;
-
-          /**
-           * The URL that the user will be redirected to upon completing the linked flow.
-           */
-          return_url?: string;
-        }
-
-        export type Type = 'account_onboarding' | 'account_update';
-
-        export namespace AccountOnboarding {
-          export interface CollectionOptions {
-            /**
-             * Specifies whether the platform collects only currently_due requirements (`currently_due`) or both currently_due and eventually_due requirements (`eventually_due`). If you don't specify collection_options, the default value is currently_due.
-             */
-            fields?: CollectionOptions.Fields;
-
-            /**
-             * Specifies whether the platform collects future_requirements in addition to requirements in Connect Onboarding. The default value is `omit`.
-             */
-            future_requirements?: CollectionOptions.FutureRequirements;
-          }
-
-          export type Configuration = 'customer' | 'merchant' | 'recipient';
-
-          export namespace CollectionOptions {
-            export type Fields = 'currently_due' | 'eventually_due';
-
-            export type FutureRequirements = 'include' | 'omit';
-          }
-        }
-
-        export namespace AccountUpdate {
-          export interface CollectionOptions {
-            /**
-             * Specifies whether the platform collects only currently_due requirements (`currently_due`) or both currently_due and eventually_due requirements (`eventually_due`). The default value is `currently_due`.
-             */
-            fields?: CollectionOptions.Fields;
-
-            /**
-             * Specifies whether the platform collects future_requirements in addition to requirements in Connect Onboarding. The default value is `omit`.
-             */
-            future_requirements?: CollectionOptions.FutureRequirements;
-          }
-
-          export type Configuration = 'customer' | 'merchant' | 'recipient';
-
-          export namespace CollectionOptions {
-            export type Fields = 'currently_due' | 'eventually_due';
-
-            export type FutureRequirements = 'include' | 'omit';
-          }
-        }
+        export type FutureRequirements = 'include' | 'omit' | OtherString;
       }
     }
   }
@@ -179,7 +162,9 @@ export namespace V2 {
       account: string;
 
       /**
-       * The use case of the AccountLink.
+       * Specifies the Stripe-hosted flow for this Account Link. Set `type` and the matching options hash—for example,
+       * `account_onboarding`—to configure the flow, including which Account configurations to collect information for and
+       * any flow-specific collection or redirect options.
        */
       use_case: AccountLinkCreateParams.UseCase;
     }
@@ -210,11 +195,6 @@ export namespace V2 {
           collection_options?: AccountOnboarding.CollectionOptions;
 
           /**
-           * Open Enum. A v2/core/account can be configured to enable certain functionality. The configuration param targets the v2/core/account_link to collect information for the specified v2/core/account configuration/s.
-           */
-          configurations: Array<AccountOnboarding.Configuration>;
-
-          /**
            * The URL the user will be redirected to if the AccountLink is expired, has been used, or is otherwise invalid. The URL you specify should attempt to generate a new AccountLink with the same parameters used to create the original AccountLink, then redirect the user to the new AccountLink's URL so they can continue the flow. If a new AccountLink cannot be generated or the redirect fails you should display a useful error to the user. Please make sure to implement authentication before redirecting the user in case this URL is leaked to a third party.
            */
           refresh_url: string;
@@ -232,11 +212,6 @@ export namespace V2 {
           collection_options?: AccountUpdate.CollectionOptions;
 
           /**
-           * Open Enum. A v2/account can be configured to enable certain functionality. The configuration param targets the v2/account_link to collect information for the specified v2/account configuration/s.
-           */
-          configurations: Array<AccountUpdate.Configuration>;
-
-          /**
            * The URL the user will be redirected to if the Account Link is expired, has been used, or is otherwise invalid. The URL you specify should attempt to generate a new Account Link with the same parameters used to create the original Account Link, then redirect the user to the new Account Link URL so they can continue the flow. Make sure to authenticate the user before redirecting to the new Account Link, in case the URL leaks to a third party. If a new Account Link can't be generated, or if the redirect fails, you should display a useful error to the user.
            */
           refresh_url: string;
@@ -247,7 +222,10 @@ export namespace V2 {
           return_url?: string;
         }
 
-        export type Type = 'account_onboarding' | 'account_update';
+        export type Type =
+          | 'account_onboarding'
+          | 'account_update'
+          | OtherString;
 
         export namespace AccountOnboarding {
           export interface CollectionOptions {
@@ -262,12 +240,13 @@ export namespace V2 {
             future_requirements?: CollectionOptions.FutureRequirements;
           }
 
-          export type Configuration = 'customer' | 'merchant' | 'recipient';
-
           export namespace CollectionOptions {
-            export type Fields = 'currently_due' | 'eventually_due';
+            export type Fields =
+              | 'currently_due'
+              | 'eventually_due'
+              | OtherString;
 
-            export type FutureRequirements = 'include' | 'omit';
+            export type FutureRequirements = 'include' | 'omit' | OtherString;
           }
         }
 
@@ -284,12 +263,13 @@ export namespace V2 {
             future_requirements?: CollectionOptions.FutureRequirements;
           }
 
-          export type Configuration = 'customer' | 'merchant' | 'recipient';
-
           export namespace CollectionOptions {
-            export type Fields = 'currently_due' | 'eventually_due';
+            export type Fields =
+              | 'currently_due'
+              | 'eventually_due'
+              | OtherString;
 
-            export type FutureRequirements = 'include' | 'omit';
+            export type FutureRequirements = 'include' | 'omit' | OtherString;
           }
         }
       }

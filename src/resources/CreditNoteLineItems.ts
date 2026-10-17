@@ -3,7 +3,7 @@
 import {TaxRate} from './TaxRates.js';
 import {Discount, DeletedDiscount} from './Discounts.js';
 import * as Billing from './Billing/index.js';
-import {Metadata, Decimal} from '../shared.js';
+import {Metadata, Decimal, OtherString} from '../shared.js';
 import {RequestOptions} from '../lib.js';
 export interface CreditNoteLineItem {
   /**
@@ -153,14 +153,14 @@ export namespace CreditNoteLineItem {
     type: 'tax_rate_details';
   }
 
-  export type Type = 'custom_line_item' | 'invoice_line_item';
+  export type Type = 'custom_line_item' | 'invoice_line_item' | OtherString;
 
   export namespace PretaxCreditAmount {
-    export type Type = 'credit_balance_transaction' | 'discount';
+    export type Type = 'credit_balance_transaction' | 'discount' | OtherString;
   }
 
   export namespace Tax {
-    export type TaxBehavior = 'exclusive' | 'inclusive';
+    export type TaxBehavior = 'exclusive' | 'inclusive' | OtherString;
 
     export interface TaxRateDetails {
       /**
@@ -185,6 +185,7 @@ export namespace CreditNoteLineItem {
       | 'reverse_charge'
       | 'standard_rated'
       | 'taxable_basis_reduced'
-      | 'zero_rated';
+      | 'zero_rated'
+      | OtherString;
   }
 }

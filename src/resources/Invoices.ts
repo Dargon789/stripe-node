@@ -20,6 +20,7 @@ import * as Billing from './Billing/index.js';
 import {
   Emptyable,
   MetadataParam,
+  OtherString,
   AddressParam,
   PaginationParams,
   RangeQueryParam,
@@ -46,7 +47,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<DeletedInvoice>> {
     return this._makeRequest(
       'DELETE',
-      `/v1/invoices/${id}`,
+      `/v1/invoices/${encodeURIComponent(id)}`,
       params,
       options
     ) as any;
@@ -59,33 +60,39 @@ export class InvoiceResource extends StripeResource {
     params?: InvoiceRetrieveParams,
     options?: RequestOptions
   ): Promise<Response<Invoice>> {
-    return this._makeRequest('GET', `/v1/invoices/${id}`, params, options, {
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          lines: {
-            kind: 'object',
-            fields: {
-              data: {
-                kind: 'array',
-                element: {
-                  kind: 'object',
-                  fields: {
-                    pricing: {
-                      kind: 'nullable',
-                      inner: {
-                        kind: 'object',
-                        fields: {
-                          unit_amount_decimal: {
-                            kind: 'nullable',
-                            inner: {kind: 'decimal_string'},
+    return this._makeRequest(
+      'GET',
+      `/v1/invoices/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            lines: {
+              kind: 'object',
+              fields: {
+                data: {
+                  kind: 'array',
+                  element: {
+                    kind: 'object',
+                    fields: {
+                      pricing: {
+                        kind: 'nullable',
+                        inner: {
+                          kind: 'object',
+                          fields: {
+                            unit_amount_decimal: {
+                              kind: 'nullable',
+                              inner: {kind: 'decimal_string'},
+                            },
                           },
                         },
                       },
-                    },
-                    quantity_decimal: {
-                      kind: 'nullable',
-                      inner: {kind: 'decimal_string'},
+                      quantity_decimal: {
+                        kind: 'nullable',
+                        inner: {kind: 'decimal_string'},
+                      },
                     },
                   },
                 },
@@ -93,12 +100,13 @@ export class InvoiceResource extends StripeResource {
             },
           },
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * Draft invoices are fully editable. Once an invoice is [finalized](https://docs.stripe.com/docs/billing/invoices/workflow#finalized),
-   * monetary values, as well as collection_method, become uneditable.
+   * you can no longer change most of its details, including monetary values and collection_method. For most invoices,
+   * this also includes description.
    *
    * If you would like to stop the Stripe Billing engine from automatically finalizing, reattempting payments on,
    * sending reminders for, or [automatically reconciling](https://docs.stripe.com/docs/billing/invoices/reconciliation) invoices, pass
@@ -109,33 +117,39 @@ export class InvoiceResource extends StripeResource {
     params?: InvoiceUpdateParams,
     options?: RequestOptions
   ): Promise<Response<Invoice>> {
-    return this._makeRequest('POST', `/v1/invoices/${id}`, params, options, {
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          lines: {
-            kind: 'object',
-            fields: {
-              data: {
-                kind: 'array',
-                element: {
-                  kind: 'object',
-                  fields: {
-                    pricing: {
-                      kind: 'nullable',
-                      inner: {
-                        kind: 'object',
-                        fields: {
-                          unit_amount_decimal: {
-                            kind: 'nullable',
-                            inner: {kind: 'decimal_string'},
+    return this._makeRequest(
+      'POST',
+      `/v1/invoices/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            lines: {
+              kind: 'object',
+              fields: {
+                data: {
+                  kind: 'array',
+                  element: {
+                    kind: 'object',
+                    fields: {
+                      pricing: {
+                        kind: 'nullable',
+                        inner: {
+                          kind: 'object',
+                          fields: {
+                            unit_amount_decimal: {
+                              kind: 'nullable',
+                              inner: {kind: 'decimal_string'},
+                            },
                           },
                         },
                       },
-                    },
-                    quantity_decimal: {
-                      kind: 'nullable',
-                      inner: {kind: 'decimal_string'},
+                      quantity_decimal: {
+                        kind: 'nullable',
+                        inner: {kind: 'decimal_string'},
+                      },
                     },
                   },
                 },
@@ -143,8 +157,8 @@ export class InvoiceResource extends StripeResource {
             },
           },
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * You can list all invoices, or list the invoices for a specific customer. The invoices are returned sorted by creation date, with the most recently created invoices appearing first.
@@ -309,7 +323,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<Invoice>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${id}/add_lines`,
+      `/v1/invoices/${encodeURIComponent(id)}/add_lines`,
       params,
       options,
       {
@@ -387,7 +401,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<Invoice>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${id}/attach_payment`,
+      `/v1/invoices/${encodeURIComponent(id)}/attach_payment`,
       params,
       options,
       {
@@ -438,7 +452,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<Invoice>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${id}/finalize`,
+      `/v1/invoices/${encodeURIComponent(id)}/finalize`,
       params,
       options,
       {
@@ -489,7 +503,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<Invoice>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${id}/mark_uncollectible`,
+      `/v1/invoices/${encodeURIComponent(id)}/mark_uncollectible`,
       params,
       options,
       {
@@ -540,7 +554,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<Invoice>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${id}/pay`,
+      `/v1/invoices/${encodeURIComponent(id)}/pay`,
       params,
       options,
       {
@@ -591,7 +605,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<Invoice>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${id}/remove_lines`,
+      `/v1/invoices/${encodeURIComponent(id)}/remove_lines`,
       params,
       options,
       {
@@ -644,7 +658,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<Invoice>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${id}/send`,
+      `/v1/invoices/${encodeURIComponent(id)}/send`,
       params,
       options,
       {
@@ -695,7 +709,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<Invoice>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${id}/update_lines`,
+      `/v1/invoices/${encodeURIComponent(id)}/update_lines`,
       params,
       options,
       {
@@ -766,7 +780,7 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<Invoice>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${id}/void`,
+      `/v1/invoices/${encodeURIComponent(id)}/void`,
       params,
       options,
       {
@@ -952,7 +966,7 @@ export class InvoiceResource extends StripeResource {
   ): ApiListPromise<InvoiceLineItem> {
     return this._makeRequest(
       'GET',
-      `/v1/invoices/${id}/lines`,
+      `/v1/invoices/${encodeURIComponent(id)}/lines`,
       params,
       options,
       {
@@ -1003,7 +1017,9 @@ export class InvoiceResource extends StripeResource {
   ): Promise<Response<InvoiceLineItem>> {
     return this._makeRequest(
       'POST',
-      `/v1/invoices/${invoiceId}/lines/${id}`,
+      `/v1/invoices/${encodeURIComponent(invoiceId)}/lines/${encodeURIComponent(
+        id
+      )}`,
       params,
       options,
       {
@@ -1353,7 +1369,7 @@ export interface Invoice {
   receipt_number: string | null;
 
   /**
-   * The rendering-related settings that control how the invoice is displayed on customer-facing surfaces such as PDF and Hosted Invoice Page.
+   * The rendering-related settings that control how invoices render in customer-facing interfaces such as the PDF or hosted invoice page.
    */
   rendering: Invoice.Rendering | null;
 
@@ -1381,6 +1397,8 @@ export interface Invoice {
    * The status of the invoice, one of `draft`, `open`, `paid`, `uncollectible`, or `void`. [Learn more](https://docs.stripe.com/billing/invoices/workflow#workflow-overview)
    */
   status: Invoice.Status | null;
+
+  status_details?: Invoice.StatusDetails;
 
   status_transitions: Invoice.StatusTransitions;
 
@@ -1484,9 +1502,13 @@ export namespace Invoice {
     | 'subscription_cycle'
     | 'subscription_threshold'
     | 'subscription_update'
-    | 'upcoming';
+    | 'upcoming'
+    | OtherString;
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export interface ConfirmationSecret {
     /**
@@ -1536,11 +1558,11 @@ export namespace Invoice {
     tracking_number?: string | null;
   }
 
-  export type CustomerTaxExempt = 'exempt' | 'none' | 'reverse';
+  export type CustomerTaxExempt = 'exempt' | 'none' | 'reverse' | OtherString;
 
   export interface CustomerTaxId {
     /**
-     * The type of the tax ID, one of `ad_nrt`, `ar_cuit`, `eu_vat`, `bo_tin`, `br_cnpj`, `br_cpf`, `cn_tin`, `co_nit`, `cr_tin`, `do_rcn`, `ec_ruc`, `eu_oss_vat`, `hr_oib`, `pe_ruc`, `ro_tin`, `rs_pib`, `sv_nit`, `uy_ruc`, `ve_rif`, `vn_tin`, `gb_vat`, `nz_gst`, `au_abn`, `au_arn`, `in_gst`, `no_vat`, `no_voec`, `za_vat`, `ch_vat`, `mx_rfc`, `sg_uen`, `ru_inn`, `ru_kpp`, `ca_bn`, `hk_br`, `es_cif`, `pl_nip`, `it_cf`, `fo_vat`, `gi_tin`, `py_ruc`, `tw_vat`, `th_vat`, `jp_cn`, `jp_rn`, `jp_trn`, `li_uid`, `li_vat`, `lk_vat`, `my_itn`, `us_ein`, `kr_brn`, `ca_qst`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `my_sst`, `sg_gst`, `ae_trn`, `cl_tin`, `sa_vat`, `id_npwp`, `my_frp`, `il_vat`, `ge_vat`, `ua_vat`, `is_vat`, `bg_uic`, `hu_tin`, `si_tin`, `ke_pin`, `tr_tin`, `eg_tin`, `ph_tin`, `al_tin`, `bh_vat`, `kz_bin`, `ng_tin`, `om_vat`, `de_stn`, `ch_uid`, `tz_vat`, `uz_vat`, `uz_tin`, `md_vat`, `ma_vat`, `by_tin`, `ao_tin`, `bs_tin`, `bb_tin`, `cd_nif`, `mr_nif`, `me_pib`, `zw_tin`, `ba_tin`, `gn_nif`, `mk_vat`, `sr_fin`, `sn_ninea`, `am_tin`, `np_pan`, `tj_tin`, `ug_tin`, `zm_tin`, `kh_tin`, `aw_tin`, `az_tin`, `bd_bin`, `bj_ifu`, `et_tin`, `kg_tin`, `la_tin`, `cm_niu`, `cv_nif`, `bf_ifu`, or `unknown`
+     * The type of the tax ID, one of `ad_nrt`, `ar_cuit`, `eu_vat`, `bo_tin`, `br_cnpj`, `br_cpf`, `cn_tin`, `co_nit`, `cr_tin`, `do_rcn`, `ec_ruc`, `eu_oss_vat`, `hr_oib`, `pe_ruc`, `ro_tin`, `rs_pib`, `sv_nit`, `uy_ruc`, `ve_rif`, `vn_tin`, `gb_vat`, `nz_gst`, `au_abn`, `au_arn`, `in_gst`, `no_vat`, `no_voec`, `za_vat`, `ch_vat`, `mx_rfc`, `sg_uen`, `ru_inn`, `ru_kpp`, `ca_bn`, `hk_br`, `es_cif`, `pl_nip`, `it_cf`, `fo_vat`, `gi_tin`, `py_ruc`, `tw_vat`, `th_vat`, `jp_cn`, `jp_rn`, `jp_trn`, `li_uid`, `li_vat`, `lk_vat`, `my_itn`, `us_ein`, `kr_brn`, `ca_qst`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `my_sst`, `sg_gst`, `ae_trn`, `cl_tin`, `sa_vat`, `id_npwp`, `my_frp`, `il_vat`, `ge_vat`, `ua_vat`, `is_vat`, `bg_uic`, `hu_tin`, `si_tin`, `ke_pin`, `tr_tin`, `eg_tin`, `ph_tin`, `al_tin`, `bh_vat`, `kz_bin`, `ng_tin`, `om_vat`, `de_stn`, `ch_uid`, `tz_vat`, `uz_vat`, `uz_tin`, `md_vat`, `ma_vat`, `by_tin`, `ao_tin`, `bs_tin`, `bb_tin`, `cd_nif`, `mr_nif`, `me_pib`, `zw_tin`, `ba_tin`, `gn_nif`, `mk_vat`, `sr_fin`, `sn_ninea`, `am_tin`, `np_pan`, `tj_tin`, `ug_tin`, `zm_tin`, `kh_tin`, `aw_tin`, `az_tin`, `bd_bin`, `bj_ifu`, `et_tin`, `kg_tin`, `la_tin`, `cm_niu`, `cv_nif`, `bf_ifu`, `ic_nif`, or `unknown`
      */
     type: CustomerTaxId.Type;
 
@@ -1576,7 +1598,7 @@ export namespace Invoice {
 
   export interface LastFinalizationError {
     /**
-     * For card errors resulting from a card issuer decline, a short string indicating [how to proceed with an error](https://docs.stripe.com/declines#retrying-issuer-declines) if they provide one.
+     * For card errors resulting from a card issuer decline, a short string indicating [how to proceed with an error](https://docs.stripe.com/declines/card#retrying-issuer-declines) if they provide one.
      */
     advice_code?: string;
 
@@ -1657,7 +1679,7 @@ export namespace Invoice {
     /**
      * A SetupIntent guides you through the process of setting up and saving a customer's payment credentials for future payments.
      * For example, you can use a SetupIntent to set up and save your customer's card without immediately collecting a payment.
-     * Later, you can use [PaymentIntents](https://api.stripe.com#payment_intents) to drive the payment flow.
+     * Later, you can use [PaymentIntents](https://docs.stripe.com/api#payment_intents) to drive the payment flow.
      *
      * Create a SetupIntent when you're ready to collect your customer's payment credentials.
      * Don't maintain long-lived, unconfirmed SetupIntents because they might not be valid.
@@ -1668,9 +1690,9 @@ export namespace Invoice {
      * For example, cardholders in [certain regions](https://stripe.com/guides/strong-customer-authentication) might need to be run through
      * [Strong Customer Authentication](https://docs.stripe.com/strong-customer-authentication) during payment method collection
      * to streamline later [off-session payments](https://docs.stripe.com/payments/setup-intents).
-     * If you use the SetupIntent with a [Customer](https://api.stripe.com#setup_intent_object-customer),
+     * If you use the SetupIntent with a [Customer](https://docs.stripe.com/api#setup_intent_object-customer),
      * it automatically attaches the resulting payment method to that Customer after successful setup.
-     * We recommend using SetupIntents or [setup_future_usage](https://api.stripe.com#payment_intent_object-setup_future_usage) on
+     * We recommend using SetupIntents or [setup_future_usage](https://docs.stripe.com/api#payment_intent_object-setup_future_usage) on
      * PaymentIntents to save payment methods to prevent saving invalid or unoptimized payment methods.
      *
      * By using SetupIntents, you can reduce friction for your customers, even as regulations change over time.
@@ -1794,7 +1816,17 @@ export namespace Invoice {
     tracking_number?: string | null;
   }
 
-  export type Status = 'draft' | 'open' | 'paid' | 'uncollectible' | 'void';
+  export type Status =
+    | 'draft'
+    | 'open'
+    | 'paid'
+    | 'uncollectible'
+    | 'void'
+    | OtherString;
+
+  export interface StatusDetails {
+    uncollectible?: StatusDetails.Uncollectible;
+  }
 
   export interface StatusTransitions {
     /**
@@ -1902,7 +1934,8 @@ export namespace Invoice {
   export namespace AutomaticTax {
     export type DisabledReason =
       | 'finalization_requires_location_inputs'
-      | 'finalization_system_error';
+      | 'finalization_system_error'
+      | OtherString;
 
     export interface Liability {
       /**
@@ -1916,10 +1949,14 @@ export namespace Invoice {
       type: Liability.Type;
     }
 
-    export type Status = 'complete' | 'failed' | 'requires_location_inputs';
+    export type Status =
+      | 'complete'
+      | 'failed'
+      | 'requires_location_inputs'
+      | OtherString;
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -1978,6 +2015,7 @@ export namespace Invoice {
       | 'hk_br'
       | 'hr_oib'
       | 'hu_tin'
+      | 'ic_nif'
       | 'id_npwp'
       | 'il_vat'
       | 'in_gst'
@@ -2041,11 +2079,12 @@ export namespace Invoice {
       | 'vn_tin'
       | 'za_vat'
       | 'zm_tin'
-      | 'zw_tin';
+      | 'zw_tin'
+      | OtherString;
   }
 
   export namespace Issuer {
-    export type Type = 'account' | 'self';
+    export type Type = 'account' | 'self' | OtherString;
   }
 
   export namespace LastFinalizationError {
@@ -2062,9 +2101,11 @@ export namespace Invoice {
       | 'alipay_upgrade_required'
       | 'amount_too_large'
       | 'amount_too_small'
+      | 'anomalous_money_movement_request'
       | 'api_key_expired'
       | 'application_fees_not_allowed'
       | 'approval_required'
+      | 'authentication_failure'
       | 'authentication_required'
       | 'balance_insufficient'
       | 'balance_invalid_parameter'
@@ -2077,6 +2118,7 @@ export namespace Invoice {
       | 'bank_account_verification_failed'
       | 'billing_invalid_mandate'
       | 'bitcoin_upgrade_required'
+      | 'capability_not_active'
       | 'capture_charge_authorization_expired'
       | 'capture_unauthorized_payment'
       | 'card_decline_rate_limit_exceeded'
@@ -2099,11 +2141,19 @@ export namespace Invoice {
       | 'customer_session_expired'
       | 'customer_tax_location_invalid'
       | 'debit_not_authorized'
+      | 'dispute_evidence_page_limit_exceeded'
       | 'email_invalid'
       | 'expired_card'
+      | 'expired_payment_method'
+      | 'failed_tax_calculation'
+      | 'financial_account_balance_does_not_support_currency'
+      | 'financial_account_capability_not_enabled'
+      | 'financial_account_capability_restricted'
       | 'financial_connections_account_inactive'
       | 'financial_connections_account_pending_account_numbers'
       | 'financial_connections_account_unavailable_account_numbers'
+      | 'financial_connections_consent_locale_invalid'
+      | 'financial_connections_consent_locale_unsupported'
       | 'financial_connections_no_successful_transaction_refresh'
       | 'forwarding_api_inactive'
       | 'forwarding_api_invalid_parameter'
@@ -2115,6 +2165,7 @@ export namespace Invoice {
       | 'incorrect_address'
       | 'incorrect_cvc'
       | 'incorrect_number'
+      | 'incorrect_postal_code'
       | 'incorrect_zip'
       | 'india_recurring_payment_mandate_canceled'
       | 'instant_payouts_config_disabled'
@@ -2124,6 +2175,7 @@ export namespace Invoice {
       | 'insufficient_funds'
       | 'intent_invalid_state'
       | 'intent_verification_method_missing'
+      | 'invalid_canceled_subscription_fields'
       | 'invalid_card_type'
       | 'invalid_characters'
       | 'invalid_charge_amount'
@@ -2155,6 +2207,7 @@ export namespace Invoice {
       | 'parameter_missing'
       | 'parameter_unknown'
       | 'parameters_exclusive'
+      | 'payment_evaluation_on_api_version_not_supported'
       | 'payment_intent_action_required'
       | 'payment_intent_authentication_failure'
       | 'payment_intent_incompatible_payment_method'
@@ -2183,6 +2236,7 @@ export namespace Invoice {
       | 'payment_method_not_available'
       | 'payment_method_provider_decline'
       | 'payment_method_provider_timeout'
+      | 'payment_method_restricted'
       | 'payment_method_unactivated'
       | 'payment_method_unexpected_state'
       | 'payment_method_unsupported_type'
@@ -2239,13 +2293,15 @@ export namespace Invoice {
       | 'token_in_use'
       | 'transfer_source_balance_parameters_mismatch'
       | 'transfers_not_allowed'
-      | 'url_invalid';
+      | 'url_invalid'
+      | OtherString;
 
     export type Type =
       | 'api_error'
       | 'card_error'
       | 'idempotency_error'
-      | 'invalid_request_error';
+      | 'invalid_request_error'
+      | OtherString;
   }
 
   export namespace Parent {
@@ -2274,7 +2330,7 @@ export namespace Invoice {
       subscription_proration_date?: number;
     }
 
-    export type Type = 'quote_details' | 'subscription_details';
+    export type Type = 'quote_details' | 'subscription_details' | OtherString;
   }
 
   export namespace PaymentSettings {
@@ -2288,6 +2344,16 @@ export namespace Invoice {
        * If paying by `bancontact`, this sub-hash contains details about the Bancontact payment method options to pass to the invoice's PaymentIntent.
        */
       bancontact: PaymentMethodOptions.Bancontact | null;
+
+      /**
+       * If paying by `billie`, this sub-hash contains details about the Billie payment method options to pass to the invoice's PaymentIntent.
+       */
+      billie?: PaymentMethodOptions.Billie | null;
+
+      /**
+       * If paying by `blik`, this sub-hash contains details about the Blik payment method options to pass to the invoice's PaymentIntent.
+       */
+      blik?: PaymentMethodOptions.Blik | null;
 
       /**
        * If paying by `card`, this sub-hash contains details about the Card payment method options to pass to the invoice's PaymentIntent.
@@ -2335,10 +2401,13 @@ export namespace Invoice {
       | 'ach_debit'
       | 'acss_debit'
       | 'affirm'
+      | 'alipay'
       | 'amazon_pay'
       | 'au_becs_debit'
       | 'bacs_debit'
       | 'bancontact'
+      | 'billie'
+      | 'blik'
       | 'boleto'
       | 'card'
       | 'cashapp'
@@ -2356,6 +2425,7 @@ export namespace Invoice {
       | 'konbini'
       | 'kr_card'
       | 'link'
+      | 'mb_way'
       | 'multibanco'
       | 'naver_pay'
       | 'nz_bank_account'
@@ -2368,6 +2438,7 @@ export namespace Invoice {
       | 'pix'
       | 'promptpay'
       | 'revolut_pay'
+      | 'satispay'
       | 'sepa_credit_transfer'
       | 'sepa_debit'
       | 'sofort'
@@ -2375,7 +2446,8 @@ export namespace Invoice {
       | 'twint'
       | 'upi'
       | 'us_bank_account'
-      | 'wechat_pay';
+      | 'wechat_pay'
+      | OtherString;
 
     export namespace PaymentMethodOptions {
       export interface AcssDebit {
@@ -2393,6 +2465,17 @@ export namespace Invoice {
          */
         preferred_language: Bancontact.PreferredLanguage;
       }
+
+      export interface Billie {
+        company_details?: Billie.CompanyDetails;
+
+        /**
+         * An identifier or reference that this payment corresponds to.
+         */
+        reference?: string | null;
+      }
+
+      export interface Blik {}
 
       export interface Card {
         installments?: Card.Installments;
@@ -2456,15 +2539,60 @@ export namespace Invoice {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace MandateOptions {
-          export type TransactionType = 'business' | 'personal';
+          export type TransactionType = 'business' | 'personal' | OtherString;
         }
       }
 
       export namespace Bancontact {
-        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
+      }
+
+      export namespace Billie {
+        export interface CompanyDetails {
+          registered_address?: Address;
+
+          /**
+           * Company or entity name.
+           */
+          registered_name: string | null;
+
+          /**
+           * The official registration number for the given registration type.
+           */
+          registration_number: string | null;
+
+          /**
+           * Type of registration the company or entity holds in their registered country.
+           */
+          registration_type?: CompanyDetails.RegistrationType;
+
+          /**
+           * VAT ID number.
+           */
+          vat: string | null;
+        }
+
+        export namespace CompanyDetails {
+          export type RegistrationType =
+            | 'ch_ein'
+            | 'de_hrb'
+            | 'dk_cvr'
+            | 'es_cif'
+            | 'fi_tunnus'
+            | 'fr_siren'
+            | 'fr_siret'
+            | 'it_rea'
+            | 'nl_kvk'
+            | 'no_org_number'
+            | 'no_pno'
+            | 'se_org_number'
+            | 'se_pno'
+            | 'uk_crn';
+        }
       }
 
       export namespace Card {
@@ -2475,7 +2603,11 @@ export namespace Invoice {
           enabled: boolean | null;
         }
 
-        export type RequestThreeDSecure = 'any' | 'automatic' | 'challenge';
+        export type RequestThreeDSecure =
+          | 'any'
+          | 'automatic'
+          | 'challenge'
+          | OtherString;
       }
 
       export namespace CustomerBalance {
@@ -2497,7 +2629,14 @@ export namespace Invoice {
           }
 
           export namespace EuBankTransfer {
-            export type Country = 'BE' | 'DE' | 'ES' | 'FR' | 'IE' | 'NL';
+            export type Country =
+              | 'BE'
+              | 'DE'
+              | 'ES'
+              | 'FR'
+              | 'IE'
+              | 'NL'
+              | OtherString;
           }
         }
       }
@@ -2521,7 +2660,7 @@ export namespace Invoice {
         }
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
 
           export type Purpose =
             | 'dependant_support'
@@ -2534,12 +2673,13 @@ export namespace Invoice {
             | 'retail'
             | 'salary'
             | 'tax'
-            | 'utility';
+            | 'utility'
+            | OtherString;
         }
       }
 
       export namespace Pix {
-        export type AmountIncludesIof = 'always' | 'never';
+        export type AmountIncludesIof = 'always' | 'never' | OtherString;
       }
 
       export namespace Upi {
@@ -2566,7 +2706,7 @@ export namespace Invoice {
         }
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
         }
       }
 
@@ -2588,7 +2728,8 @@ export namespace Invoice {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace FinancialConnections {
           export interface Filters {
@@ -2602,12 +2743,20 @@ export namespace Invoice {
             | 'balances'
             | 'ownership'
             | 'payment_method'
-            | 'transactions';
+            | 'transactions'
+            | OtherString;
 
-          export type Prefetch = 'balances' | 'ownership' | 'transactions';
+          export type Prefetch =
+            | 'balances'
+            | 'ownership'
+            | 'transactions'
+            | OtherString;
 
           export namespace Filters {
-            export type AccountSubcategory = 'checking' | 'savings';
+            export type AccountSubcategory =
+              | 'checking'
+              | 'savings'
+              | OtherString;
           }
         }
       }
@@ -2623,7 +2772,7 @@ export namespace Invoice {
     }
 
     export namespace Pdf {
-      export type PageSize = 'a4' | 'auto' | 'letter';
+      export type PageSize = 'a4' | 'auto' | 'letter' | OtherString;
     }
   }
 
@@ -2668,7 +2817,27 @@ export namespace Invoice {
         | 'reverse_charge'
         | 'standard_rated'
         | 'taxable_basis_reduced'
-        | 'zero_rated';
+        | 'zero_rated'
+        | OtherString;
+    }
+  }
+
+  export namespace StatusDetails {
+    export interface Uncollectible {
+      /**
+       * The reason why the invoice is uncollectible.
+       */
+      reason: Uncollectible.Reason | null;
+    }
+
+    export namespace Uncollectible {
+      export type Reason =
+        | 'max_payment_attempts'
+        | 'payment_not_received'
+        | 'subscription_canceled'
+        | 'subscription_paused'
+        | 'user_forgiven'
+        | OtherString;
     }
   }
 
@@ -2687,11 +2856,11 @@ export namespace Invoice {
   }
 
   export namespace TotalPretaxCreditAmount {
-    export type Type = 'credit_balance_transaction' | 'discount';
+    export type Type = 'credit_balance_transaction' | 'discount' | OtherString;
   }
 
   export namespace TotalTax {
-    export type TaxBehavior = 'exclusive' | 'inclusive';
+    export type TaxBehavior = 'exclusive' | 'inclusive' | OtherString;
 
     export interface TaxRateDetails {
       /**
@@ -2716,7 +2885,8 @@ export namespace Invoice {
       | 'reverse_charge'
       | 'standard_rated'
       | 'taxable_basis_reduced'
-      | 'zero_rated';
+      | 'zero_rated'
+      | OtherString;
   }
 }
 export interface InvoiceCreateParams {
@@ -2856,7 +3026,7 @@ export interface InvoiceCreateParams {
   pending_invoice_items_behavior?: InvoiceCreateParams.PendingInvoiceItemsBehavior;
 
   /**
-   * The rendering-related settings that control how the invoice is displayed on customer-facing surfaces such as PDF and Hosted Invoice Page.
+   * The rendering-related settings that control how invoices render in customer-facing interfaces such as the PDF or hosted invoice page.
    */
   rendering?: InvoiceCreateParams.Rendering;
 
@@ -2898,7 +3068,10 @@ export namespace InvoiceCreateParams {
     liability?: AutomaticTax.Liability;
   }
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export interface CustomField {
     /**
@@ -2970,7 +3143,7 @@ export namespace InvoiceCreateParams {
     payment_method_types?: Emptyable<Array<PaymentSettings.PaymentMethodType>>;
   }
 
-  export type PendingInvoiceItemsBehavior = 'exclude' | 'include';
+  export type PendingInvoiceItemsBehavior = 'exclude' | 'include' | OtherString;
 
   export interface Rendering {
     /**
@@ -3049,12 +3222,12 @@ export namespace InvoiceCreateParams {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
   export namespace Issuer {
-    export type Type = 'account' | 'self';
+    export type Type = 'account' | 'self' | OtherString;
   }
 
   export namespace PaymentSettings {
@@ -3068,6 +3241,16 @@ export namespace InvoiceCreateParams {
        * If paying by `bancontact`, this sub-hash contains details about the Bancontact payment method options to pass to the invoice's PaymentIntent.
        */
       bancontact?: Emptyable<PaymentMethodOptions.Bancontact>;
+
+      /**
+       * If paying by `billie`, this sub-hash contains details about the Billie payment method options to pass to the invoice's PaymentIntent.
+       */
+      billie?: Emptyable<PaymentMethodOptions.Billie>;
+
+      /**
+       * If paying by `blik`, this sub-hash contains details about the Blik payment method options to pass to the invoice's PaymentIntent.
+       */
+      blik?: Emptyable<PaymentMethodOptions.Blik>;
 
       /**
        * If paying by `card`, this sub-hash contains details about the Card payment method options to pass to the invoice's PaymentIntent.
@@ -3115,10 +3298,13 @@ export namespace InvoiceCreateParams {
       | 'ach_debit'
       | 'acss_debit'
       | 'affirm'
+      | 'alipay'
       | 'amazon_pay'
       | 'au_becs_debit'
       | 'bacs_debit'
       | 'bancontact'
+      | 'billie'
+      | 'blik'
       | 'boleto'
       | 'card'
       | 'cashapp'
@@ -3136,6 +3322,7 @@ export namespace InvoiceCreateParams {
       | 'konbini'
       | 'kr_card'
       | 'link'
+      | 'mb_way'
       | 'multibanco'
       | 'naver_pay'
       | 'nz_bank_account'
@@ -3148,6 +3335,7 @@ export namespace InvoiceCreateParams {
       | 'pix'
       | 'promptpay'
       | 'revolut_pay'
+      | 'satispay'
       | 'sepa_credit_transfer'
       | 'sepa_debit'
       | 'sofort'
@@ -3155,7 +3343,8 @@ export namespace InvoiceCreateParams {
       | 'twint'
       | 'upi'
       | 'us_bank_account'
-      | 'wechat_pay';
+      | 'wechat_pay'
+      | OtherString;
 
     export namespace PaymentMethodOptions {
       export interface AcssDebit {
@@ -3176,6 +3365,20 @@ export namespace InvoiceCreateParams {
          */
         preferred_language?: Bancontact.PreferredLanguage;
       }
+
+      export interface Billie {
+        /**
+         * Registration details about the buyer's organization.
+         */
+        company_details?: Emptyable<Billie.CompanyDetails>;
+
+        /**
+         * An identifier or reference that this payment corresponds to.
+         */
+        reference?: string;
+      }
+
+      export interface Blik {}
 
       export interface Card {
         /**
@@ -3256,15 +3459,64 @@ export namespace InvoiceCreateParams {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace MandateOptions {
-          export type TransactionType = 'business' | 'personal';
+          export type TransactionType = 'business' | 'personal' | OtherString;
         }
       }
 
       export namespace Bancontact {
-        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
+      }
+
+      export namespace Billie {
+        export interface CompanyDetails {
+          /**
+           * The address the company or entity is registered with.
+           */
+          registered_address?: Emptyable<AddressParam>;
+
+          /**
+           * Company or entity name.
+           */
+          registered_name?: string;
+
+          /**
+           * The official registration number for the given registration type.
+           */
+          registration_number?: string;
+
+          /**
+           * Type of registration the company or entity holds in their registered country.
+           */
+          registration_type?: Emptyable<CompanyDetails.RegistrationType>;
+
+          /**
+           * VAT ID number.
+           */
+          vat?: string;
+        }
+
+        export namespace CompanyDetails {
+          export type RegistrationType =
+            | 'ch_ein'
+            | 'de_hrb'
+            | 'dk_cvr'
+            | 'es_cif'
+            | 'fi_tunnus'
+            | 'fr_siren'
+            | 'fr_siret'
+            | 'it_rea'
+            | 'nl_kvk'
+            | 'no_org_number'
+            | 'no_pno'
+            | 'se_org_number'
+            | 'se_pno'
+            | 'uk_crn'
+            | OtherString;
+        }
       }
 
       export namespace Card {
@@ -3281,7 +3533,11 @@ export namespace InvoiceCreateParams {
           plan?: Emptyable<Installments.Plan>;
         }
 
-        export type RequestThreeDSecure = 'any' | 'automatic' | 'challenge';
+        export type RequestThreeDSecure =
+          | 'any'
+          | 'automatic'
+          | 'challenge'
+          | OtherString;
 
         export namespace Installments {
           export interface Plan {
@@ -3303,7 +3559,11 @@ export namespace InvoiceCreateParams {
           }
 
           export namespace Plan {
-            export type Type = 'bonus' | 'fixed_count' | 'revolving';
+            export type Type =
+              | 'bonus'
+              | 'fixed_count'
+              | 'revolving'
+              | OtherString;
           }
         }
       }
@@ -3356,12 +3616,13 @@ export namespace InvoiceCreateParams {
             | 'retail'
             | 'salary'
             | 'tax'
-            | 'utility';
+            | 'utility'
+            | OtherString;
         }
       }
 
       export namespace Pix {
-        export type AmountIncludesIof = 'always' | 'never';
+        export type AmountIncludesIof = 'always' | 'never' | OtherString;
       }
 
       export namespace Upi {
@@ -3388,7 +3649,7 @@ export namespace InvoiceCreateParams {
         }
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
         }
       }
 
@@ -3413,7 +3674,8 @@ export namespace InvoiceCreateParams {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace FinancialConnections {
           export interface Filters {
@@ -3427,12 +3689,20 @@ export namespace InvoiceCreateParams {
             | 'balances'
             | 'ownership'
             | 'payment_method'
-            | 'transactions';
+            | 'transactions'
+            | OtherString;
 
-          export type Prefetch = 'balances' | 'ownership' | 'transactions';
+          export type Prefetch =
+            | 'balances'
+            | 'ownership'
+            | 'transactions'
+            | OtherString;
 
           export namespace Filters {
-            export type AccountSubcategory = 'checking' | 'savings';
+            export type AccountSubcategory =
+              | 'checking'
+              | 'savings'
+              | OtherString;
           }
         }
       }
@@ -3440,7 +3710,10 @@ export namespace InvoiceCreateParams {
   }
 
   export namespace Rendering {
-    export type AmountTaxDisplay = 'exclude_tax' | 'include_inclusive_tax';
+    export type AmountTaxDisplay =
+      | 'exclude_tax'
+      | 'include_inclusive_tax'
+      | OtherString;
 
     export interface Pdf {
       /**
@@ -3452,7 +3725,7 @@ export namespace InvoiceCreateParams {
     }
 
     export namespace Pdf {
-      export type PageSize = 'a4' | 'auto' | 'letter';
+      export type PageSize = 'a4' | 'auto' | 'letter' | OtherString;
     }
   }
 
@@ -3526,7 +3799,11 @@ export namespace InvoiceCreateParams {
         };
       }
 
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
 
       export namespace DeliveryEstimate {
         export interface Maximum {
@@ -3554,11 +3831,23 @@ export namespace InvoiceCreateParams {
         }
 
         export namespace Maximum {
-          export type Unit = 'business_day' | 'day' | 'hour' | 'month' | 'week';
+          export type Unit =
+            | 'business_day'
+            | 'day'
+            | 'hour'
+            | 'month'
+            | 'week'
+            | OtherString;
         }
 
         export namespace Minimum {
-          export type Unit = 'business_day' | 'day' | 'hour' | 'month' | 'week';
+          export type Unit =
+            | 'business_day'
+            | 'day'
+            | 'hour'
+            | 'month'
+            | 'week'
+            | OtherString;
         }
       }
 
@@ -3576,7 +3865,11 @@ export namespace InvoiceCreateParams {
         }
 
         export namespace CurrencyOptions {
-          export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+          export type TaxBehavior =
+            | 'exclusive'
+            | 'inclusive'
+            | 'unspecified'
+            | OtherString;
         }
       }
     }
@@ -3700,7 +3993,7 @@ export interface InvoiceUpdateParams {
   payment_settings?: InvoiceUpdateParams.PaymentSettings;
 
   /**
-   * The rendering-related settings that control how the invoice is displayed on customer-facing surfaces such as PDF and Hosted Invoice Page.
+   * The rendering-related settings that control how invoices render in customer-facing interfaces such as the PDF or hosted invoice page.
    */
   rendering?: InvoiceUpdateParams.Rendering;
 
@@ -3737,7 +4030,10 @@ export namespace InvoiceUpdateParams {
     liability?: AutomaticTax.Liability;
   }
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export interface CustomField {
     /**
@@ -3874,12 +4170,12 @@ export namespace InvoiceUpdateParams {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
   export namespace Issuer {
-    export type Type = 'account' | 'self';
+    export type Type = 'account' | 'self' | OtherString;
   }
 
   export namespace PaymentSettings {
@@ -3893,6 +4189,16 @@ export namespace InvoiceUpdateParams {
        * If paying by `bancontact`, this sub-hash contains details about the Bancontact payment method options to pass to the invoice's PaymentIntent.
        */
       bancontact?: Emptyable<PaymentMethodOptions.Bancontact>;
+
+      /**
+       * If paying by `billie`, this sub-hash contains details about the Billie payment method options to pass to the invoice's PaymentIntent.
+       */
+      billie?: Emptyable<PaymentMethodOptions.Billie>;
+
+      /**
+       * If paying by `blik`, this sub-hash contains details about the Blik payment method options to pass to the invoice's PaymentIntent.
+       */
+      blik?: Emptyable<PaymentMethodOptions.Blik>;
 
       /**
        * If paying by `card`, this sub-hash contains details about the Card payment method options to pass to the invoice's PaymentIntent.
@@ -3940,10 +4246,13 @@ export namespace InvoiceUpdateParams {
       | 'ach_debit'
       | 'acss_debit'
       | 'affirm'
+      | 'alipay'
       | 'amazon_pay'
       | 'au_becs_debit'
       | 'bacs_debit'
       | 'bancontact'
+      | 'billie'
+      | 'blik'
       | 'boleto'
       | 'card'
       | 'cashapp'
@@ -3961,6 +4270,7 @@ export namespace InvoiceUpdateParams {
       | 'konbini'
       | 'kr_card'
       | 'link'
+      | 'mb_way'
       | 'multibanco'
       | 'naver_pay'
       | 'nz_bank_account'
@@ -3973,6 +4283,7 @@ export namespace InvoiceUpdateParams {
       | 'pix'
       | 'promptpay'
       | 'revolut_pay'
+      | 'satispay'
       | 'sepa_credit_transfer'
       | 'sepa_debit'
       | 'sofort'
@@ -3980,7 +4291,8 @@ export namespace InvoiceUpdateParams {
       | 'twint'
       | 'upi'
       | 'us_bank_account'
-      | 'wechat_pay';
+      | 'wechat_pay'
+      | OtherString;
 
     export namespace PaymentMethodOptions {
       export interface AcssDebit {
@@ -4001,6 +4313,20 @@ export namespace InvoiceUpdateParams {
          */
         preferred_language?: Bancontact.PreferredLanguage;
       }
+
+      export interface Billie {
+        /**
+         * Registration details about the buyer's organization.
+         */
+        company_details?: Emptyable<Billie.CompanyDetails>;
+
+        /**
+         * An identifier or reference that this payment corresponds to.
+         */
+        reference?: string;
+      }
+
+      export interface Blik {}
 
       export interface Card {
         /**
@@ -4081,15 +4407,64 @@ export namespace InvoiceUpdateParams {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace MandateOptions {
-          export type TransactionType = 'business' | 'personal';
+          export type TransactionType = 'business' | 'personal' | OtherString;
         }
       }
 
       export namespace Bancontact {
-        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl';
+        export type PreferredLanguage = 'de' | 'en' | 'fr' | 'nl' | OtherString;
+      }
+
+      export namespace Billie {
+        export interface CompanyDetails {
+          /**
+           * The address the company or entity is registered with.
+           */
+          registered_address?: Emptyable<AddressParam>;
+
+          /**
+           * Company or entity name.
+           */
+          registered_name?: string;
+
+          /**
+           * The official registration number for the given registration type.
+           */
+          registration_number?: string;
+
+          /**
+           * Type of registration the company or entity holds in their registered country.
+           */
+          registration_type?: Emptyable<CompanyDetails.RegistrationType>;
+
+          /**
+           * VAT ID number.
+           */
+          vat?: string;
+        }
+
+        export namespace CompanyDetails {
+          export type RegistrationType =
+            | 'ch_ein'
+            | 'de_hrb'
+            | 'dk_cvr'
+            | 'es_cif'
+            | 'fi_tunnus'
+            | 'fr_siren'
+            | 'fr_siret'
+            | 'it_rea'
+            | 'nl_kvk'
+            | 'no_org_number'
+            | 'no_pno'
+            | 'se_org_number'
+            | 'se_pno'
+            | 'uk_crn'
+            | OtherString;
+        }
       }
 
       export namespace Card {
@@ -4106,7 +4481,11 @@ export namespace InvoiceUpdateParams {
           plan?: Emptyable<Installments.Plan>;
         }
 
-        export type RequestThreeDSecure = 'any' | 'automatic' | 'challenge';
+        export type RequestThreeDSecure =
+          | 'any'
+          | 'automatic'
+          | 'challenge'
+          | OtherString;
 
         export namespace Installments {
           export interface Plan {
@@ -4128,7 +4507,11 @@ export namespace InvoiceUpdateParams {
           }
 
           export namespace Plan {
-            export type Type = 'bonus' | 'fixed_count' | 'revolving';
+            export type Type =
+              | 'bonus'
+              | 'fixed_count'
+              | 'revolving'
+              | OtherString;
           }
         }
       }
@@ -4181,12 +4564,13 @@ export namespace InvoiceUpdateParams {
             | 'retail'
             | 'salary'
             | 'tax'
-            | 'utility';
+            | 'utility'
+            | OtherString;
         }
       }
 
       export namespace Pix {
-        export type AmountIncludesIof = 'always' | 'never';
+        export type AmountIncludesIof = 'always' | 'never' | OtherString;
       }
 
       export namespace Upi {
@@ -4213,7 +4597,7 @@ export namespace InvoiceUpdateParams {
         }
 
         export namespace MandateOptions {
-          export type AmountType = 'fixed' | 'maximum';
+          export type AmountType = 'fixed' | 'maximum' | OtherString;
         }
       }
 
@@ -4238,7 +4622,8 @@ export namespace InvoiceUpdateParams {
         export type VerificationMethod =
           | 'automatic'
           | 'instant'
-          | 'microdeposits';
+          | 'microdeposits'
+          | OtherString;
 
         export namespace FinancialConnections {
           export interface Filters {
@@ -4252,12 +4637,20 @@ export namespace InvoiceUpdateParams {
             | 'balances'
             | 'ownership'
             | 'payment_method'
-            | 'transactions';
+            | 'transactions'
+            | OtherString;
 
-          export type Prefetch = 'balances' | 'ownership' | 'transactions';
+          export type Prefetch =
+            | 'balances'
+            | 'ownership'
+            | 'transactions'
+            | OtherString;
 
           export namespace Filters {
-            export type AccountSubcategory = 'checking' | 'savings';
+            export type AccountSubcategory =
+              | 'checking'
+              | 'savings'
+              | OtherString;
           }
         }
       }
@@ -4265,7 +4658,10 @@ export namespace InvoiceUpdateParams {
   }
 
   export namespace Rendering {
-    export type AmountTaxDisplay = 'exclude_tax' | 'include_inclusive_tax';
+    export type AmountTaxDisplay =
+      | 'exclude_tax'
+      | 'include_inclusive_tax'
+      | OtherString;
 
     export interface Pdf {
       /**
@@ -4277,7 +4673,7 @@ export namespace InvoiceUpdateParams {
     }
 
     export namespace Pdf {
-      export type PageSize = 'a4' | 'auto' | 'letter';
+      export type PageSize = 'a4' | 'auto' | 'letter' | OtherString;
     }
   }
 
@@ -4351,7 +4747,11 @@ export namespace InvoiceUpdateParams {
         };
       }
 
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
 
       export namespace DeliveryEstimate {
         export interface Maximum {
@@ -4379,11 +4779,23 @@ export namespace InvoiceUpdateParams {
         }
 
         export namespace Maximum {
-          export type Unit = 'business_day' | 'day' | 'hour' | 'month' | 'week';
+          export type Unit =
+            | 'business_day'
+            | 'day'
+            | 'hour'
+            | 'month'
+            | 'week'
+            | OtherString;
         }
 
         export namespace Minimum {
-          export type Unit = 'business_day' | 'day' | 'hour' | 'month' | 'week';
+          export type Unit =
+            | 'business_day'
+            | 'day'
+            | 'hour'
+            | 'month'
+            | 'week'
+            | OtherString;
         }
       }
 
@@ -4401,7 +4813,11 @@ export namespace InvoiceUpdateParams {
         }
 
         export namespace CurrencyOptions {
-          export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+          export type TaxBehavior =
+            | 'exclusive'
+            | 'inclusive'
+            | 'unspecified'
+            | OtherString;
         }
       }
     }
@@ -4446,9 +4862,18 @@ export interface InvoiceListParams extends PaginationParams {
   subscription?: string;
 }
 export namespace InvoiceListParams {
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
-  export type Status = 'draft' | 'open' | 'paid' | 'uncollectible' | 'void';
+  export type Status =
+    | 'draft'
+    | 'open'
+    | 'paid'
+    | 'uncollectible'
+    | 'void'
+    | OtherString;
 }
 export interface InvoiceDeleteParams {}
 export interface InvoiceAddLinesParams {
@@ -4527,7 +4952,7 @@ export namespace InvoiceAddLinesParams {
     quantity_decimal?: Decimal;
 
     /**
-     * A list of up to 10 tax amounts for this line item. This can be useful if you calculate taxes on your own or use a third-party to calculate them. You cannot set tax amounts if any line item has [tax_rates](https://docs.stripe.com/api/invoices/line_item#invoice_line_item_object-tax_rates) or if the invoice has [default_tax_rates](https://docs.stripe.com/api/invoices/object#invoice_object-default_tax_rates) or uses [automatic tax](https://docs.stripe.com/tax/invoicing). Pass an empty string to remove previously defined tax amounts.
+     * A list of up to 20 tax amounts for this line item. This can be useful if you calculate taxes on your own or use a third-party to calculate them. You cannot set tax amounts if any line item has [tax_rates](https://docs.stripe.com/api/invoices/line_item#invoice_line_item_object-tax_rates) or if the invoice has [default_tax_rates](https://docs.stripe.com/api/invoices/object#invoice_object-default_tax_rates) or uses [automatic tax](https://docs.stripe.com/tax/invoicing). Pass an empty string to remove previously defined tax amounts.
      */
     tax_amounts?: Emptyable<Array<Line.TaxAmount>>;
 
@@ -4658,12 +5083,35 @@ export namespace InvoiceAddLinesParams {
         tax_code?: string;
 
         /**
+         * Tax details for this product, including the [tax code](https://docs.stripe.com/tax/tax-codes) and an optional performance location.
+         */
+        tax_details?: ProductData.TaxDetails;
+
+        /**
          * A label that represents units of this product. When set, this will be included in customers' receipts, invoices, Checkout, and the customer portal.
          */
         unit_label?: string;
       }
 
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
+
+      export namespace ProductData {
+        export interface TaxDetails {
+          /**
+           * A tax location ID. Depending on the [tax code](https://docs.stripe.com/tax/tax-for-tickets/reference/tax-location-performance), this is required, optional, or not supported.
+           */
+          performance_location?: string;
+
+          /**
+           * A [tax code](https://docs.stripe.com/tax/tax-categories) ID.
+           */
+          tax_code?: Emptyable<string>;
+        }
+      }
     }
 
     export namespace TaxAmount {
@@ -4729,7 +5177,8 @@ export namespace InvoiceAddLinesParams {
         | 'reverse_charge'
         | 'standard_rated'
         | 'taxable_basis_reduced'
-        | 'zero_rated';
+        | 'zero_rated'
+        | OtherString;
 
       export namespace TaxRateData {
         export type JurisdictionLevel =
@@ -4738,23 +5187,29 @@ export namespace InvoiceAddLinesParams {
           | 'county'
           | 'district'
           | 'multiple'
-          | 'state';
+          | 'state'
+          | OtherString;
 
         export type TaxType =
           | 'amusement_tax'
           | 'communications_tax'
+          | 'digital_excise_tax'
           | 'gst'
           | 'hst'
           | 'igst'
           | 'jct'
           | 'lease_tax'
+          | 'mass_transit_parking_tax'
+          | 'parking_tax'
           | 'pst'
           | 'qst'
           | 'retail_delivery_fee'
           | 'rst'
           | 'sales_tax'
           | 'service_tax'
-          | 'vat';
+          | 'utility_users_tax'
+          | 'vat'
+          | OtherString;
       }
     }
   }
@@ -5007,7 +5462,7 @@ export namespace InvoiceCreatePreviewParams {
     type: Issuer.Type;
   }
 
-  export type PreviewMode = 'next' | 'recurring';
+  export type PreviewMode = 'next' | 'recurring' | OtherString;
 
   export interface ScheduleDetails {
     /**
@@ -5035,7 +5490,7 @@ export namespace InvoiceCreatePreviewParams {
     /**
      * For new subscriptions, a future timestamp to anchor the subscription's [billing cycle](https://docs.stripe.com/subscriptions/billing-cycle). This is used to determine the date of the first full invoice, and, for plans with `month` or `year` intervals, the day of the month for subsequent invoices. For existing subscriptions, the value can only be set to `now` or `unchanged`.
      */
-    billing_cycle_anchor?: SubscriptionDetails.BillingCycleAnchor | number;
+    billing_cycle_anchor?: SubscriptionDetails.BillingCycleAnchor;
 
     /**
      * Controls how prorations and invoices for subscriptions are calculated and orchestrated.
@@ -5071,6 +5526,20 @@ export namespace InvoiceCreatePreviewParams {
      * A list of up to 20 subscription items, each with an attached price.
      */
     items?: Array<SubscriptionDetails.Item>;
+
+    /**
+     * Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
+     */
+    metadata?: Emptyable<MetadataParam>;
+
+    /**
+     * Previews the invoice that would be generated when pausing the subscription. Passing an empty hash won't preview pausing and instead returns the next invoice.
+     *
+     * To receive a preview invoice, set `invoicing_behavior` to `invoice`. A preview isn't available if the `bill_for` options produce no billable amounts.
+     *
+     * `pending_invoice_item` never has a preview available because pausing wouldn't generate an invoice, and paused subscriptions don't generate invoices either.
+     */
+    pause?: SubscriptionDetails.Pause;
 
     /**
      * Determines how to handle [prorations](https://docs.stripe.com/billing/subscriptions/prorations) when the billing cycle changes (e.g., when switching plans, resetting `billing_cycle_anchor=now`, or starting a trial), or if an item's `quantity` changes. The default value is `create_prorations`.
@@ -5112,7 +5581,7 @@ export namespace InvoiceCreatePreviewParams {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -5141,11 +5610,11 @@ export namespace InvoiceCreatePreviewParams {
       ip_address?: Emptyable<string>;
     }
 
-    export type TaxExempt = 'exempt' | 'none' | 'reverse';
+    export type TaxExempt = 'exempt' | 'none' | 'reverse' | OtherString;
 
     export interface TaxId {
       /**
-       * Type of the tax ID, one of `ad_nrt`, `ae_trn`, `al_tin`, `am_tin`, `ao_tin`, `ar_cuit`, `au_abn`, `au_arn`, `aw_tin`, `az_tin`, `ba_tin`, `bb_tin`, `bd_bin`, `bf_ifu`, `bg_uic`, `bh_vat`, `bj_ifu`, `bo_tin`, `br_cnpj`, `br_cpf`, `bs_tin`, `by_tin`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `cd_nif`, `ch_uid`, `ch_vat`, `cl_tin`, `cm_niu`, `cn_tin`, `co_nit`, `cr_tin`, `cv_nif`, `de_stn`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `et_tin`, `eu_oss_vat`, `eu_vat`, `fo_vat`, `gb_vat`, `ge_vat`, `gi_tin`, `gn_nif`, `hk_br`, `hr_oib`, `hu_tin`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `it_cf`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kg_tin`, `kh_tin`, `kr_brn`, `kz_bin`, `la_tin`, `li_uid`, `li_vat`, `lk_vat`, `ma_vat`, `md_vat`, `me_pib`, `mk_vat`, `mr_nif`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `ng_tin`, `no_vat`, `no_voec`, `np_pan`, `nz_gst`, `om_vat`, `pe_ruc`, `ph_tin`, `pl_nip`, `py_ruc`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sn_ninea`, `sr_fin`, `sv_nit`, `th_vat`, `tj_tin`, `tr_tin`, `tw_vat`, `tz_vat`, `ua_vat`, `ug_tin`, `us_ein`, `uy_ruc`, `uz_tin`, `uz_vat`, `ve_rif`, `vn_tin`, `za_vat`, `zm_tin`, or `zw_tin`
+       * Type of the tax ID, one of `ad_nrt`, `ae_trn`, `al_tin`, `am_tin`, `ao_tin`, `ar_cuit`, `au_abn`, `au_arn`, `aw_tin`, `az_tin`, `ba_tin`, `bb_tin`, `bd_bin`, `bf_ifu`, `bg_uic`, `bh_vat`, `bj_ifu`, `bo_tin`, `br_cnpj`, `br_cpf`, `bs_tin`, `by_tin`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `cd_nif`, `ch_uid`, `ch_vat`, `cl_tin`, `cm_niu`, `cn_tin`, `co_nit`, `cr_tin`, `cv_nif`, `de_stn`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `et_tin`, `eu_oss_vat`, `eu_vat`, `fo_vat`, `gb_vat`, `ge_vat`, `gi_tin`, `gn_nif`, `hk_br`, `hr_oib`, `hu_tin`, `ic_nif`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `it_cf`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kg_tin`, `kh_tin`, `kr_brn`, `kz_bin`, `la_tin`, `li_uid`, `li_vat`, `lk_vat`, `ma_vat`, `md_vat`, `me_pib`, `mk_vat`, `mr_nif`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `ng_tin`, `no_vat`, `no_voec`, `np_pan`, `nz_gst`, `om_vat`, `pe_ruc`, `ph_tin`, `pl_nip`, `py_ruc`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sn_ninea`, `sr_fin`, `sv_nit`, `th_vat`, `tj_tin`, `tr_tin`, `tw_vat`, `tz_vat`, `ua_vat`, `ug_tin`, `us_ein`, `uy_ruc`, `uz_tin`, `uz_vat`, `ve_rif`, `vn_tin`, `za_vat`, `zm_tin`, or `zw_tin`
        */
       type: TaxId.Type;
 
@@ -5210,6 +5679,7 @@ export namespace InvoiceCreatePreviewParams {
         | 'hk_br'
         | 'hr_oib'
         | 'hu_tin'
+        | 'ic_nif'
         | 'id_npwp'
         | 'il_vat'
         | 'in_gst'
@@ -5272,7 +5742,8 @@ export namespace InvoiceCreatePreviewParams {
         | 'vn_tin'
         | 'za_vat'
         | 'zm_tin'
-        | 'zw_tin';
+        | 'zw_tin'
+        | OtherString;
     }
   }
 
@@ -5333,15 +5804,23 @@ export namespace InvoiceCreatePreviewParams {
       unit_amount_decimal?: Decimal;
     }
 
-    export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'unspecified'
+      | OtherString;
 
     export namespace PriceData {
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
     }
   }
 
   export namespace Issuer {
-    export type Type = 'account' | 'self';
+    export type Type = 'account' | 'self' | OtherString;
   }
 
   export namespace ScheduleDetails {
@@ -5357,7 +5836,7 @@ export namespace InvoiceCreatePreviewParams {
       type: BillingMode.Type;
     }
 
-    export type EndBehavior = 'cancel' | 'release';
+    export type EndBehavior = 'cancel' | 'release' | OtherString;
 
     export interface Phase {
       /**
@@ -5451,7 +5930,7 @@ export namespace InvoiceCreatePreviewParams {
       proration_behavior?: Phase.ProrationBehavior;
 
       /**
-       * The date at which this phase of the subscription schedule starts or `now`. Must be set on the first phase.
+       * The date at which this phase of the subscription schedule starts or `now`. Must be set on the first phase. Prefer to specify `now` over an explicit timestamp when appropriate to avoid unexpected behavior due to request delays or clock skew resulting in the phase being slightly backdated or postdated.
        */
       start_date?: number | 'now';
 
@@ -5466,7 +5945,7 @@ export namespace InvoiceCreatePreviewParams {
       trial?: boolean;
 
       /**
-       * Sets the phase to trialing from the start date to this date. Must be before the phase end date, can not be combined with `trial`
+       * Sets the phase to trialing from the start date to this date. Must be within the phase. When previewing an update, if combined with `trial=true`, it must match the phase end date.
        */
       trial_end?: number | 'now';
     }
@@ -5474,7 +5953,8 @@ export namespace InvoiceCreatePreviewParams {
     export type ProrationBehavior =
       | 'always_invoice'
       | 'create_prorations'
-      | 'none';
+      | 'none'
+      | OtherString;
 
     export namespace BillingMode {
       export interface Flexible {
@@ -5484,10 +5964,10 @@ export namespace InvoiceCreatePreviewParams {
         proration_discounts?: Flexible.ProrationDiscounts;
       }
 
-      export type Type = 'classic' | 'flexible';
+      export type Type = 'classic' | 'flexible' | OtherString;
 
       export namespace Flexible {
-        export type ProrationDiscounts = 'included' | 'itemized';
+        export type ProrationDiscounts = 'included' | 'itemized' | OtherString;
       }
     }
 
@@ -5546,7 +6026,10 @@ export namespace InvoiceCreatePreviewParams {
         liability?: AutomaticTax.Liability;
       }
 
-      export type BillingCycleAnchor = 'automatic' | 'phase_start';
+      export type BillingCycleAnchor =
+        | 'automatic'
+        | 'phase_start'
+        | OtherString;
 
       export interface BillingThresholds {
         /**
@@ -5560,7 +6043,10 @@ export namespace InvoiceCreatePreviewParams {
         reset_billing_cycle_anchor?: boolean;
       }
 
-      export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+      export type CollectionMethod =
+        | 'charge_automatically'
+        | 'send_invoice'
+        | OtherString;
 
       export interface Discount {
         /**
@@ -5653,7 +6139,8 @@ export namespace InvoiceCreatePreviewParams {
       export type ProrationBehavior =
         | 'always_invoice'
         | 'create_prorations'
-        | 'none';
+        | 'none'
+        | OtherString;
 
       export interface TransferData {
         /**
@@ -5753,19 +6240,25 @@ export namespace InvoiceCreatePreviewParams {
             export type Type =
               | 'min_item_period_end'
               | 'phase_end'
-              | 'timestamp';
+              | 'timestamp'
+              | OtherString;
           }
 
           export namespace Start {
             export type Type =
               | 'max_item_period_start'
               | 'phase_start'
-              | 'timestamp';
+              | 'timestamp'
+              | OtherString;
           }
         }
 
         export namespace PriceData {
-          export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+          export type TaxBehavior =
+            | 'exclusive'
+            | 'inclusive'
+            | 'unspecified'
+            | OtherString;
         }
       }
 
@@ -5783,12 +6276,12 @@ export namespace InvoiceCreatePreviewParams {
         }
 
         export namespace Liability {
-          export type Type = 'account' | 'self';
+          export type Type = 'account' | 'self' | OtherString;
         }
       }
 
       export namespace Duration {
-        export type Interval = 'day' | 'month' | 'week' | 'year';
+        export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
       }
 
       export namespace InvoiceSettings {
@@ -5805,7 +6298,7 @@ export namespace InvoiceCreatePreviewParams {
         }
 
         export namespace Issuer {
-          export type Type = 'account' | 'self';
+          export type Type = 'account' | 'self' | OtherString;
         }
       }
 
@@ -5879,10 +6372,19 @@ export namespace InvoiceCreatePreviewParams {
             interval_count?: number;
           }
 
-          export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+          export type TaxBehavior =
+            | 'exclusive'
+            | 'inclusive'
+            | 'unspecified'
+            | OtherString;
 
           export namespace Recurring {
-            export type Interval = 'day' | 'month' | 'week' | 'year';
+            export type Interval =
+              | 'day'
+              | 'month'
+              | 'week'
+              | 'year'
+              | OtherString;
           }
         }
       }
@@ -5890,7 +6392,17 @@ export namespace InvoiceCreatePreviewParams {
   }
 
   export namespace SubscriptionDetails {
-    export type BillingCycleAnchor = 'now' | 'unchanged';
+    export interface BillingCycleAnchor {
+      /**
+       * A timestamp to use as the subscription's billing cycle anchor. Only valid when `type` is `timestamp`.
+       */
+      timestamp?: number;
+
+      /**
+       * Determines how the subscription's billing cycle anchor behaves for the invoice preview.
+       */
+      type: BillingCycleAnchor.Type;
+    }
 
     export interface BillingMode {
       /**
@@ -5911,7 +6423,7 @@ export namespace InvoiceCreatePreviewParams {
       applies_to?: Array<BillingSchedule.AppliesTo>;
 
       /**
-       * The end date for the billing schedule.
+       * The end date for the billing schedule. You must not set this earlier than current period end for every applicable subscription item.
        */
       bill_until?: BillingSchedule.BillUntil;
 
@@ -5924,7 +6436,8 @@ export namespace InvoiceCreatePreviewParams {
     export type CancelAt =
       | 'max_billed_until'
       | 'max_period_end'
-      | 'min_period_end';
+      | 'min_period_end'
+      | OtherString;
 
     export interface Item {
       /**
@@ -5938,6 +6451,11 @@ export namespace InvoiceCreatePreviewParams {
       clear_usage?: boolean;
 
       /**
+       * The trial offer to apply to this subscription item.
+       */
+      current_trial?: Item.CurrentTrial;
+
+      /**
        * A flag that, if set to `true`, will delete the specified item.
        */
       deleted?: boolean;
@@ -5948,7 +6466,7 @@ export namespace InvoiceCreatePreviewParams {
       discounts?: Emptyable<Array<Item.Discount>>;
 
       /**
-       * Subscription item to update.
+       * Subscription item to update. If you omit `id`, the API adds a new subscription item rather than updating the existing one. See [Changing a subscription's price](https://docs.stripe.com/billing/subscriptions/change-price#changing).
        */
       id?: string;
 
@@ -5963,12 +6481,12 @@ export namespace InvoiceCreatePreviewParams {
       plan?: string;
 
       /**
-       * The ID of the price object. One of `price` or `price_data` is required. When changing a subscription item's price, `quantity` is set to 1 unless a `quantity` parameter is provided.
+       * The ID of the price object. You can use either `price` or `price_data`, but not both, to set or change this item's price. If you're updating an existing item without changing its price, omit both. When changing a subscription item's price, `quantity` is set to 1 unless a `quantity` parameter is provided.
        */
       price?: string;
 
       /**
-       * Data used to generate a new [Price](https://docs.stripe.com/api/prices) object inline. One of `price` or `price_data` is required.
+       * Data used to generate a new [Price](https://docs.stripe.com/api/prices) object inline. You can use either `price` or `price_data`, but not both, to set or change this item's price. If you're updating an existing item without changing its price, omit both.
        */
       price_data?: Item.PriceData;
 
@@ -5983,10 +6501,32 @@ export namespace InvoiceCreatePreviewParams {
       tax_rates?: Emptyable<Array<string>>;
     }
 
+    export interface Pause {
+      /**
+       * Controls what to bill for when pausing the subscription.
+       */
+      bill_for?: Pause.BillFor;
+
+      /**
+       * Determines how to handle debits and credits when pausing. Defaults to `pending_invoice_item`.
+       */
+      invoicing_behavior?: Pause.InvoicingBehavior;
+
+      /**
+       * The type of pause to apply. Defaults to `subscription`.
+       */
+      type?: Pause.Type;
+    }
+
     export type ProrationBehavior =
       | 'always_invoice'
       | 'create_prorations'
-      | 'none';
+      | 'none'
+      | OtherString;
+
+    export namespace BillingCycleAnchor {
+      export type Type = 'now' | 'timestamp' | 'unchanged' | OtherString;
+    }
 
     export namespace BillingMode {
       export interface Flexible {
@@ -5996,10 +6536,10 @@ export namespace InvoiceCreatePreviewParams {
         proration_discounts?: Flexible.ProrationDiscounts;
       }
 
-      export type Type = 'classic' | 'flexible';
+      export type Type = 'classic' | 'flexible' | OtherString;
 
       export namespace Flexible {
-        export type ProrationDiscounts = 'included' | 'itemized';
+        export type ProrationDiscounts = 'included' | 'itemized' | OtherString;
       }
     }
 
@@ -6046,10 +6586,15 @@ export namespace InvoiceCreatePreviewParams {
           interval_count?: number;
         }
 
-        export type Type = 'duration' | 'timestamp';
+        export type Type = 'duration' | 'timestamp' | OtherString;
 
         export namespace Duration {
-          export type Interval = 'day' | 'month' | 'week' | 'year';
+          export type Interval =
+            | 'day'
+            | 'month'
+            | 'week'
+            | 'year'
+            | OtherString;
         }
       }
     }
@@ -6060,6 +6605,13 @@ export namespace InvoiceCreatePreviewParams {
          * Number of units that meets the billing threshold to advance the subscription to a new billing period (e.g., it takes 10 $5 units to meet a $50 [monetary threshold](https://docs.stripe.com/api/subscriptions/update#update_subscription-billing_thresholds-amount_gte))
          */
         usage_gte: number;
+      }
+
+      export interface CurrentTrial {
+        /**
+         * The ID of the trial offer to apply to the subscription item.
+         */
+        trial_offer: string;
       }
 
       export interface Discount {
@@ -6124,10 +6676,68 @@ export namespace InvoiceCreatePreviewParams {
           interval_count?: number;
         }
 
-        export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+        export type TaxBehavior =
+          | 'exclusive'
+          | 'inclusive'
+          | 'unspecified'
+          | OtherString;
 
         export namespace Recurring {
-          export type Interval = 'day' | 'month' | 'week' | 'year';
+          export type Interval =
+            | 'day'
+            | 'month'
+            | 'week'
+            | 'year'
+            | OtherString;
+        }
+      }
+    }
+
+    export namespace Pause {
+      export interface BillFor {
+        /**
+         * Controls when to bill for metered usage in the current period. Defaults to `{ type: "now" }`.
+         */
+        outstanding_usage_through?: BillFor.OutstandingUsageThrough;
+
+        /**
+         * Controls when to credit for unused time on licensed items. Defaults to `{ type: "now" }`.
+         */
+        unused_time_from?: BillFor.UnusedTimeFrom;
+      }
+
+      export type InvoicingBehavior =
+        | 'invoice'
+        | 'pending_invoice_item'
+        | OtherString;
+
+      export type Type = 'subscription' | OtherString;
+
+      export namespace BillFor {
+        export interface OutstandingUsageThrough {
+          /**
+           * When to bill metered usage in the current period.
+           */
+          type: OutstandingUsageThrough.Type;
+        }
+
+        export interface UnusedTimeFrom {
+          /**
+           * When to credit for unused time.
+           */
+          type: UnusedTimeFrom.Type;
+        }
+
+        export namespace OutstandingUsageThrough {
+          export type Type = 'none' | 'now' | OtherString;
+        }
+
+        export namespace UnusedTimeFrom {
+          export type Type =
+            | 'item_current_period_start'
+            | 'none'
+            | 'now'
+            | OtherString;
         }
       }
     }
@@ -6226,7 +6836,7 @@ export namespace InvoiceRemoveLinesParams {
   }
 
   export namespace Line {
-    export type Behavior = 'delete' | 'unassign';
+    export type Behavior = 'delete' | 'unassign' | OtherString;
   }
 }
 export interface InvoiceSearchParams {
@@ -6332,7 +6942,7 @@ export namespace InvoiceUpdateLinesParams {
     quantity_decimal?: Decimal;
 
     /**
-     * A list of up to 10 tax amounts for this line item. This can be useful if you calculate taxes on your own or use a third-party to calculate them. You cannot set tax amounts if any line item has [tax_rates](https://docs.stripe.com/api/invoices/line_item#invoice_line_item_object-tax_rates) or if the invoice has [default_tax_rates](https://docs.stripe.com/api/invoices/object#invoice_object-default_tax_rates) or uses [automatic tax](https://docs.stripe.com/tax/invoicing). Pass an empty string to remove previously defined tax amounts.
+     * A list of up to 20 tax amounts for this line item. This can be useful if you calculate taxes on your own or use a third-party to calculate them. You cannot set tax amounts if any line item has [tax_rates](https://docs.stripe.com/api/invoices/line_item#invoice_line_item_object-tax_rates) or if the invoice has [default_tax_rates](https://docs.stripe.com/api/invoices/object#invoice_object-default_tax_rates) or uses [automatic tax](https://docs.stripe.com/tax/invoicing). Pass an empty string to remove previously defined tax amounts.
      */
     tax_amounts?: Emptyable<Array<Line.TaxAmount>>;
 
@@ -6463,12 +7073,35 @@ export namespace InvoiceUpdateLinesParams {
         tax_code?: string;
 
         /**
+         * Tax details for this product, including the [tax code](https://docs.stripe.com/tax/tax-codes) and an optional performance location.
+         */
+        tax_details?: ProductData.TaxDetails;
+
+        /**
          * A label that represents units of this product. When set, this will be included in customers' receipts, invoices, Checkout, and the customer portal.
          */
         unit_label?: string;
       }
 
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
+
+      export namespace ProductData {
+        export interface TaxDetails {
+          /**
+           * A tax location ID. Depending on the [tax code](https://docs.stripe.com/tax/tax-for-tickets/reference/tax-location-performance), this is required, optional, or not supported.
+           */
+          performance_location?: string;
+
+          /**
+           * A [tax code](https://docs.stripe.com/tax/tax-categories) ID.
+           */
+          tax_code?: Emptyable<string>;
+        }
+      }
     }
 
     export namespace TaxAmount {
@@ -6534,7 +7167,8 @@ export namespace InvoiceUpdateLinesParams {
         | 'reverse_charge'
         | 'standard_rated'
         | 'taxable_basis_reduced'
-        | 'zero_rated';
+        | 'zero_rated'
+        | OtherString;
 
       export namespace TaxRateData {
         export type JurisdictionLevel =
@@ -6543,23 +7177,29 @@ export namespace InvoiceUpdateLinesParams {
           | 'county'
           | 'district'
           | 'multiple'
-          | 'state';
+          | 'state'
+          | OtherString;
 
         export type TaxType =
           | 'amusement_tax'
           | 'communications_tax'
+          | 'digital_excise_tax'
           | 'gst'
           | 'hst'
           | 'igst'
           | 'jct'
           | 'lease_tax'
+          | 'mass_transit_parking_tax'
+          | 'parking_tax'
           | 'pst'
           | 'qst'
           | 'retail_delivery_fee'
           | 'rst'
           | 'sales_tax'
           | 'service_tax'
-          | 'vat';
+          | 'utility_users_tax'
+          | 'vat'
+          | OtherString;
       }
     }
   }
@@ -6621,7 +7261,7 @@ export interface InvoiceUpdateLineItemParams {
   quantity_decimal?: Decimal;
 
   /**
-   * A list of up to 10 tax amounts for this line item. This can be useful if you calculate taxes on your own or use a third-party to calculate them. You cannot set tax amounts if any line item has [tax_rates](https://docs.stripe.com/api/invoices/line_item#invoice_line_item_object-tax_rates) or if the invoice has [default_tax_rates](https://docs.stripe.com/api/invoices/object#invoice_object-default_tax_rates) or uses [automatic tax](https://docs.stripe.com/tax/invoicing). Pass an empty string to remove previously defined tax amounts.
+   * A list of up to 20 tax amounts for this line item. This can be useful if you calculate taxes on your own or use a third-party to calculate them. You cannot set tax amounts if any line item has [tax_rates](https://docs.stripe.com/api/invoices/line_item#invoice_line_item_object-tax_rates) or if the invoice has [default_tax_rates](https://docs.stripe.com/api/invoices/object#invoice_object-default_tax_rates) or uses [automatic tax](https://docs.stripe.com/tax/invoicing). Pass an empty string to remove previously defined tax amounts.
    */
   tax_amounts?: Emptyable<Array<InvoiceUpdateLineItemParams.TaxAmount>>;
 
@@ -6751,12 +7391,35 @@ export namespace InvoiceUpdateLineItemParams {
       tax_code?: string;
 
       /**
+       * Tax details for this product, including the [tax code](https://docs.stripe.com/tax/tax-codes) and an optional performance location.
+       */
+      tax_details?: ProductData.TaxDetails;
+
+      /**
        * A label that represents units of this product. When set, this will be included in customers' receipts, invoices, Checkout, and the customer portal.
        */
       unit_label?: string;
     }
 
-    export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+    export type TaxBehavior =
+      | 'exclusive'
+      | 'inclusive'
+      | 'unspecified'
+      | OtherString;
+
+    export namespace ProductData {
+      export interface TaxDetails {
+        /**
+         * A tax location ID. Depending on the [tax code](https://docs.stripe.com/tax/tax-for-tickets/reference/tax-location-performance), this is required, optional, or not supported.
+         */
+        performance_location?: string;
+
+        /**
+         * A [tax code](https://docs.stripe.com/tax/tax-categories) ID.
+         */
+        tax_code?: Emptyable<string>;
+      }
+    }
   }
 
   export namespace TaxAmount {
@@ -6822,7 +7485,8 @@ export namespace InvoiceUpdateLineItemParams {
       | 'reverse_charge'
       | 'standard_rated'
       | 'taxable_basis_reduced'
-      | 'zero_rated';
+      | 'zero_rated'
+      | OtherString;
 
     export namespace TaxRateData {
       export type JurisdictionLevel =
@@ -6831,23 +7495,29 @@ export namespace InvoiceUpdateLineItemParams {
         | 'county'
         | 'district'
         | 'multiple'
-        | 'state';
+        | 'state'
+        | OtherString;
 
       export type TaxType =
         | 'amusement_tax'
         | 'communications_tax'
+        | 'digital_excise_tax'
         | 'gst'
         | 'hst'
         | 'igst'
         | 'jct'
         | 'lease_tax'
+        | 'mass_transit_parking_tax'
+        | 'parking_tax'
         | 'pst'
         | 'qst'
         | 'retail_delivery_fee'
         | 'rst'
         | 'sales_tax'
         | 'service_tax'
-        | 'vat';
+        | 'utility_users_tax'
+        | 'vat'
+        | OtherString;
     }
   }
 }

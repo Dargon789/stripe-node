@@ -2,7 +2,7 @@
 
 import {StripeResource} from '../StripeResource.js';
 import {LineItem} from './LineItems.js';
-import {Discount} from './Discounts.js';
+import {Discount as _Discount} from './Discounts.js';
 import {Application, DeletedApplication} from './Applications.js';
 import {Customer, DeletedCustomer} from './Customers.js';
 import {TaxRate} from './TaxRates.js';
@@ -14,6 +14,7 @@ import * as TestHelpers from './TestHelpers/index.js';
 import {
   Emptyable,
   MetadataParam,
+  OtherString,
   Decimal,
   PaginationParams,
   Metadata,
@@ -253,76 +254,86 @@ export class QuoteResource extends StripeResource {
     params?: QuoteRetrieveParams,
     options?: RequestOptions
   ): Promise<Response<Quote>> {
-    return this._makeRequest('GET', `/v1/quotes/${id}`, params, options, {
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          computed: {
-            kind: 'object',
-            fields: {
-              upfront: {
-                kind: 'object',
-                fields: {
-                  line_items: {
-                    kind: 'object',
-                    fields: {
-                      data: {
-                        kind: 'array',
-                        element: {
-                          kind: 'object',
-                          fields: {
-                            price: {
-                              kind: 'nullable',
-                              inner: {
-                                kind: 'object',
-                                fields: {
-                                  currency_options: {
-                                    kind: 'array',
-                                    element: {
-                                      kind: 'object',
-                                      fields: {
-                                        tiers: {
-                                          kind: 'array',
-                                          element: {
-                                            kind: 'object',
-                                            fields: {
-                                              flat_amount_decimal: {
-                                                kind: 'nullable',
-                                                inner: {kind: 'decimal_string'},
-                                              },
-                                              unit_amount_decimal: {
-                                                kind: 'nullable',
-                                                inner: {kind: 'decimal_string'},
+    return this._makeRequest(
+      'GET',
+      `/v1/quotes/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            computed: {
+              kind: 'object',
+              fields: {
+                upfront: {
+                  kind: 'object',
+                  fields: {
+                    line_items: {
+                      kind: 'object',
+                      fields: {
+                        data: {
+                          kind: 'array',
+                          element: {
+                            kind: 'object',
+                            fields: {
+                              price: {
+                                kind: 'nullable',
+                                inner: {
+                                  kind: 'object',
+                                  fields: {
+                                    currency_options: {
+                                      kind: 'array',
+                                      element: {
+                                        kind: 'object',
+                                        fields: {
+                                          tiers: {
+                                            kind: 'array',
+                                            element: {
+                                              kind: 'object',
+                                              fields: {
+                                                flat_amount_decimal: {
+                                                  kind: 'nullable',
+                                                  inner: {
+                                                    kind: 'decimal_string',
+                                                  },
+                                                },
+                                                unit_amount_decimal: {
+                                                  kind: 'nullable',
+                                                  inner: {
+                                                    kind: 'decimal_string',
+                                                  },
+                                                },
                                               },
                                             },
                                           },
-                                        },
-                                        unit_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
-                                        },
-                                      },
-                                    },
-                                  },
-                                  tiers: {
-                                    kind: 'array',
-                                    element: {
-                                      kind: 'object',
-                                      fields: {
-                                        flat_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
-                                        },
-                                        unit_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
+                                          unit_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
                                         },
                                       },
                                     },
-                                  },
-                                  unit_amount_decimal: {
-                                    kind: 'nullable',
-                                    inner: {kind: 'decimal_string'},
+                                    tiers: {
+                                      kind: 'array',
+                                      element: {
+                                        kind: 'object',
+                                        fields: {
+                                          flat_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
+                                          unit_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
+                                        },
+                                      },
+                                    },
+                                    unit_amount_decimal: {
+                                      kind: 'nullable',
+                                      inner: {kind: 'decimal_string'},
+                                    },
                                   },
                                 },
                               },
@@ -337,8 +348,8 @@ export class QuoteResource extends StripeResource {
             },
           },
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * A quote models prices and services for a customer.
@@ -348,93 +359,103 @@ export class QuoteResource extends StripeResource {
     params?: QuoteUpdateParams,
     options?: RequestOptions
   ): Promise<Response<Quote>> {
-    return this._makeRequest('POST', `/v1/quotes/${id}`, params, options, {
-      requestSchema: {
-        kind: 'object',
-        fields: {
-          line_items: {
-            kind: 'array',
-            element: {
-              kind: 'object',
-              fields: {
-                price_data: {
-                  kind: 'object',
-                  fields: {unit_amount_decimal: {kind: 'decimal_string'}},
+    return this._makeRequest(
+      'POST',
+      `/v1/quotes/${encodeURIComponent(id)}`,
+      params,
+      options,
+      {
+        requestSchema: {
+          kind: 'object',
+          fields: {
+            line_items: {
+              kind: 'array',
+              element: {
+                kind: 'object',
+                fields: {
+                  price_data: {
+                    kind: 'object',
+                    fields: {unit_amount_decimal: {kind: 'decimal_string'}},
+                  },
                 },
               },
             },
           },
         },
-      },
-      responseSchema: {
-        kind: 'object',
-        fields: {
-          computed: {
-            kind: 'object',
-            fields: {
-              upfront: {
-                kind: 'object',
-                fields: {
-                  line_items: {
-                    kind: 'object',
-                    fields: {
-                      data: {
-                        kind: 'array',
-                        element: {
-                          kind: 'object',
-                          fields: {
-                            price: {
-                              kind: 'nullable',
-                              inner: {
-                                kind: 'object',
-                                fields: {
-                                  currency_options: {
-                                    kind: 'array',
-                                    element: {
-                                      kind: 'object',
-                                      fields: {
-                                        tiers: {
-                                          kind: 'array',
-                                          element: {
-                                            kind: 'object',
-                                            fields: {
-                                              flat_amount_decimal: {
-                                                kind: 'nullable',
-                                                inner: {kind: 'decimal_string'},
-                                              },
-                                              unit_amount_decimal: {
-                                                kind: 'nullable',
-                                                inner: {kind: 'decimal_string'},
+        responseSchema: {
+          kind: 'object',
+          fields: {
+            computed: {
+              kind: 'object',
+              fields: {
+                upfront: {
+                  kind: 'object',
+                  fields: {
+                    line_items: {
+                      kind: 'object',
+                      fields: {
+                        data: {
+                          kind: 'array',
+                          element: {
+                            kind: 'object',
+                            fields: {
+                              price: {
+                                kind: 'nullable',
+                                inner: {
+                                  kind: 'object',
+                                  fields: {
+                                    currency_options: {
+                                      kind: 'array',
+                                      element: {
+                                        kind: 'object',
+                                        fields: {
+                                          tiers: {
+                                            kind: 'array',
+                                            element: {
+                                              kind: 'object',
+                                              fields: {
+                                                flat_amount_decimal: {
+                                                  kind: 'nullable',
+                                                  inner: {
+                                                    kind: 'decimal_string',
+                                                  },
+                                                },
+                                                unit_amount_decimal: {
+                                                  kind: 'nullable',
+                                                  inner: {
+                                                    kind: 'decimal_string',
+                                                  },
+                                                },
                                               },
                                             },
                                           },
-                                        },
-                                        unit_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
-                                        },
-                                      },
-                                    },
-                                  },
-                                  tiers: {
-                                    kind: 'array',
-                                    element: {
-                                      kind: 'object',
-                                      fields: {
-                                        flat_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
-                                        },
-                                        unit_amount_decimal: {
-                                          kind: 'nullable',
-                                          inner: {kind: 'decimal_string'},
+                                          unit_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
                                         },
                                       },
                                     },
-                                  },
-                                  unit_amount_decimal: {
-                                    kind: 'nullable',
-                                    inner: {kind: 'decimal_string'},
+                                    tiers: {
+                                      kind: 'array',
+                                      element: {
+                                        kind: 'object',
+                                        fields: {
+                                          flat_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
+                                          unit_amount_decimal: {
+                                            kind: 'nullable',
+                                            inner: {kind: 'decimal_string'},
+                                          },
+                                        },
+                                      },
+                                    },
+                                    unit_amount_decimal: {
+                                      kind: 'nullable',
+                                      inner: {kind: 'decimal_string'},
+                                    },
                                   },
                                 },
                               },
@@ -449,8 +470,8 @@ export class QuoteResource extends StripeResource {
             },
           },
         },
-      },
-    }) as any;
+      }
+    ) as any;
   }
   /**
    * Accepts the specified quote.
@@ -462,7 +483,7 @@ export class QuoteResource extends StripeResource {
   ): Promise<Response<Quote>> {
     return this._makeRequest(
       'POST',
-      `/v1/quotes/${id}/accept`,
+      `/v1/quotes/${encodeURIComponent(id)}/accept`,
       params,
       options,
       {
@@ -567,7 +588,7 @@ export class QuoteResource extends StripeResource {
   ): Promise<Response<Quote>> {
     return this._makeRequest(
       'POST',
-      `/v1/quotes/${id}/cancel`,
+      `/v1/quotes/${encodeURIComponent(id)}/cancel`,
       params,
       options,
       {
@@ -672,7 +693,7 @@ export class QuoteResource extends StripeResource {
   ): Promise<Response<Quote>> {
     return this._makeRequest(
       'POST',
-      `/v1/quotes/${id}/finalize`,
+      `/v1/quotes/${encodeURIComponent(id)}/finalize`,
       params,
       options,
       {
@@ -775,10 +796,16 @@ export class QuoteResource extends StripeResource {
     params?: QuotePdfParams,
     options?: RequestOptions
   ): Promise<StripeStreamResponse> {
-    return this._makeRequest('GET', `/v1/quotes/${id}/pdf`, params, options, {
-      apiBase: 'files',
-      streaming: true,
-    }) as any;
+    return this._makeRequest(
+      'GET',
+      `/v1/quotes/${encodeURIComponent(id)}/pdf`,
+      params,
+      options,
+      {
+        apiBase: 'files',
+        streaming: true,
+      }
+    ) as any;
   }
   /**
    * When retrieving a quote, there is an includable [computed.upfront.line_items](https://stripe.com/docs/api/quotes/object#quote_object-computed-upfront-line_items) property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of upfront line items.
@@ -790,7 +817,7 @@ export class QuoteResource extends StripeResource {
   ): ApiListPromise<LineItem> {
     return this._makeRequest(
       'GET',
-      `/v1/quotes/${id}/computed_upfront_line_items`,
+      `/v1/quotes/${encodeURIComponent(id)}/computed_upfront_line_items`,
       params,
       options,
       {
@@ -877,7 +904,7 @@ export class QuoteResource extends StripeResource {
   ): ApiListPromise<LineItem> {
     return this._makeRequest(
       'GET',
-      `/v1/quotes/${id}/line_items`,
+      `/v1/quotes/${encodeURIComponent(id)}/line_items`,
       params,
       options,
       {
@@ -1033,7 +1060,7 @@ export interface Quote {
   /**
    * The discounts applied to this quote.
    */
-  discounts: Array<string | Discount>;
+  discounts: Array<string | _Discount>;
 
   /**
    * The date on which the quote will be canceled if in `open` or `draft` status. Measured in seconds since the Unix epoch.
@@ -1141,7 +1168,10 @@ export namespace Quote {
     status: AutomaticTax.Status | null;
   }
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export interface Computed {
     /**
@@ -1166,14 +1196,29 @@ export namespace Quote {
 
   export interface InvoiceSettings {
     /**
+     * A list of up to 4 custom fields to be displayed on the invoice.
+     */
+    custom_fields: Array<InvoiceSettings.CustomField> | null;
+
+    /**
      * Number of days within which a customer must pay invoices generated by this quote. This value will be `null` for quotes where `collection_method=charge_automatically`.
      */
     days_until_due: number | null;
 
+    /**
+     * An arbitrary string attached to the object. Often useful for displaying to users.
+     */
+    description: string | null;
+
+    /**
+     * Footer to be displayed on the invoice.
+     */
+    footer: string | null;
+
     issuer: InvoiceSettings.Issuer;
   }
 
-  export type Status = 'accepted' | 'canceled' | 'draft' | 'open';
+  export type Status = 'accepted' | 'canceled' | 'draft' | 'open' | OtherString;
 
   export interface StatusTransitions {
     /**
@@ -1268,10 +1313,14 @@ export namespace Quote {
       type: Liability.Type;
     }
 
-    export type Status = 'complete' | 'failed' | 'requires_location_inputs';
+    export type Status =
+      | 'complete'
+      | 'failed'
+      | 'requires_location_inputs'
+      | OtherString;
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -1320,7 +1369,7 @@ export namespace Quote {
     }
 
     export namespace Recurring {
-      export type Interval = 'day' | 'month' | 'week' | 'year';
+      export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
 
       export interface TotalDetails {
         /**
@@ -1362,12 +1411,12 @@ export namespace Quote {
             amount: number;
 
             /**
-             * A discount represents the actual application of a [coupon](https://api.stripe.com#coupons) or [promotion code](https://api.stripe.com#promotion_codes).
+             * A discount represents the actual application of a [coupon](https://docs.stripe.com/api#coupons) or [promotion code](https://docs.stripe.com/api#promotion_codes).
              * It contains information about when the discount began, when it will end, and what it is applied to.
              *
              * Related guide: [Applying discounts to subscriptions](https://docs.stripe.com/billing/subscriptions/discounts)
              */
-            discount: Discount;
+            discount: _Discount;
           }
 
           export interface Tax {
@@ -1410,7 +1459,8 @@ export namespace Quote {
               | 'reverse_charge'
               | 'standard_rated'
               | 'taxable_basis_reduced'
-              | 'zero_rated';
+              | 'zero_rated'
+              | OtherString;
           }
         }
       }
@@ -1457,12 +1507,12 @@ export namespace Quote {
             amount: number;
 
             /**
-             * A discount represents the actual application of a [coupon](https://api.stripe.com#coupons) or [promotion code](https://api.stripe.com#promotion_codes).
+             * A discount represents the actual application of a [coupon](https://docs.stripe.com/api#coupons) or [promotion code](https://docs.stripe.com/api#promotion_codes).
              * It contains information about when the discount began, when it will end, and what it is applied to.
              *
              * Related guide: [Applying discounts to subscriptions](https://docs.stripe.com/billing/subscriptions/discounts)
              */
-            discount: Discount;
+            discount: _Discount;
           }
 
           export interface Tax {
@@ -1505,7 +1555,8 @@ export namespace Quote {
               | 'reverse_charge'
               | 'standard_rated'
               | 'taxable_basis_reduced'
-              | 'zero_rated';
+              | 'zero_rated'
+              | OtherString;
           }
         }
       }
@@ -1513,6 +1564,18 @@ export namespace Quote {
   }
 
   export namespace InvoiceSettings {
+    export interface CustomField {
+      /**
+       * The name of the custom field.
+       */
+      name: string;
+
+      /**
+       * The value of the custom field.
+       */
+      value: string;
+    }
+
     export interface Issuer {
       /**
        * The connected account being referenced when `type` is `account`.
@@ -1526,7 +1589,7 @@ export namespace Quote {
     }
 
     export namespace Issuer {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -1548,10 +1611,10 @@ export namespace Quote {
         proration_discounts?: Flexible.ProrationDiscounts;
       }
 
-      export type Type = 'classic' | 'flexible';
+      export type Type = 'classic' | 'flexible' | OtherString;
 
       export namespace Flexible {
-        export type ProrationDiscounts = 'included' | 'itemized';
+        export type ProrationDiscounts = 'included' | 'itemized' | OtherString;
       }
     }
   }
@@ -1577,12 +1640,12 @@ export namespace Quote {
         amount: number;
 
         /**
-         * A discount represents the actual application of a [coupon](https://api.stripe.com#coupons) or [promotion code](https://api.stripe.com#promotion_codes).
+         * A discount represents the actual application of a [coupon](https://docs.stripe.com/api#coupons) or [promotion code](https://docs.stripe.com/api#promotion_codes).
          * It contains information about when the discount began, when it will end, and what it is applied to.
          *
          * Related guide: [Applying discounts to subscriptions](https://docs.stripe.com/billing/subscriptions/discounts)
          */
-        discount: Discount;
+        discount: _Discount;
       }
 
       export interface Tax {
@@ -1625,7 +1688,8 @@ export namespace Quote {
           | 'reverse_charge'
           | 'standard_rated'
           | 'taxable_basis_reduced'
-          | 'zero_rated';
+          | 'zero_rated'
+          | OtherString;
       }
     }
   }
@@ -1749,7 +1813,10 @@ export namespace QuoteCreateParams {
     liability?: AutomaticTax.Liability;
   }
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export interface Discount {
     /**
@@ -1782,9 +1849,24 @@ export namespace QuoteCreateParams {
 
   export interface InvoiceSettings {
     /**
+     * A list of up to 4 custom fields to be displayed on the invoice.
+     */
+    custom_fields?: Emptyable<Array<InvoiceSettings.CustomField>>;
+
+    /**
      * Number of days within which a customer must pay the invoice generated by this quote. This value will be `null` for quotes where `collection_method=charge_automatically`.
      */
     days_until_due?: number;
+
+    /**
+     * An arbitrary string attached to the object. Often useful for displaying to users.
+     */
+    description?: Emptyable<string>;
+
+    /**
+     * Footer to be displayed on the invoice.
+     */
+    footer?: Emptyable<string>;
 
     /**
      * The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
@@ -1877,11 +1959,23 @@ export namespace QuoteCreateParams {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
   export namespace InvoiceSettings {
+    export interface CustomField {
+      /**
+       * The name of the custom field. This may be up to 40 characters.
+       */
+      name: string;
+
+      /**
+       * The value of the custom field. This may be up to 140 characters.
+       */
+      value: string;
+    }
+
     export interface Issuer {
       /**
        * The connected account being referenced when `type` is `account`.
@@ -1895,7 +1989,7 @@ export namespace QuoteCreateParams {
     }
 
     export namespace Issuer {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -1962,10 +2056,14 @@ export namespace QuoteCreateParams {
         interval_count?: number;
       }
 
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
 
       export namespace Recurring {
-        export type Interval = 'day' | 'month' | 'week' | 'year';
+        export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
       }
     }
   }
@@ -1991,10 +2089,10 @@ export namespace QuoteCreateParams {
         proration_discounts?: Flexible.ProrationDiscounts;
       }
 
-      export type Type = 'classic' | 'flexible';
+      export type Type = 'classic' | 'flexible' | OtherString;
 
       export namespace Flexible {
-        export type ProrationDiscounts = 'included' | 'itemized';
+        export type ProrationDiscounts = 'included' | 'itemized' | OtherString;
       }
     }
   }
@@ -2114,7 +2212,10 @@ export namespace QuoteUpdateParams {
     liability?: AutomaticTax.Liability;
   }
 
-  export type CollectionMethod = 'charge_automatically' | 'send_invoice';
+  export type CollectionMethod =
+    | 'charge_automatically'
+    | 'send_invoice'
+    | OtherString;
 
   export interface Discount {
     /**
@@ -2135,9 +2236,24 @@ export namespace QuoteUpdateParams {
 
   export interface InvoiceSettings {
     /**
+     * A list of up to 4 custom fields to be displayed on the invoice.
+     */
+    custom_fields?: Emptyable<Array<InvoiceSettings.CustomField>>;
+
+    /**
      * Number of days within which a customer must pay the invoice generated by this quote. This value will be `null` for quotes where `collection_method=charge_automatically`.
      */
     days_until_due?: number;
+
+    /**
+     * An arbitrary string attached to the object. Often useful for displaying to users.
+     */
+    description?: Emptyable<string>;
+
+    /**
+     * Footer to be displayed on the invoice.
+     */
+    footer?: Emptyable<string>;
 
     /**
      * The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
@@ -2230,11 +2346,23 @@ export namespace QuoteUpdateParams {
     }
 
     export namespace Liability {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
   export namespace InvoiceSettings {
+    export interface CustomField {
+      /**
+       * The name of the custom field. This may be up to 40 characters.
+       */
+      name: string;
+
+      /**
+       * The value of the custom field. This may be up to 140 characters.
+       */
+      value: string;
+    }
+
     export interface Issuer {
       /**
        * The connected account being referenced when `type` is `account`.
@@ -2248,7 +2376,7 @@ export namespace QuoteUpdateParams {
     }
 
     export namespace Issuer {
-      export type Type = 'account' | 'self';
+      export type Type = 'account' | 'self' | OtherString;
     }
   }
 
@@ -2315,10 +2443,14 @@ export namespace QuoteUpdateParams {
         interval_count?: number;
       }
 
-      export type TaxBehavior = 'exclusive' | 'inclusive' | 'unspecified';
+      export type TaxBehavior =
+        | 'exclusive'
+        | 'inclusive'
+        | 'unspecified'
+        | OtherString;
 
       export namespace Recurring {
-        export type Interval = 'day' | 'month' | 'week' | 'year';
+        export type Interval = 'day' | 'month' | 'week' | 'year' | OtherString;
       }
     }
   }
@@ -2350,7 +2482,7 @@ export interface QuoteListParams extends PaginationParams {
   test_clock?: string;
 }
 export namespace QuoteListParams {
-  export type Status = 'accepted' | 'canceled' | 'draft' | 'open';
+  export type Status = 'accepted' | 'canceled' | 'draft' | 'open' | OtherString;
 }
 export interface QuoteAcceptParams {
   /**

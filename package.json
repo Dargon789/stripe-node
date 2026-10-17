@@ -1,6 +1,6 @@
 {
   "name": "stripe",
-  "version": "22.2.0",
+  "version": "23.0.0",
   "description": "Stripe API wrapper",
   "keywords": [
     "stripe",
@@ -22,7 +22,7 @@
   },
   "bugs": "https://github.com/stripe/stripe-node/issues",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "main": "cjs/stripe.cjs.node.js",
   "devDependencies": {
@@ -41,7 +41,7 @@
     "eslint-plugin-prettier": "^3.4.1",
     "mocha": "^11.0.1",
     "mocha-junit-reporter": "^2.1.0",
-    "nock": "^13.2.9",
+    "nock": "^14.0.17",
     "node-fetch": "^2.6.7",
     "nyc": "^15.1.0",
     "prettier": "^1.16.4",
@@ -55,7 +55,7 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "@types/node": ">=18"
+    "@types/node": ">=20"
   },
   "peerDependenciesMeta": {
     "@types/node": {
@@ -68,6 +68,10 @@
     "prepack": "just install && just build"
   },
   "exports": {
+    "extensibility": {
+      "import": "./esm/stripe.esm.extensibility.js",
+      "require": "./cjs/stripe.cjs.extensibility.js"
+    },
     "browser": {
       "import": "./esm/stripe.esm.worker.js",
       "require": "./cjs/stripe.cjs.worker.js"

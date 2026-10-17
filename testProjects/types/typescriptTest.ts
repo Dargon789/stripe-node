@@ -7,6 +7,8 @@
 
 import Stripe from 'stripe';
 
+const majorApiVersion: string = Stripe.MAJOR_API_VERSION;
+
 let stripe = new Stripe('sk_test_123', {
   apiVersion: Stripe.API_VERSION,
 });
@@ -106,11 +108,6 @@ stripe = new Stripe('sk_test_123', {unknownProperty: true});
 
   const cusList: Stripe.ApiList<Stripe.Customer> = await stripe.customers.list();
 
-  /**
-   * TODO(DEVSDK-2534): remove this test when we fix V2List at next major.
-   */
-  const v2EventsListBC: Stripe.ApiList<Stripe.V2.Core.Event> = await stripe.v2.core.events.list();
-
   const v2EventsList: Stripe.V2List<Stripe.V2.Core.Event> = await stripe.v2.core.events.list();
 
   const aThousandCustomers: Array<Stripe.Customer> = await stripe.customers
@@ -180,6 +177,9 @@ stripe = new Stripe('sk_test_123', {unknownProperty: true});
 
 const maxBufferedRequestMetrics: number =
   Stripe.StripeResource.MAX_BUFFERED_REQUEST_METRICS;
+
+declare const v2SearchResult: Stripe.V2SearchResult<Stripe.V2.Core.Event>;
+declare const v2SearchResultPromise: Stripe.V2SearchResultPromise<Stripe.V2.Core.Event>;
 
 // Test NodeHttpClient request processing.
 import {Agent} from 'http';
@@ -271,6 +271,32 @@ const instanceofCheck2 = {} instanceof Stripe.errors.StripeAPIError;
 const instanceofCheck5 = {} instanceof stripe.errors.StripeError;
 const instanceofCheck6 = {} instanceof stripe.errors.StripeAPIError;
 
+// errors namespace provides type-level access
+let errorsCheck1: Stripe.errors.StripeError;
+let errorsCheck2: Stripe.errors.StripeCardError;
+let errorsCheck3: Stripe.errors.StripeInvalidRequestError;
+
+
+// instanceof narrows to the correct type
+const instanceofNarrowing = (
+  e: unknown
+): Stripe.errors.StripeError | null => {
+  if (e instanceof Stripe.errors.StripeError) {
+    return e;
+  }
+  return null;
+};
+
+// Error objects expose generated fields with proper types
+const errorFieldAccess = (e: Stripe.errors.StripeError): void => {
+  const networkAdviceCode: string | undefined = e.network_advice_code;
+  const networkDeclineCode: string | undefined = e.network_decline_code;
+  const adviceCode: string | undefined = e.advice_code;
+  const paymentIntent: Stripe.PaymentIntent | undefined = e.payment_intent;
+  const paymentMethod: Stripe.PaymentMethod | undefined = e.payment_method;
+  const setupIntent: Stripe.SetupIntent | undefined = e.setup_intent;
+};
+
 stripe.files.create({
   purpose: 'dispute_evidence',
   file: {
@@ -327,6 +353,8 @@ const v2ContextObj: Stripe.StripeContextType | undefined = v2EventNotif.context;
 async (): Promise<void> => {
   // parsing event notifications
   const eventNotification = stripe.parseEventNotification('', '', '');
+  // literal type, so this is really checking the (purported) value
+  eventNotification.object === 'v2.core.event';
 
   if (eventNotification.type === 'v1.billing.meter.error_report_triggered') {
     eventNotification.related_object;
@@ -359,7 +387,122 @@ async (): Promise<void> => {
   let f: Stripe.Events.V1BillingMeterErrorReportTriggeredEventNotification;
   // union of all V2 Events
   let g: Stripe.V2.Core.Event;
+  // union of all v1 events
+  let h: Stripe.Event;
+  // the shape of an event's `related_object`
+  let i: Stripe.Events.RelatedObject;
+  // ...and the variant that "singleton" events use, whose related object has no
+  // standalone id
+  let j: Stripe.Events.RelatedSingletonObject;
 }
+
+{
+  // a singleton related object is reachable only by url
+  const singleton = {} as Stripe.Events.RelatedSingletonObject;
+  const singletonType: string = singleton.type;
+  const singletonUrl: string = singleton.url;
+  // @ts-expect-error - a singleton related object has no id
+  singleton.id;
+
+  // whereas the usual related object does have one
+  const related = {} as Stripe.Events.RelatedObject;
+  const relatedId: string = related.id;
+}
+
+async (): Promise<void> => {
+  // event handler
+  const handler = stripe.notificationHandler(
+    'whsec_123',
+    async (unhandledEvent, client, details) => {
+      const e: Stripe.Events.UnknownEventNotification = unhandledEvent;
+      const s: Stripe = client;
+      const d: Stripe.UnhandledNotificationDetails = details;
+    }
+  );
+
+  handler
+    .preHandle(async (event, client) => {
+      const e: Stripe.V2.Core.EventNotification = event;
+      const s: Stripe = client;
+      return true;
+    })
+    .on('v1.billing.meter.error_report_triggered', async (event) => {
+      const meter: Stripe.Billing.Meter = await event.fetchRelatedObject();
+      const e: Stripe.Events.V1BillingMeterErrorReportTriggeredEventNotification = event;
+      const evt: Stripe.Events.V1BillingMeterErrorReportTriggeredEvent = await event.fetchEvent();
+    })
+    .on('v1.billing.meter.no_meter_found', async (event) => {
+      const e: Stripe.Events.V1BillingMeterNoMeterFoundEventNotification = event;
+      // @ts-expect-error - shouldn't be available
+      const meter: Stripe.Billing.Meter = await event.fetchRelatedObject();
+      const evt: Stripe.Events.V1BillingMeterNoMeterFoundEvent = await event.fetchEvent();
+    });
+
+  const res: void = await handler.handle('', '');
+
+  // @ts-expect-error - preHandle callback must resolve boolean, not void
+  handler.preHandle(async () => {});
+  // @ts-expect-error - preHandle callback must resolve boolean, not int
+  handler.preHandle(async () => 3);
+  handler.preHandle(async () => false);
+};
+
+// event handler that skips signature verification
+async (): Promise<void> => {
+  const unverifiedHandler = stripe.notificationHandlerWithoutVerification(
+    async (unhandledEvent, client, details) => {
+      const e: Stripe.Events.UnknownEventNotification = unhandledEvent;
+      const s: Stripe = client;
+      const d: Stripe.UnhandledNotificationDetails = details;
+    }
+  );
+
+  unverifiedHandler.on(
+    'v1.billing.meter.error_report_triggered',
+    async (event) => {
+      const meter: Stripe.Billing.Meter = await event.fetchRelatedObject();
+      const e: Stripe.Events.V1BillingMeterErrorReportTriggeredEventNotification = event;
+    }
+  );
+
+  // handle() takes only the body; there is no signature to pass
+  const res: void = await unverifiedHandler.handle('');
+
+  // @ts-expect-error - the verifying two-argument handle is not available here
+  await unverifiedHandler.handle('', 'sig_header');
+
+  // Node exposes only the client factory. The handler classes are type-only (they are
+  // not attached as statics on the constructor), so the static factory that the other
+  // SDKs offer is intentionally unreachable here.
+  // @ts-expect-error - StripeEventNotificationHandler is not a runtime value
+  Stripe.StripeEventNotificationHandler.withoutVerification(
+    stripe,
+    async () => {}
+  );
+};
+
+// both handler types must be nameable off the namespace
+let _verifyingHandler: Stripe.StripeEventNotificationHandler;
+let _unverifiedHandler: Stripe.StripeEventNotificationHandlerWithoutVerification;
+
+// event-notification methods take the same payload/header types as the v1 webhook
+// methods: WebhookPayload (string | Uint8Array) and WebhookHeader, which includes
+// string[] so it composes with express's `Request#headers` type.
+async (): Promise<void> => {
+  const arrayHeader: string[] = ['sig'];
+  const bytesBody: Uint8Array = new TextEncoder().encode('{}');
+
+  stripe.parseEventNotification(bytesBody, arrayHeader, 'whsec_123');
+  await stripe.parseEventNotificationAsync(bytesBody, arrayHeader, 'whsec_123');
+  stripe.parseEventNotificationWithoutVerification(bytesBody);
+
+  await stripe
+    .notificationHandler('whsec_123', async () => {})
+    .handle(bytesBody, arrayHeader);
+  await stripe
+    .notificationHandlerWithoutVerification(async () => {})
+    .handle(bytesBody);
+};
 
 // Test that the Decimal type is exported
 {
@@ -389,8 +532,43 @@ event = stripe.webhooks.constructEvent(
   'secret'
 );
 
+// constructEventWithoutVerification on webhooks object and client
+event = stripe.webhooks.constructEventWithoutVerification('payload');
+
+// parseEventNotificationWithoutVerification on client
+const _notificationWV: Stripe.V2.Core.EventNotification = stripe.parseEventNotificationWithoutVerification(
+  'payload'
+);
+
+// Verify that nested types with names matching imported types resolve correctly.
+// e.g. Checkout.Session.TotalDetails.Breakdown.Discount.discount should be
+// Stripe.Discount, not a self-referential Breakdown.Discount. (DEVSDK-3139)
+{
+  const session = {} as Stripe.Checkout.Session;
+  for (const item of session.total_details?.breakdown?.discounts ?? []) {
+    const discount: Stripe.Discount = item.discount as Stripe.Discount;
+    const promoCode: string | Stripe.PromotionCode | null =
+      discount.promotion_code;
+    const customer: string | Stripe.Customer | Stripe.DeletedCustomer | null =
+      discount.customer;
+    const start: number = discount.start;
+  }
+
+  const schedule = {} as Stripe.SubscriptionSchedule;
+  for (const phase of schedule.phases) {
+    for (const d of phase.discounts) {
+      if (typeof d.discount !== 'string' && d.discount) {
+        const promoCode: string | Stripe.PromotionCode | null =
+          d.discount.promotion_code;
+        const start: number = d.discount.start;
+      }
+    }
+  }
+}
+
 const v2AccountCreateParamConfiguration: Stripe.V2.Core.AccountCreateParams.Configuration = {};
 const checkoutSessionParam: Stripe.Checkout.SessionCreateParams = {};
+const checkoutSessionParamLineItem: Stripe.Checkout.SessionCreateParams.LineItem = {};
 const v2EventListParams: Stripe.V2.Core.EventListParams = {};
 const v2AccountCreateParams: Stripe.V2.Core.AccountCreateParams = {};
 const oAuthToken: Stripe.OAuthToken = {};
@@ -403,3 +581,51 @@ const oAuthAuthorizeUrlOptions: Stripe.OAuthAuthorizeUrlOptions = {};
 const oAuthAuthorizeUrlParams: Stripe.OAuthAuthorizeUrlParams = {};
 const oAuthDeauthorization: Stripe.OAuthDeauthorization = {stripe_user_id: ''};
 const oAuthDeauthorizeParams: Stripe.OAuthDeauthorizeParams = {};
+
+// Resource sub-types (companion namespace access)
+let priceRecurring: Stripe.Price.Recurring;
+let customerInvoiceSettings: Stripe.Customer.InvoiceSettings;
+let subscriptionBillingMode: Stripe.Subscription.BillingMode;
+
+// Deep resource sub-types (2+ levels)
+const billingModeType: Stripe.Subscription.BillingMode.Type = 'classic';
+
+// Nested resource sub-types (product namespace → resource → sub-type)
+let alertStatus: Stripe.Billing.Alert.Status;
+let terminalTipping: Stripe.Terminal.Configuration.Tipping;
+let appsSecretScope: Stripe.Apps.Secret.Scope;
+
+// Deep params sub-namespaces (2+ levels)
+let accountBizProfile: Stripe.AccountCreateParams.BusinessProfile;
+let accountBizRevenue: Stripe.AccountCreateParams.BusinessProfile.AnnualRevenue;
+
+// Access and type top level resources and nested resources
+const customerResource: Stripe.CustomerResource = new Stripe.CustomerResource(
+  stripe
+);
+
+// Access nested resource
+const v2AccountResource: Stripe.V2.Billing.MeterEventResource = new Stripe.V2.Billing.MeterEventResource(
+  stripe
+);
+
+// Namespace type exports that must remain accessible (v21 parity).
+const _stripeConfig: Stripe.StripeConfig = {maxNetworkRetries: 3};
+const _latestApiVersion: Stripe.LatestApiVersion = '' as any;
+const _httpAgent: Stripe.HttpAgent = null as any;
+const _httpProtocol: Stripe.HttpProtocol = 'https';
+const _stripeResource: Stripe.StripeResource = null as any;
+const _cryptoProvider: Stripe.CryptoProvider = null as any;
+const _httpClient: Stripe.HttpClient = null as any;
+const _httpClientResponse: Stripe.HttpClientResponse = null as any;
+const _rawErrorType: Stripe.RawErrorType = 'card_error';
+const _webhooksType: Stripe.Webhooks = null as any;
+const _webhookTestHeaderOptions: Stripe.WebhookTestHeaderOptions = {
+  payload: '{}',
+  secret: 'whsec_test',
+};
+const _signatureType: Stripe.Signature = null as any;
+
+// Factory function return types must be assignable to their interface types.
+const _nodeHttpClient: Stripe.HttpClient = Stripe.createNodeHttpClient();
+const _nodeCryptoProvider: Stripe.CryptoProvider = Stripe.createNodeCryptoProvider();

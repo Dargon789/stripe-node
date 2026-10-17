@@ -4,6 +4,7 @@ import {multipartRequestDataProcessor} from '../multipart.js';
 import {StripeResource} from '../StripeResource.js';
 import {FileLink} from './FileLinks.js';
 import {
+  OtherString,
   Emptyable,
   MetadataParam,
   PaginationParams,
@@ -54,7 +55,12 @@ export class FileResource extends StripeResource {
     params?: FileRetrieveParams,
     options?: RequestOptions
   ): Promise<Response<File>> {
-    return this._makeRequest('GET', `/v1/files/${id}`, params, options) as any;
+    return this._makeRequest(
+      'GET',
+      `/v1/files/${encodeURIComponent(id)}`,
+      params,
+      options
+    ) as any;
   }
 }
 export interface File {
@@ -84,7 +90,7 @@ export interface File {
   filename: string | null;
 
   /**
-   * A list of [file links](https://api.stripe.com#file_links) that point at this file.
+   * A list of [file links](https://docs.stripe.com/api#file_links) that point at this file.
    */
   links?: ApiList<FileLink> | null;
 
@@ -135,7 +141,8 @@ export namespace File {
     | 'terminal_android_apk'
     | 'terminal_reader_splashscreen'
     | 'terminal_wifi_certificate'
-    | 'terminal_wifi_private_key';
+    | 'terminal_wifi_private_key'
+    | OtherString;
 }
 export interface FileCreateParams {
   /**
@@ -154,7 +161,7 @@ export interface FileCreateParams {
   expand?: Array<string>;
 
   /**
-   * Optional parameters that automatically create a [file link](https://api.stripe.com#file_links) for the newly created file.
+   * Optional parameters that automatically create a [file link](https://docs.stripe.com/api#file_links) for the newly created file.
    */
   file_link_data?: FileCreateParams.FileLinkData;
 }
@@ -174,7 +181,8 @@ export namespace FileCreateParams {
     | 'terminal_android_apk'
     | 'terminal_reader_splashscreen'
     | 'terminal_wifi_certificate'
-    | 'terminal_wifi_private_key';
+    | 'terminal_wifi_private_key'
+    | OtherString;
 
   export interface FileLinkData {
     /**
@@ -237,5 +245,6 @@ export namespace FileListParams {
     | 'terminal_android_apk'
     | 'terminal_reader_splashscreen'
     | 'terminal_wifi_certificate'
-    | 'terminal_wifi_private_key';
+    | 'terminal_wifi_private_key'
+    | OtherString;
 }
